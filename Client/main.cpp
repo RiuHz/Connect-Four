@@ -2,6 +2,7 @@
 #include <vector>
 #include "enum/TextColors.hpp"
 #include "enum/TextStyles.hpp"
+#include "headers/UDPClient.hpp"
 
 using namespace lso;
 
@@ -38,6 +39,21 @@ void printColumNumbers(const unsigned int cols) {
 }
 
 int main() {
+
+    /* Socket UDP */
+    try {
+        UDPClient client("127.0.0.1", 5000);
+
+        client.sendMessage("Ciao sono il client 123");
+        
+        std::cout << "Messaggio inviato. Attendo risposta..." << std::endl;
+        
+        std::string risposta = client.receiveMessage();
+        std::cout << "Risposta dal Server C: " << risposta << std::endl;
+
+    } catch (const std::exception& e) {
+        std::cerr << "Errore: " << e.what() << std::endl;
+    }
 
     unsigned int rows = 6;
     unsigned int cols = 7;
