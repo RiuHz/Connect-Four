@@ -1,57 +1,56 @@
-#include <iostream>
-#include <vector>
-#include "enum/TextColors.hpp"
-#include "enum/TextStyles.hpp"
+#include <string>
 
-using namespace lso;
+#include "core/setup/setup.hpp"
+#include "core/board/board.hpp"
 
-// Definire il tipo board e uint oppure mi sparo
-
-// Devo pensare che la board arriva già colorata, quindi devo usare il tipo String
-
-void printRow(const std::vector<std::vector<std::string>> & board, const unsigned int row, const unsigned int cols) {
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
-
-    for (unsigned int i = 0; i < cols; i++)
-        std::cout << " " << board[row][i] << " ";
-
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE << std::endl;
-}
-
-void printSeparator(const unsigned int cols) {
-    std::cout << TextColor::BLUE << '+';
-
-    for (unsigned int i = 0; i < cols; i++)
-        std::cout << "---";
-
-    std::cout << '+' << TextColor::WHITE << std::endl;
-}
-
-void printColumNumbers(const unsigned int cols) {
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
-
-    for (unsigned int i = 0; i < cols; i++) {
-        std::cout << ' ' << i << ' ';
-    }
-
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE << std::endl;
-}
+using namespace std;
 
 int main() {
 
-    unsigned int rows = 6;
-    unsigned int cols = 7;
+    string player_name = lso::Setup::getPlayerName();
 
-    std::vector<std::vector<std::string>> board(rows, std::vector<std::string>(cols, "·"));
+    lso::Setup::connectToServer();
 
-    board[5][0] = TextColor::RED + (TextStyle::BOLD + std::string("X")) + TextStyle::RESET;
-    board[5][1] = TextColor::YELLOW + (TextStyle::BOLD + std::string("O")) + TextStyle::RESET;
 
-    for (unsigned int i = 0; i < rows; i++)
-        printRow(board, i, cols);
+    // Mostra lista lobby
 
-    printSeparator(cols);
-    printColumNumbers(cols);
+    /*
+    1) Pulire console
+    2) Idea presa da whiteboard
+    3) Input nel rigo più basso della console?
+    */
+
+    // Test Board
+
+    cout << "Printing empty board" << endl;
+
+    lso::Board board = lso::Board();
+
+    board.printBoard();
+
+    cout << endl << endl;
+    
+    board.addRedMove(1);
+    board.printBoard();
+
+    cout << endl << endl;
+
+    board.addYellowMove(1);
+    board.printBoard();
+
+    for (int i = 0; i < 6; i++) {
+        cout << endl << endl;
+
+        board.addYellowMove(1);
+        board.printBoard();
+    }
+
+    try {
+        board.addRedMove(1);
+    } catch (std::exception error) {
+        cout << error.what() << endl;
+    }
+
 
     return 0;
 }
