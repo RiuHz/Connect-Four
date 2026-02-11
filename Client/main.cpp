@@ -2,7 +2,7 @@
 
 #include "core/setup/setup.hpp"
 #include "core/board/board.hpp"
-#include "headers/UDPClient.hpp"
+#include "core/network/UDPClient.hpp"
 
 using namespace std;
 
@@ -10,7 +10,7 @@ int main() {
 
     /* Socket UDP */
     try {
-        UDPClient client("127.0.0.1", 5000);
+        lso::UDPClient client("127.0.0.1", 5000);
 
         client.sendMessage("Ciao sono il client 123");
         
