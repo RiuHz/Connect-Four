@@ -9,7 +9,7 @@ debug: main.o core/setup/setup.o core/board/board.o core/network/UDPClient.o
 	$(CCompiler) $(CDebugFlags) $^ -o $@
 
 clean:
-	clear; rm -rfv *.o; rm -fv main
+	clear; rm -rfv *.o; rm -fv main debug
 
 main.o: main.cpp
 
