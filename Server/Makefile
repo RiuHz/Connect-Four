@@ -9,8 +9,8 @@ debug: main.o
 	$(CCompiler) $(CDebugFlags) $^ -o $@
 
 clean:
-	clear; rm -rfv *.o; rm -fv main
+	clear; rm -rfv *.o; rm -fv main debug
 
 %.o: %.c
-	$(CCompiler) $(CFlags) -c $< -o $@
+	$(CCompiler) $(CDebugFlags) -c $< -o $@
 
