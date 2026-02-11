@@ -1,8 +1,12 @@
 CCompiler = gcc
-CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong -I./include
+CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -fsanitize=address -flto -fstack-protector-strong
+CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
 main: main.o
 	$(CCompiler) $(CFlags) $< -o $@
+
+debug: main.o
+	$(CCompiler) $(CDebugFlags) $^ -o $@
 
 clean:
 	clear; rm -rfv *.o; rm -fv main
