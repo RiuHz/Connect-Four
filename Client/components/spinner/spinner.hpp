@@ -14,43 +14,46 @@ namespace lso {
             static inline constexpr char symbols[] = {'|', '/', '-', '\\'};
             static inline constexpr int length = sizeof(symbols);
             
-            Spinner();
-        
         protected:
-        
+            
             //...
-        
+            
         public:
-        
+            
             template <typename Data>
             static Data showLoadingTextOnFunction(const std::string & text, std::function<Data()> function) {
-
+                
                 std::future<Data> future = std::async(std::launch::async, function);
-
+                
                 for (unsigned int i = 0; future.wait_for(std::chrono::milliseconds(500)) != std::future_status::ready; i++) {
                     std::cout << "\r"
-                        << text
-                        << " "
-                        << symbols[i % length]
-                        << std::flush;
+                    << text
+                    << " "
+                    << symbols[i % length]
+                    << std::flush;
                 }
-
+                
                 std::cout << "\b"
-                        << "✔"
-                        << std::endl
-                        << std::flush;
-
+                << "✔"
+                << std::endl
+                << std::flush;
+                
                 return future.get();
             }    
+            
+            public:
+            
+                Spinner() = delete;
+                Spinner(const Spinner &) = delete;
+                Spinner(Spinner &&) noexcept = delete;
 
-        public:
+                ~Spinner() = default;
 
-            Spinner &operator = (const Spinner &) = delete;
+                Spinner &operator = (const Spinner &) = delete;
+                Spinner &operator = (Spinner &&) noexcept = delete;
 
-            Spinner &operator = (Spinner &&) noexcept = delete;
-
-            bool operator == (const Spinner &) const noexcept = delete;
-            bool operator != (const Spinner &) const noexcept = delete;
+                bool operator == (const Spinner &) const noexcept = delete;
+                bool operator != (const Spinner &) const noexcept = delete;
 
     };
 

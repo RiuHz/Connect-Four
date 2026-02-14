@@ -2,34 +2,28 @@
 
 namespace lso {
 
-    std::string Setup::getPlayerName() {
-        std::string name;
+    std::string Setup::getPlayerName() noexcept {
+        lso::Screen::clear();
 
-            std::cout << "Inserisci il tuo nome"
-                    << std::endl
-                    << "> ";
-            std::cin >> name;
+        std::string playerName;
 
-        return name;
+        std::cout << "Inserisci il tuo nome"
+                << std::endl
+                << "> ";
+        std::cin >> playerName;
+
+
+        return playerName;
     }
 
     void Setup::connectToServer() {
-        const char spinner[] = { '|', '/', '-', '\\' };
-        const int spinner_len = 4;
+        lso::Screen::clear();
 
-        for (unsigned long i = 0; i < 10; i++) {
-            std::cout << "\rConnessione al server in corso "
-                << spinner[i % spinner_len]
-                << std::flush;
+        auto test = []() -> void {
+            std::this_thread::sleep_for(std::chrono::seconds(10));
+        };
 
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-
-        std::cout << "\b"
-            << "✔"
-            << std::flush;
-
-        std::cout << std::endl;
+        Spinner::showLoadingTextOnFunction<void>(std::string("Connessione al server"), test);
     }
 
 }

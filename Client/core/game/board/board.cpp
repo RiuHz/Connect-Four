@@ -2,7 +2,7 @@
 
 namespace lso {
 
-    void Board::printBoard() {
+    void Board::printBoard() const {
         for (unsigned int row = 0; row < rows; row++)
             Board::printRow(row);
 
@@ -10,7 +10,7 @@ namespace lso {
             Board::printColumnNumbers();
     }
 
-    void Board::printRow(const unsigned int row) {
+    void Board::printRow(const unsigned int row) const {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
 
         for (unsigned int column = 0; column < columns; column++)
@@ -19,7 +19,7 @@ namespace lso {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE << std::endl;
     }
 
-    void Board::printSeparator() {
+    void Board::printSeparator() const noexcept {
         std::cout << TextColor::BLUE << '+';
 
         for (unsigned int column = 0; column < columns; column++)
@@ -28,7 +28,7 @@ namespace lso {
         std::cout << '+' << TextColor::WHITE << std::endl;
     }
 
-    void Board::printColumnNumbers() {
+    void Board::printColumnNumbers() const noexcept {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
 
         for (unsigned int column = 0; column < columns; column++) {
@@ -38,13 +38,13 @@ namespace lso {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE << std::endl;
     }
 
-    void Board::addMove(const unsigned int column, const TextColor color) {        
+    void Board::addMove(const unsigned int column, const TextColor color) noexcept {        
         unsigned int row = findDeepestEmptyRow(column);
 
         grid[row][column] = color + playerSymbol + TextStyle::RESET;
     }
 
-    unsigned int Board::findDeepestEmptyRow(const unsigned int column) {
+    unsigned int Board::findDeepestEmptyRow(const unsigned int column) const {
         for (unsigned int row = rows - 1; row != invalidGridValue; row--)
             if (grid[row][column] == emptySymbol)
                 return row;

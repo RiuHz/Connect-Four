@@ -25,35 +25,35 @@ namespace lso {
 
             std::vector< std::vector<std::string> > grid;
 
-            void printRow(const unsigned int row);
+            void printRow(const unsigned int row) const noexcept;
 
-            void printSeparator();
+            void printSeparator() const noexcept;
 
-            void printColumnNumbers();
+            void printColumnNumbers() const noexcept;
 
-            void addMove(const unsigned int column, const TextColor color);
-
-            unsigned int findDeepestEmptyRow(const unsigned int column);
-
-        protected:
-
-            //...
-
-        public:
-
-            Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
-
-            void printBoard();
-
-            void inline addRedMove(const unsigned int column) { addMove(column, TextColor::RED); };
+            unsigned int findDeepestEmptyRow(const unsigned int column) const;
             
-            void inline addYellowMove(const unsigned int column) { addMove(column, TextColor::YELLOW); };
+        protected:
+            
+            //...
+            
+        public:
+            
+            Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
+            
+            void printBoard() const noexcept;
+            
+            void addMove(const unsigned int column, const TextColor color) noexcept;
 
         public:
+
+            Board(const Board &) = delete;
+            Board(Board &&) noexcept = delete;
+
+            ~Board() = default;
 
             Board &operator = (const Board &) = delete;
-
-            Board &operator = (Board &&) noexcept = delete;
+            Board &operator = (Board &&) noexcept = default;
 
             bool operator == (const Board &) const noexcept = delete;
             bool operator != (const Board &) const noexcept = delete;
