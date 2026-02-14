@@ -1,4 +1,5 @@
 #include "UDPClient.hpp"
+#include <cstring>
 
 namespace lso {
 

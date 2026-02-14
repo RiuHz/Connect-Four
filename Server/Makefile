@@ -2,7 +2,8 @@ CCompiler = gcc
 CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -fsanitize=address -flto -fstack-protector-strong
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
-SRC = main.c 
+SRC = main.c \
+	core/network/UDPServer.o
 
 OBJ = $(SRC:.c=.o)
 
@@ -17,5 +18,5 @@ clean:
 	clear; rm -rfv *.o; rm -fv main debug
 
 %.o: %.c
-	$(CCompiler) $(CFlags) -c $< -o $@
+	$(CCompiler) $(CDebugFlags) -c $< -o $@
 

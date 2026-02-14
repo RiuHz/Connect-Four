@@ -1,6 +1,7 @@
 #include <string>
 
 #include "core/setup/setup.hpp"
+#include "core/network/UDPClient.hpp"
 #include "enum/TextStyles.hpp"
 
 #define SERVER_ADDRESS "127.0.0.1"
@@ -21,7 +22,7 @@ void clearScreen() {
 
 int main() {
     
-/*     try {
+    try {
         lso::UDPClient client(SERVER_ADDRESS, 5000);
 
         client.sendMessage("Ciao sono il client 123");
@@ -33,7 +34,7 @@ int main() {
 
     } catch (const std::exception& e) {
         std::cerr << "Errore: " << e.what() << std::endl;
-    } */
+    }
 
     enterAlternateScreen();
 
