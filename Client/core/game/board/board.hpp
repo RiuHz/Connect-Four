@@ -17,9 +17,6 @@ namespace lso {
 
             static inline constexpr unsigned int invalidGridValue = UINT_MAX;
 
-            static inline constexpr unsigned int columns = 6;
-            static inline constexpr unsigned int rows = 7;
-
             static inline std::string emptySymbol = "·";
             static inline std::string playerSymbol = "O";
 
@@ -41,6 +38,9 @@ namespace lso {
             
             Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
             
+            static inline constexpr unsigned int columns = 6;
+            static inline constexpr unsigned int rows = 7;
+
             void printBoard() const noexcept;
             
             void addMove(const unsigned int column, const TextColor color) noexcept;
