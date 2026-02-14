@@ -1,9 +1,15 @@
 #include "UDPClient.hpp"
+#include "../../../Server/core/shared/contracts.h"
+
+#include <iostream>
 #include <cstring>
+#include <arpa/inet.h>
+
+#define MAXLINE 1024
 
 namespace lso {
 
-    UDPClient::UDPClient(std::string server_ip, int server_port) {
+    UDPClient::UDPClient(std::string server_ip, __uint16_t server_port) {
         clientSocket = socket(AF_INET, SOCK_DGRAM, 0);
 
         if (clientSocket < 0)
@@ -29,7 +35,7 @@ namespace lso {
         );
     }
 
-    std::string UDPClient::receiveMessage() {
+    void UDPClient::receiveMessage() {
         char buffer[MAXLINE];
 
         socklen_t socketLength = sizeof(serverAddress);
@@ -42,13 +48,20 @@ namespace lso {
             (struct sockaddr *) &serverAddress,
             &socketLength
         );
-        
-        if (n < 0)
-            return std::string("");
 
-        buffer[n] = '\0';
+        if (n < 0) {
+            std::cout << "Risposta dal Server C: " << "Non ho letto niente" << std::endl;
+        }
+        else{
+            S_Benvenuto* pacchetto = reinterpret_cast<S_Benvenuto*>(buffer);
 
-        return std::string(buffer);
+            if (pacchetto->tipoMessaggio == S_BENVENUTO) {
+                std::cout << pacchetto->messaggioBenvenuto << std::endl; 
+            }
+        }
+
+        //buffer[n] = '\0';
+
     }
 
 }

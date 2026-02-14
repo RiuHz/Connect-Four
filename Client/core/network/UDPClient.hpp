@@ -24,13 +24,13 @@ namespace lso {
 
         public:
 
-            UDPClient(std::string server_ip, int server_port);
+            UDPClient(std::string server_ip, __uint16_t server_port);
             
             ~UDPClient();
 
             void sendMessage(std::string message);
 
-            std::string receiveMessage();
+            void receiveMessage();
     };
 
 }
