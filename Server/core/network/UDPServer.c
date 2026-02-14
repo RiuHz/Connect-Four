@@ -1,4 +1,5 @@
 #include "UDPServer.h"
+#include "../shared/contracts.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,8 +76,6 @@ void avviaServer(int socketServer){
         } 
 }
 
-
-
 void associaThreadClient(int socket, struct sockaddr_in addr, char *buffer, ssize_t len) {
         // Allocazione della struttura dati da passare al thread
         ClientInfo *dati = (ClientInfo *)malloc(sizeof(ClientInfo));
@@ -108,20 +107,20 @@ void *inviaMessaggio(void *arg) {
                 (unsigned long)pthread_self(), inet_ntoa(dati->indirizzoClient.sin_addr));
 
         // INSERIRE LOGICA PER LA GESTIONE DEI MESSAGGI (bozza qui da rivedere e rifattorizzare assolutamente altrimenti esplodo)
-        char risposta[DIMENSIONE_BUFFER];
+
 
         // SCENARIO 1: CLIENT APPENA CONNESSO - SCOPO: INVIO MESSAGGIO DI BENVENUTO
-        if (strncmp(dati->buffer, "Ciao, sono un nuovo Client!", 27) == 0) {
-            sprintf(risposta, "Ciao, sono il thread %lu, ho ricevuto il tuo messaggio di saluto. Benvenuto a Forza 4!", (unsigned long)pthread_self());
-        }
-        else
-        {
-            strcpy(risposta, "Messaggio ricevuto no corrispondenza dal Server!");
-        }        
-    
-        sendto(dati->socketServer, risposta, strlen(risposta), 0,
-           (struct sockaddr *)&dati->indirizzoClient, sizeof(dati->indirizzoClient));
+        S_Benvenuto pacchetto;
+        pacchetto.tipoMessaggio=S_BENVENUTO;
+        strncpy(pacchetto.messaggioBenvenuto,"Ciao <nomeClient> ti diamo il benvenuto a Forza 4!",sizeof(pacchetto.messaggioBenvenuto));
         
+        sendto(dati->socketServer,&pacchetto,sizeof(pacchetto),0,(struct sockaddr *)&dati->indirizzoClient, sizeof(dati->indirizzoClient));
+        
+        //     char risposta[DIMENSIONE_BUFFER];
+        //     strcpy(risposta, "Messaggio ricevuto no corrispondenza dal Server!");
+        //     sendto(dati->socketServer, risposta, strlen(risposta), 0, (struct sockaddr *)&dati->indirizzoClient, sizeof(dati->indirizzoClient));        
+    
+
         sleep(10); // Per prova, da togliere
         
         // Libero tutto
