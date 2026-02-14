@@ -10,7 +10,6 @@ namespace lso {
             Board::printColumnNumbers();
     }
 
-
     void Board::printRow(const unsigned int row) {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
 
@@ -32,8 +31,8 @@ namespace lso {
     void Board::printColumnNumbers() {
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
 
-        for (unsigned int i = 0; i < columns; i++) {
-            std::cout << ' ' << i << ' ';
+        for (unsigned int column = 0; column < columns; column++) {
+            std::cout << ' ' << column + 1 << ' ';
         }
 
         std::cout << TextColor::BLUE << '|' << TextColor::WHITE << std::endl;
