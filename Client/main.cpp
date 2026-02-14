@@ -1,16 +1,28 @@
 #include <string>
 
 #include "core/setup/setup.hpp"
-#include "core/board/board.hpp"
-#include "headers/UDPClient.hpp"
+#include "enum/TextStyles.hpp"
+
+#define SERVER_ADDRESS "127.0.0.1"
 
 using namespace std;
 
-int main() {
+void enterAlternateScreen() {
+    cout << "\033[?1049h\033[?25l" << flush;
+}
 
-    /* Socket UDP */
-    try {
-        UDPClient client("127.0.0.1", 5000);
+void exitAlternateScreen() {
+    cout << "\033[?25h\033[?1049l" << flush;
+}
+
+void clearScreen() {
+    cout << "\033[H\033[2J" << flush;
+}
+
+int main() {
+    
+/*     try {
+        lso::UDPClient client(SERVER_ADDRESS, 5000);
 
         client.sendMessage("Ciao sono il client 123");
         
@@ -21,52 +33,60 @@ int main() {
 
     } catch (const std::exception& e) {
         std::cerr << "Errore: " << e.what() << std::endl;
-    }
+    } */
+
+    enterAlternateScreen();
+
+    clearScreen();
 
     string player_name = lso::Setup::getPlayerName();
+    
+    clearScreen();
 
     lso::Setup::connectToServer();
 
-
-    // Mostra lista lobby
-
-    /*
-    1) Pulire console
-    2) Idea presa da whiteboard
-    3) Input nel rigo più basso della console?
-    */
-
-    // Test Board
-
-    cout << "Printing empty board" << endl;
-
-    lso::Board board = lso::Board();
-
-    board.printBoard();
-
-    cout << endl << endl;
+    clearScreen();
     
-    board.addRedMove(1);
-    board.printBoard();
+    int scelta = 0;
+    
+    do {
+        
+        cout << "|---| Menu |---|" << endl
+        << "1) Crea Lobby" << endl
+        << "2) Visualizza lobby" << endl
+        << "3) Esci" << endl
+        << endl
+        << "> ";
+        
+        cin >> scelta;
+        
+        switch (scelta) {
+            case 1:
+                // Qua apro la lobby
+                cout << "Hai scelto crea lobby" << endl;
+                break;
+            
+            case 2:
+                // Qua visualizzo le lobby
+                cout << "Hai scelto visualizza lobby" << endl;
+                break;
+            
+            case 3:
+                cout << "Uscendo..." << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+                break;
+                
+            default:
+                cout << "Scelta non valida" << endl;
+                this_thread::sleep_for(chrono::seconds(1));
+                
+        }
 
-    cout << endl << endl;
+        clearScreen();
+        
+    } while (scelta != 3);
 
-    board.addYellowMove(1);
-    board.printBoard();
-
-    for (int i = 0; i < 6; i++) {
-        cout << endl << endl;
-
-        board.addYellowMove(1);
-        board.printBoard();
-    }
-
-    try {
-        board.addRedMove(1);
-    } catch (std::exception error) {
-        cout << error.what() << endl;
-    }
-
+    exitAlternateScreen();
 
     return 0;
 }
