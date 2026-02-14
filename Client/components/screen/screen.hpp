@@ -16,11 +16,11 @@ namespace lso {
         
         public:
         
-            static inline constexpr void open() { std::cout << "\033[?1049h\033[?25l" << std::flush; };
+            static inline void open() { std::cout << "\033[?1049h\033[?25l" << std::flush; };
 
-            static inline constexpr void close() { std::cout << "\033[?25h\033[?1049l" << std::flush; };
+            static inline void close() { std::cout << "\033[?25h\033[?1049l" << std::flush; };
 
-            static inline constexpr void clear() { std::cout << "\033[H\033[2J" << std::flush; };
+            static inline void clear() { std::cout << "\033[H\033[2J" << std::flush; };
 
         public:
 
