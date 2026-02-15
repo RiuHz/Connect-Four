@@ -6,8 +6,8 @@
 #include <climits>
 #include <string_view>
 
-#include "../../enum/TextStyles.hpp"
-#include "../../enum/TextColors.hpp"
+#include "../../../enum/TextStyles.hpp"
+#include "../../../enum/TextColors.hpp"
 
 namespace lso {
 
@@ -17,10 +17,13 @@ namespace lso {
 
             static inline constexpr unsigned int invalidGridValue = UINT_MAX;
 
-            static inline std::string emptySymbol = "·";
-            static inline std::string playerSymbol = "O";
+            static inline constexpr unsigned int columns = 6;
+            static inline constexpr unsigned int rows = 7;
 
             std::vector< std::vector<std::string> > grid;
+
+            static const inline std::string emptySymbol = "·";
+            static const inline std::string playerSymbol = "O";
 
             void printRow(const unsigned int row) const noexcept;
 
@@ -37,18 +40,15 @@ namespace lso {
         public:
             
             Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
-            
-            static inline constexpr unsigned int columns = 6;
-            static inline constexpr unsigned int rows = 7;
 
-            void printBoard() const noexcept;
+            void addMove(const unsigned int column, const TextColor color);
             
-            void addMove(const unsigned int column, const TextColor color) noexcept;
+            void print() const noexcept; 
 
         public:
 
             Board(const Board &) = delete;
-            Board(Board &&) noexcept = delete;
+            Board(Board &&) noexcept = default;
 
             ~Board() = default;
 
@@ -57,7 +57,6 @@ namespace lso {
 
             bool operator == (const Board &) const noexcept = delete;
             bool operator != (const Board &) const noexcept = delete;
-            
     };
 
 }
