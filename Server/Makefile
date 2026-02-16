@@ -3,7 +3,12 @@ CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -flto -fstack
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
 SRC = main.c \
-	core/network/TCPServer.o
+	core/network/TCPServer.o \
+	core/global/globals.o \
+	core/utils/list.o \
+	core/threading/threads.o \
+	core/handler/handlers.o \
+	core/handler/Request/requests.o
 
 OBJ = $(SRC:.c=.o)
 
