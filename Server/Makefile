@@ -3,7 +3,7 @@ CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -fsanitize=ad
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
 SRC = main.c \
-	core/network/UDPServer.o
+	core/network/TCPServer.o
 
 OBJ = $(SRC:.c=.o)
 
