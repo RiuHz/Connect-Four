@@ -6,8 +6,8 @@
 #include <climits>
 #include <string_view>
 
-#include "../../enum/TextStyles.hpp"
-#include "../../enum/TextColors.hpp"
+#include "../../../enum/TextStyles.hpp"
+#include "../../../enum/TextColors.hpp"
 
 namespace lso {
 
@@ -20,44 +20,43 @@ namespace lso {
             static inline constexpr unsigned int columns = 6;
             static inline constexpr unsigned int rows = 7;
 
-            static inline std::string emptySymbol = "·";
-            static inline std::string playerSymbol = "O";
-
             std::vector< std::vector<std::string> > grid;
 
-            void printRow(const unsigned int row);
+            static const inline std::string emptySymbol = "·";
+            static const inline std::string playerSymbol = "O";
 
-            void printSeparator();
+            void printRow(const unsigned int row) const noexcept;
 
-            void printColumnNumbers();
+            void printSeparator() const noexcept;
 
-            void addMove(const unsigned int column, const TextColor color);
+            void printColumnNumbers() const noexcept;
 
-            unsigned int findDeepestEmptyRow(const unsigned int column);
-
+            unsigned int findDeepestEmptyRow(const unsigned int column) const;
+            
         protected:
-
+            
             //...
-
+            
         public:
-
+            
             Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
 
-            void printBoard();
-
-            void inline addRedMove(const unsigned int column) { addMove(column, TextColor::RED); };
+            void addMove(const unsigned int column, const TextColor color);
             
-            void inline addYellowMove(const unsigned int column) { addMove(column, TextColor::YELLOW); };
+            void print() const noexcept; 
 
         public:
 
-            Board &operator = (const Board &) = delete;
+            Board(const Board &) = delete;
+            Board(Board &&) noexcept = default;
 
-            Board &operator = (Board &&) noexcept = delete;
+            ~Board() = default;
+
+            Board &operator = (const Board &) = delete;
+            Board &operator = (Board &&) noexcept = default;
 
             bool operator == (const Board &) const noexcept = delete;
             bool operator != (const Board &) const noexcept = delete;
-            
     };
 
 }
