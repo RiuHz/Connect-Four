@@ -3,13 +3,25 @@
 
 #include <stdint.h>
 
-#define NAME_LEN 20
+#define NAME_LEN 21
 
 #define BOARD_ROWS 6
 #define BOARD_COLUMNS 7
 
 #define SERVER_ADDRESS "127.0.0.1"
 #define SERVER_PORT 5000
+
+#define GAME_CREATED 1u
+#define GAME_WAITING 2u
+#define GAME_IN_PROGRESS 3u
+#define GAME_ENDED 4u
+
+typedef struct {
+    uint32_t id;
+    char proprietario[NAME_LEN];
+    char avversario[NAME_LEN];
+    uint32_t stato;
+} Game;
 
 // (REQ = Request) Richieste effettuate dal client
 // (RES = Response) Riposte inviate dal server
@@ -54,11 +66,13 @@ typedef struct {
 } Payload_REQ_CREATE_GAME;
 
 typedef struct {
-    GamesList partite;
+    uint32_t numberOfGames;
+    Game games[];
 } Payload_RES_GAMES_LIST;
 
 typedef struct {
-    GamesList listaPartite;
+    uint32_t numberOfGames;
+    Game games[];
 } Payload_EVT_GAMES_LIST_UPDATED;
 
 typedef struct {
@@ -76,24 +90,5 @@ typedef struct {
 typedef struct {
     uint32_t column;
 } Payload_EVT_OPPONENT_MOVE;
-
-typedef enum {
-    CREATED = 1,
-    WAITING,
-    IN_PROGRESS,
-    ENDED
-} GameState;
-
-typedef struct {
-    uint32_t id;
-    char proprietario[NAME_LEN];
-    char avversario[NAME_LEN];
-    GameState stato;
-    Game * next = nullptr;
-} Game;
-
-typedef struct {
-    Game * head = nullptr;
-} GamesList;
 
 #endif
