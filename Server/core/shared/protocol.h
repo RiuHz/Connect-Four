@@ -3,12 +3,17 @@
 
 #include <stdint.h>
 
+#define NAME_LEN 20
+
 #define BOARD_ROWS 6
 #define BOARD_COLUMNS 7
 
-// REQ = Request fatte dal client
-// RES = Response inviate dal server
-// EVT = Event eventi inviati dal server
+#define SERVER_ADDRESS "127.0.0.1"
+#define SERVER_PORT 5000
+
+// (REQ = Request) Richieste effettuate dal client
+// (RES = Response) Riposte inviate dal server
+// (EVT = Event) Eventi inviati dal server
 
 typedef enum {
     REQ_CONNECT = 1,
@@ -16,19 +21,25 @@ typedef enum {
     REQ_CREATE_GAME,
     REQ_JOIN_GAME,
     REQ_LEAVE_GAME,
+    EVT_OPPONENT_JOIN,
+    REQ_GAME_ACCEPTED,
+    REQ_GAME_DENIED,
+    EVT_GAME_ACCEPTED,
+    EVT_GAME_DENIED,
     REQ_GAMES_LIST,
     RES_GAMES_LIST,
     EVT_GAMES_LIST_UPDATED,
     EVT_GAME_CREATED,
     EVT_GAME_ENDED,
     REQ_MOVE,
+    EVT_OPPONENT_MOVE,
     EVT_GAME_WON,
     EVT_GAME_LOST,
     EVT_GAME_DRAW,
     REQ_REMATCH_ACCEPTED,
     REQ_REMATCH_DENIED,
-    RES_REMATCH_ACCEPTED,
-    RES_REMATCH_DENIED
+    EVT_REMATCH_ACCEPTED,
+    EVT_REMATCH_DENIED
 } MessageType;
 
 // Ogni messaggio è della struttura [MessageHeader][Message] così anche in TCP sappiamo quanti byte aspettare
@@ -39,7 +50,7 @@ typedef struct {
 } MessageHeader;
 
 typedef struct {
-    char playerName[20];
+    char playerName[NAME_LEN];
 } Payload_REQ_CREATE_GAME;
 
 typedef struct {
@@ -62,6 +73,10 @@ typedef struct {
     uint32_t column;
 } Payload_REQ_MOVE;
 
+typedef struct {
+    uint32_t column;
+} Payload_EVT_OPPONENT_MOVE;
+
 typedef enum {
     CREATED = 1,
     WAITING,
@@ -71,8 +86,8 @@ typedef enum {
 
 typedef struct {
     uint32_t id;
-    char proprietario[20];
-    char avversario[20];
+    char proprietario[NAME_LEN];
+    char avversario[NAME_LEN];
     GameState stato;
     Game * next = nullptr;
 } Game;
