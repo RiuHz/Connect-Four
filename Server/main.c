@@ -1,10 +1,10 @@
 #include <unistd.h>
 
-#include "core/network/UDPServer.h"
+#include "core/network/TCPServer.h"
 
 int main()
 {   
-        int socketServer = creaSocketServerUDP();
+        int socketServer = creaSocketServerTCP();
 
         avviaServer(socketServer);
 
