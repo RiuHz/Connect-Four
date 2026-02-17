@@ -65,7 +65,7 @@ typedef struct {
 
 typedef struct {
     char playerName[NAME_LEN];
-} Payload_REQ_CREATE_GAME;
+} Payload_REQ_CONNECT;
 
 typedef struct {
     uint32_t numberOfGames;
