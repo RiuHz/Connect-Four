@@ -1,6 +1,7 @@
 #include "requests.h"
 #include "../../shared/protocol.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -35,4 +36,18 @@ void richiestaListaPartite(int socketClientConnesso){
     //invio la lista di partite al client
 
 
+}
+
+void richiestaCreaPartita(int socketClientConnesso){
+    printf("Test");
+    socketClientConnesso+=1;
+// typedef struct {
+//     char playerName[NAME_LEN];
+// } Payload_REQ_CREATE_GAME;
+
+// crea partita
+
+// avvisa gli altri client che è stata creata una nuova partita
+
+    
 }
