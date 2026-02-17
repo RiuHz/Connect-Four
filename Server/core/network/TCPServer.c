@@ -1,7 +1,7 @@
 #include "TCPServer.h"
 #include "../utils/list.h"
 #include "../threading/threads.h"
-
+#include "../global/globals.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -68,17 +68,35 @@ void avviaServer(int socketServer){
                         continue;
                 }
 
-                // per debug (da togliere)
-                printf("Nuova connessione: socket fd %d, ip %s\n", nuovoClient, inet_ntoa(indirizzoClient.sin_addr));
+                printf("Nuova connessione: socket fd %d, ip %s\n", nuovoClient, inet_ntoa(indirizzoClient.sin_addr)); //DEBUG
 
                 // inserisco il nuovoClient valido 
                 aggiungiClient(nuovoClient);
 
-                stampaLista(); // only for debug da togliere peffozza
+                stampaListaClient(); //DEBUG
 
                 associaThreadClient(nuovoClient); 
                 
         } 
+}
+
+void inviaBroadcast(void *datiPacchetto, size_t dimensioneTotale) {
+    
+    pthread_mutex_lock(&mutexListaClient); 
+
+    ListaClient* clientCorrente = listaClient;
+    while (clientCorrente != NULL) {
+        // mando il puntatore al pacchetto e la dimensione da mandare
+        ssize_t byteInviati = send(clientCorrente->socketClient, datiPacchetto, dimensioneTotale, 0);
+        
+        if (byteInviati < 0) {
+            perror("Errore invio broadcast");
+            // Gestire la disconnessione ?
+        }
+        clientCorrente = clientCorrente->next;
+    }
+
+    pthread_mutex_unlock(&mutexListaClient);
 }
 
 

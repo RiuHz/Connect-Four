@@ -3,6 +3,5 @@
 
 void associaThreadClient(int nuovoClientConnesso);
 void *gestioneClientThread(void *arg);
-void inviaBroadcast(char* msg);
 
 #endif

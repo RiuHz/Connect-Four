@@ -10,8 +10,6 @@
 #include <stdint.h>
 
 #include <string.h>
-
-
 #include <sys/socket.h>
 
 #define DIMENSIONE_BUFFER 1024
@@ -60,16 +58,4 @@ void *gestioneClientThread(void *arg){
 
         pthread_exit(NULL);
         
-}
-
-void inviaBroadcast(char* msg) {
-    pthread_mutex_lock(&mutexListaClient); // Blocco la lista per leggerla
-
-    ListaClient* temp = listaClient;
-    while(temp != NULL) {
-        send(temp->socketClient, msg, strlen(msg), 0);
-        temp = temp->next;
-    }
-
-    pthread_mutex_unlock(&mutexListaClient);
 }

@@ -7,6 +7,6 @@
 
 int creaSocketServerTCP();
 void avviaServer(int socketServer);
-
+void inviaBroadcast(void *datiPacchetto, size_t dimensioneTotale);
 
 #endif
