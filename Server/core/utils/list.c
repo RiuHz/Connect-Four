@@ -1,5 +1,5 @@
 #include "list.h"
-#include "../global/globals.h" 
+#include "../global/globals.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,17 +31,17 @@ void aggiungiClient(int nuovoClientConnesso){
 }
 
 // per debug (da togliere)
-void stampaLista(){
+void stampaListaClient(){
         ListaClient* corrente=listaClient;
 
         pthread_mutex_lock(&mutexListaClient); // blocco gli altri e aggiungo solo io l' elemento
 
         if(corrente==NULL){
-              printf("\n La lista e' vuota\n");  
+              printf("\n La lista dei Client e' vuota\n");  
         }
         else
         {
-                printf("\n Lista: ");
+                printf("\n Lista client: ");
                 while(corrente!=NULL)
                 {
                         printf("\n %d\n",corrente->socketClient);
@@ -77,4 +77,51 @@ void rimuoviClient(int clientDisconnesso){
 
         pthread_mutex_unlock(&mutexListaClient); // sblocco l' acceso agli altri thread
 
+}
+
+void aggiungiPartitaAllaLista(Game game){
+        ListaPartite *nuovoNodo,*tempNodo;
+        nuovoNodo=malloc(sizeof(ListaPartite));
+
+        nuovoNodo->game=game;
+        nuovoNodo->next=NULL;
+
+        pthread_mutex_lock(&mutexListaPartite); // blocco gli altri e aggiungo solo io l' elemento
+
+        if(listaPartite==NULL){
+                listaPartite=nuovoNodo;
+        }
+        else
+        {
+                tempNodo=listaPartite;
+                nuovoNodo->next=tempNodo;
+                listaPartite=nuovoNodo;
+        }
+
+        pthread_mutex_unlock(&mutexListaPartite); // sblocco gli altri che possono fare operazioni
+
+}
+
+void stampaListaPartite(){
+        ListaPartite* corrente=listaPartite;
+
+        pthread_mutex_lock(&mutexListaPartite); // blocco gli altri e aggiungo solo io l' elemento
+
+        if(corrente==NULL){
+              printf("\n La lista delle partite e' vuota\n");  
+        }
+        else
+        {
+                printf("\n Lista partite: ");
+                while(corrente!=NULL)
+                {
+                        printf("\n %d\n",corrente->game.id);
+                        printf("\n %s\n",corrente->game.proprietario);
+                        printf("\n %s\n",corrente->game.avversario);
+                        printf("\n %d\n",corrente->game.stato);
+                        corrente=corrente->next;
+                }  
+        }
+
+        pthread_mutex_unlock(&mutexListaPartite); // sblocco gli altri che possono fare operazioni
 }

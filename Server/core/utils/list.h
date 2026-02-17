@@ -1,15 +1,12 @@
 #ifndef LIST_H
 #define LIST_H
-
-// Strutture dati necessarie
-typedef struct ListaClient {
-        int socketClient;
-        struct ListaClient *next;
-} ListaClient;
-
+#include "../shared/protocol.h"
 
 void aggiungiClient(int nuovoClientConnesso);
-void stampaLista();
+void stampaListaClient();
 void rimuoviClient(int clientDisconnesso);
+
+void aggiungiPartitaAllaLista(Game game);
+void stampaListaPartite();
 
 #endif
