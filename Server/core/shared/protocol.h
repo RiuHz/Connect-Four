@@ -9,12 +9,14 @@
 #define BOARD_COLUMNS 7
 
 #define SERVER_ADDRESS "127.0.0.1"
-#define SERVER_PORT 5000
+#define SERVER_PORT 1946
 
-#define GAME_CREATED 1u
-#define GAME_WAITING 2u
-#define GAME_IN_PROGRESS 3u
-#define GAME_ENDED 4u
+typedef enum {
+    GAME_CREATED = 1,
+    GAME_WAITING,
+    GAME_IN_PROGRESS,
+    GAME_ENDED
+} GameState;
 
 typedef struct {
     uint32_t id;
@@ -57,7 +59,7 @@ typedef enum {
 // Ogni messaggio è della struttura [MessageHeader][Message] così anche in TCP sappiamo quanti byte aspettare
 
 typedef struct {
-    uint32_t messageType;
+    uint32_t type;
     uint32_t length;
 } MessageHeader;
 
