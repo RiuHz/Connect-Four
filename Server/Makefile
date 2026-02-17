@@ -1,6 +1,6 @@
 CCompiler = gcc
 CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -flto -fstack-protector-strong
-CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c17 -fsanitize=address -flto -fstack-protector-strong
+CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
 SRC = main.c \
 	core/network/TCPServer.o \
@@ -20,7 +20,7 @@ debug: $(OBJ)
 	$(CCompiler) $(CDebugFlags) $^ -o $@
 
 clean:
-	clear; rm -rfv *.o; rm -fv main debug
+	clear; rm -rfv $(OBJ); rm -fv main debug
 
 %.o: %.c
 	$(CCompiler) $(CDebugFlags) -c $< -o $@
