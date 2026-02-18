@@ -8,7 +8,8 @@ SRC = main.c \
 	core/utils/list.o \
 	core/threading/threads.o \
 	core/handler/handlers.o \
-	core/handler/Request/requests.o
+	core/handler/Request/requests.o \
+	core/handler/Response/responses.o
 
 OBJ = $(SRC:.c=.o)
 
