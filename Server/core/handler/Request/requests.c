@@ -1,5 +1,10 @@
 #include "requests.h"
 #include "../../shared/protocol.h"
+#include "../../threading/threads.h"
+#include "../handlers.h"
+#include "../../network/TCPServer.h"
+#include "../Response/responses.h"
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,47 +12,58 @@
 #include <string.h>
 #include <sys/socket.h>
 
-void richiestaListaPartite(int socketClientConnesso){
+void richiestaConnessione(ClientInfo *clientConnesso,uint32_t dimensionePayloadDaLeggere){
+    // Dichiaro la struttura che mi serve
+    Payload_REQ_CONNECT payloadRichiestaConnessione;
 
-    // BOZZA DI PROVA
-    Game p1;
-    p1.id=1;
-    strcpy(p1.proprietario,"Mario");
-    strcpy(p1.proprietario,"");
-    p1.stato=1u;
+    // Controllo di sicurezza
+    if (dimensionePayloadDaLeggere != sizeof(Payload_REQ_CONNECT)) {
+        puliziaBuffer(clientConnesso->socketClient, dimensionePayloadDaLeggere);  // devo comunque leggere la dimensione dichiarata
+        return; // gestire poi la logica per farlo sapere al client che l'operazione non è andata a buon fine (con una send probabilmente)
+    }
 
-    Payload_RES_GAMES_LIST lista;
-    lista.games[0]=p1;
-    lista.numberOfGames=1;
+    // Leggo i dati
+    if (letturaSicuraDelPacchetto(clientConnesso->socketClient, &payloadRichiestaConnessione, sizeof(Payload_REQ_CONNECT)) <= 0) {
+        return; // Errore di rete
+    }
 
-    MessageHeader messageHeader;
-    messageHeader.messageType=RES_GAMES_LIST;
-    messageHeader.length=sizeof(Game); // per un solo game altrimenti numero partite * sizeofGame
+    // Logica
+    strncpy(clientConnesso->nomeClient, payloadRichiestaConnessione.playerName, 20);
 
-    send(socketClientConnesso, &messageHeader, sizeof(messageHeader), 0);
-    
-    send(socketClientConnesso, &lista, sizeof(Game), 0); // il 3° parametro va cambiato con dimensione totale = numeroPartite * sizeoOfGame
+    // avviso il client che è tutto ok
+    rispostaConnessione(clientConnesso);
+}
 
+void richiestaCreaPartita(ClientInfo *clientConnesso){
+    // crea partita
+    Partita partita;
+    partita.id=ottieniNuovoIdentificativoPartita();
+    strncpy(partita.proprietario, clientConnesso->nomeClient, 20);
+    partita.socketProprietario=clientConnesso->socketClient;
+    partita.stato=1;
 
-    // recupero la lista di partite
-   
-    // conversione da lista a vettore per mandarlo?
+    // aggiungi alla lista partite
+    aggiungiPartitaAllaLista(partita);
 
-    //invio la lista di partite al client
+    // avvisa gli altri client che è stata creata una nuova partita
+    inviaBroadcast(&partita,sizeof(Partita));   
 
+    rispostaCreaPartita(clientConnesso);
 
 }
 
-void richiestaCreaPartita(int socketClientConnesso){
-    printf("Test");
-    socketClientConnesso+=1;
-// typedef struct {
-//     char playerName[NAME_LEN];
-// } Payload_REQ_CREATE_GAME;
+void richiestaListaPartite(ClientInfo *clientConnesso){
 
-// crea partita
+    // recupero la lista di partite e conversione in struct di partite
 
-// avvisa gli altri client che è stata creata una nuova partita
+    size_t dimensionePacchetto = 0;
+    Payload_RES_GAMES_LIST *listaPartiteOttenute = ottieniListaPartite(&dimensionePacchetto);
 
-    
+    // invio la lista di partite al client
+
+    rispostaListaPartite(clientConnesso,dimensionePacchetto,listaPartiteOttenute);
+
+    free(listaPartiteOttenute); 
+
 }
+
