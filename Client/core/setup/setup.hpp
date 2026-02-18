@@ -9,13 +9,15 @@
 #include "../../components/spinner/spinner.hpp"
 #include "../../components/screen/screen.hpp"
 
+#include "../network/tcp/TCPClient.hpp"
+
 namespace lso {
 
     class Setup {
         
         private:
             
-            //...
+            static bool validPlayerName(const std::string name) noexcept;
         
         protected:
         
@@ -25,7 +27,7 @@ namespace lso {
         
             static std::string getPlayerName() noexcept;
             
-            static void connectToServer();
+            static std::unique_ptr<TCPClient> connectToServer(const std::string name);
             
         public:
         
