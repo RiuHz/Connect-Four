@@ -1,7 +1,10 @@
 #ifndef REQUETS_H
 #define REQUETS_H
 
-void richiestaListaPartite(int socketClientConnesso);
-void richiestaCreaPartita(int socketClientConnesso);
+#include "../../global/globals.h"
+
+void richiestaConnessione(ClientInfo *clientConnesso,uint32_t dimensionePayloadDaLeggere);
+void richiestaCreaPartita(ClientInfo *clientConnesso);
+void richiestaListaPartite(ClientInfo *clientConnesso);
 
 #endif

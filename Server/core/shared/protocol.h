@@ -31,8 +31,10 @@ typedef struct {
 
 typedef enum {
     REQ_CONNECT = 1,
+    RES_CONNECT_ACCEPTED,
     REQ_DISCONNECT,
     REQ_CREATE_GAME,
+    RES_CREATE_GAME_ACCEPTED,
     REQ_JOIN_GAME,
     REQ_LEAVE_GAME,
     EVT_OPPONENT_JOIN,
