@@ -14,14 +14,15 @@
 
 #define DIMENSIONE_BUFFER 1024
 
+
 void associaThreadClient(int nuovoClientConnesso) {
         // Creo il thread
         pthread_t tid;
 
-        int *clientInfo = malloc(sizeof(int));
-        *clientInfo = nuovoClientConnesso;
+        int *clientData = malloc(sizeof(int));
+        *clientData = nuovoClientConnesso;
 
-        if (pthread_create(&tid, NULL, gestioneClientThread,clientInfo) != 0) {
+        if (pthread_create(&tid, NULL, gestioneClientThread,clientData) != 0) {
                 perror("Errore creazione thread");
         }
 
@@ -31,13 +32,17 @@ void *gestioneClientThread(void *arg){
         int socketClient = *(int*)arg;
         free(arg); // Rilascio subito la memoria utilizzata e la rendo disponibile immediatamente
 
+        ClientInfo clientInfo;
+        clientInfo.socketClient=socketClient;
+        memset(clientInfo.nomeClient, 0, 20); // Pulizia di tutti i caratteri
+
         while(1) 
         {
-            uint32_t tipoPacchetto = identificaPacchetto(socketClient);
+            MessageHeader intestazionePacchetto = identificaPacchetto(&clientInfo);
 
-            if(tipoPacchetto<=0) break; // client disconnesso/errore
+            if(intestazionePacchetto.type<=0) break; // client disconnesso/errore
 
-            processaPacchetto(tipoPacchetto,socketClient);
+            processaPacchetto(intestazionePacchetto,&clientInfo);
 
             // fare operazioni varie e introdurre logica di gestione del tipo di messaggi ricevuti
 
@@ -52,9 +57,9 @@ void *gestioneClientThread(void *arg){
 
         }
 
-        close(socketClient); // client disconnesso mi chiudo la socket dal server verso quel client
+        close(clientInfo.socketClient); // client disconnesso mi chiudo la socket dal server verso quel client
 
-        rimuoviClient(socketClient);
+        rimuoviClient(clientInfo.socketClient);
 
         pthread_exit(NULL);
         
