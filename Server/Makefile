@@ -24,5 +24,5 @@ clean:
 	clear; rm -rfv $(OBJ); rm -fv main debug
 
 %.o: %.c
-	$(CCompiler) $(CDebugFlags) -c $< -o $@
+	$(CCompiler) $(CFlags) -c $< -o $@
 
