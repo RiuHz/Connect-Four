@@ -1,10 +1,15 @@
 #include "list.h"
 #include "../global/globals.h"
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <string.h>
+#include <arpa/inet.h>
+
+
 
 // Implementazione per le funzioni dedicate alle liste
 void aggiungiClient(int nuovoClientConnesso){
@@ -79,11 +84,11 @@ void rimuoviClient(int clientDisconnesso){
 
 }
 
-void aggiungiPartitaAllaLista(Game game){
+void aggiungiPartitaAllaLista(Partita partita){
         ListaPartite *nuovoNodo,*tempNodo;
         nuovoNodo=malloc(sizeof(ListaPartite));
 
-        nuovoNodo->game=game;
+        nuovoNodo->partita=partita;
         nuovoNodo->next=NULL;
 
         pthread_mutex_lock(&mutexListaPartite); // blocco gli altri e aggiungo solo io l' elemento
@@ -115,13 +120,52 @@ void stampaListaPartite(){
                 printf("\n Lista partite: ");
                 while(corrente!=NULL)
                 {
-                        printf("\n %d\n",corrente->game.id);
-                        printf("\n %s\n",corrente->game.proprietario);
-                        printf("\n %s\n",corrente->game.avversario);
-                        printf("\n %d\n",corrente->game.stato);
+                        printf("\n %d\n",corrente->partita.id);
+                        printf("\n %s\n",corrente->partita.proprietario);
+                        printf("\n %s\n",corrente->partita.avversario);
+                        printf("\n %d\n",corrente->partita.stato);
                         corrente=corrente->next;
                 }  
         }
 
         pthread_mutex_unlock(&mutexListaPartite); // sblocco gli altri che possono fare operazioni
+}
+
+Payload_RES_GAMES_LIST* ottieniListaPartite(size_t *dimensioneStruttura){
+
+        pthread_mutex_lock(&mutexListaPartite); // blocco gli altri 
+        pthread_mutex_lock(&mutexNumeroPartita); // blocco gli altri
+
+        // CALCOLO DIMENSIONE TOTALE
+        size_t dimensione_totale = sizeof(Payload_RES_GAMES_LIST) + (sizeof(Game) * numeroPartita);
+        *dimensioneStruttura = dimensione_totale;
+
+        // ALLOCAZIONE
+        Payload_RES_GAMES_LIST *listaPartiteDaInviare = malloc(dimensione_totale);
+        listaPartiteDaInviare->numberOfGames = htonl(numeroPartita); 
+
+        ListaPartite* corrente=listaPartite;
+
+        if(corrente==NULL){
+              printf("\n La lista delle partite e' vuota\n");  
+        }
+        else
+        {
+                while(corrente!=NULL)
+                {
+                        listaPartiteDaInviare->games->id=corrente->partita.id;
+                        strcpy(listaPartiteDaInviare->games->proprietario,corrente->partita.proprietario);
+                        strcpy(listaPartiteDaInviare->games->avversario,corrente->partita.avversario);
+                        listaPartiteDaInviare->games->stato=corrente->partita.stato;
+
+                        corrente=corrente->next;
+                }
+
+        }
+
+        pthread_mutex_unlock(&mutexNumeroPartita); // sblocco gli altri che possono fare operazioni
+        pthread_mutex_unlock(&mutexListaPartite); // sblocco gli altri che possono fare operazioni
+
+        return listaPartiteDaInviare;
+
 }
