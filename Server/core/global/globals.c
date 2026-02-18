@@ -7,6 +7,17 @@ ListaClient* listaClient = NULL;
 pthread_mutex_t mutexListaPartite = PTHREAD_MUTEX_INITIALIZER; 
 ListaPartite* listaPartite = NULL;
 
+pthread_mutex_t mutexNumeroPartita = PTHREAD_MUTEX_INITIALIZER;
+uint32_t numeroPartita = 0;
+
+uint32_t ottieniNuovoIdentificativoPartita(){
+        pthread_mutex_lock(&mutexNumeroPartita); // blocco gli altri e aggiungo solo io l' elemento
+        numeroPartita++;
+        pthread_mutex_unlock(&mutexNumeroPartita); // sblocco gli altri che possono fare operazioni
+        return numeroPartita;
+}
+
+
         // Game p1;
         // p1.id=1;
         // strcpy(p1.proprietario,"Mario");
