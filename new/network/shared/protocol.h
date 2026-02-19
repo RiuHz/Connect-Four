@@ -31,28 +31,42 @@ typedef struct {
 
 typedef enum {
     REQ_CONNECT = 1,
+    RES_CONNECT_ACCEPTED,
+
     REQ_DISCONNECT,
+
     REQ_CREATE_GAME,
-    REQ_JOIN_GAME,
-    REQ_LEAVE_GAME,
+    EVT_GAME_CREATED,
     EVT_OPPONENT_JOIN,
-    REQ_GAME_ACCEPTED,
-    REQ_GAME_DENIED,
+
+    REQ_JOIN_GAME,
     EVT_GAME_ACCEPTED,
     EVT_GAME_DENIED,
+
+    REQ_LEAVE_GAME,
+
+    REQ_GAME_ACCEPTED,
+
+    REQ_GAME_DENIED,
+
     REQ_GAMES_LIST,
     RES_GAMES_LIST,
-    EVT_GAMES_LIST_UPDATED,
-    EVT_GAME_CREATED,
+
+    EVT_GAMES_LIST_UPDATED, 
+
     EVT_GAME_ENDED,
+
     REQ_MOVE,
     EVT_OPPONENT_MOVE,
+
     EVT_GAME_WON,
     EVT_GAME_LOST,
     EVT_GAME_DRAW,
+
     REQ_REMATCH_ACCEPTED,
-    REQ_REMATCH_DENIED,
     EVT_REMATCH_ACCEPTED,
+
+    REQ_REMATCH_DENIED,
     EVT_REMATCH_DENIED
 } MessageType;
 
@@ -69,14 +83,17 @@ typedef struct {
 
 typedef struct {
     uint32_t numberOfGames;
+    // array di game o stream di byte
 } Payload_RES_GAMES_LIST;
 
 typedef struct {
-    uint32_t numberOfGames;
+    // uint32_t numberOfGames; why?
+    Game partita;
 } Payload_EVT_GAMES_LIST_UPDATED;
 
 typedef struct {
-    Game partita;
+    //Game partita; // gli altri campi di game non ci interessano (più leggero l'invio)
+    uint32_t idPartitaCreato; 
 } Payload_EVT_GAME_CREATED;
 
 typedef struct {
@@ -90,5 +107,6 @@ typedef struct {
 typedef struct {
     uint32_t column;
 } Payload_EVT_OPPONENT_MOVE;
+
 
 #endif
