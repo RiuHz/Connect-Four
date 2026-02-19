@@ -2,9 +2,13 @@
 #define RESPONSES_H
 
 #include "../../data/list/list.h"
+#include "../../shared/protocol.h"
+#include "../../threading/threads.h"
+#include "../handlers.h"
+#include "../../network/TCPServer.h"
 
-void rispostaConnessione();
-void rispostaCreaPartita(unsigned int id);
-void rispostaListaPartite(ListaPartite * lista, unsigned int lunghezza);
+
+Messaggio rispostaConnessione();
+Messaggio rispostaListaPartite(ListaPartite * lista);
 
 #endif

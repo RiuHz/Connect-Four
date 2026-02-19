@@ -1,57 +1,27 @@
 #include "responses.h"
-#include "../../shared/protocol.h"
-#include "../../threading/threads.h"
-#include "../handlers.h"
-#include "../../network/TCPServer.h"
 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/socket.h>
+Messaggio rispostaConnessione(){
+    Messaggio messaggioRisposta;
 
-void rispostaConnessione(ClientInfo *clientConnesso){
-    // Invio il pacchetto di tutto ok
-    MessageHeader messagioRisposta;
-    messagioRisposta.type=RES_CONNECT_ACCEPTED;
-    messagioRisposta.length = htonl(0);
+    messaggioRisposta.tipo=RES_CONNECT_ACCEPTED;
+    messaggioRisposta.payload=NULL;
 
-    if ( send(clientConnesso->socketClient, &messagioRisposta, sizeof(MessageHeader), 0) ){ // DEBUG
-        perror("Errore invio header pacchetto di risposta alla connessione accettata");
-        return;
-    }
-
-}
-
-void rispostaCreaPartita(ClientInfo *clientConnesso){
-     // Invio il pacchetto di tutto ok
-    MessageHeader messagioRisposta;
-    messagioRisposta.type=RES_CREATE_GAME_ACCEPTED;
-    messagioRisposta.length = htonl(0);
-
-    if (send(clientConnesso->socketClient, &messagioRisposta, sizeof(MessageHeader), 0) < 0) { // DEBUG, lasciare solo la chiamata
-        perror("Errore invio header pacchetto di risposta alla creazione accettata della partita");
-        return;
-    }
+    return messaggioRisposta;
     
 }
 
-void rispostaListaPartite(ClientInfo *clientConnesso, size_t dimensioneDaInviare, Payload_RES_GAMES_LIST *listaPartiteDaInviare ){
 
+Messaggio rispostaListaPartite(ListaPartite * lista){
     // Invio il pacchetto di tutto ok
-    MessageHeader messagioRisposta;
-    messagioRisposta.type=RES_GAMES_LIST;
-    messagioRisposta.length = htonl((uint32_t)dimensioneDaInviare);
+    Messaggio messagioRisposta;
+    messagioRisposta.tipo=RES_GAMES_LIST;
+    
+    // 1) messagioRisposta.payload= associare il puntatore allo stream di byte
 
-    if (send(clientConnesso->socketClient, &messagioRisposta, sizeof(MessageHeader), 0) < 0) { // DEBUG
-        perror("Errore invio header pacchetto di risposta lista di partite");
-        return;
-    }
+    // 2) ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->games associare il vettore di partite o lo stream di byte
 
-    if (send(clientConnesso->socketClient, listaPartiteDaInviare, dimensioneDaInviare, 0) < 0) { // DEBUG
-        perror("Errore invio payload pacchetto di risposta lista di partite");
-    }
+    // ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->numberOfGames=htonl(numeroGiochi) 
     
 }
 
