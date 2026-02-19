@@ -88,3 +88,11 @@ void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
         bytesLetti += byteRimanenti;
     }
 }
+
+void inviaRisposta(Client * clientRicevente, Messaggio messaggioDaInviare){
+
+    if ( send(clientRicevente->socket,&messaggioDaInviare, sizeof(Messaggio), 0) ){ // DEBUG
+        fprintf(stderr, "Errore invio pacchetto di risposta al client (%s) affidato al thread (%d) connessione accettata", clientRicevente -> nome,pthread_self());
+    }
+
+}
