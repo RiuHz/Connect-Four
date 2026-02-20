@@ -20,7 +20,7 @@ Messaggio attendiMessaggio(Client * client, MessageType messaggioAtteso);
 
 Messaggio processaMessaggio(MessageHeader header, uint32_t * payload);
 
-void inviaRisposta(Client * clientRicevente, Messaggio messaggioDaInviare);
+void inviaRisposta(Client * client, Messaggio messaggio);
 
 void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza);
 

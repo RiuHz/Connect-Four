@@ -89,10 +89,10 @@ void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
     }
 }
 
-void inviaRisposta(Client * clientRicevente, Messaggio messaggioDaInviare){
+void inviaRisposta(Client * client, Messaggio messaggio){
 
-    if ( send(clientRicevente->socket,&messaggioDaInviare, sizeof(Messaggio), 0) ){ // DEBUG
-        fprintf(stderr, "Errore invio pacchetto di risposta al client (%s) affidato al thread (%d) connessione accettata", clientRicevente -> nome,pthread_self());
+    if (send(client -> socket, & messaggio, sizeof(Messaggio), 0) < 0) {
+        fprintf(stderr, "Errore invio pacchetto di risposta al client (%s) affidato al thread (%d) connessione accettata", client -> nome, pthread_self());
     }
 
 }
