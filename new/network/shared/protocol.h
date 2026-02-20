@@ -82,18 +82,15 @@ typedef struct {
 } Payload_REQ_CONNECT;
 
 typedef struct {
-    uint32_t numberOfGames;
-    // array di game o stream di byte
+    Game *games;
 } Payload_RES_GAMES_LIST;
 
 typedef struct {
-    // uint32_t numberOfGames; why?
     Game partita;
 } Payload_EVT_GAMES_LIST_UPDATED;
 
 typedef struct {
-    //Game partita; // gli altri campi di game non ci interessano (più leggero l'invio)
-    uint32_t idPartitaCreato; 
+    Game partita;
 } Payload_EVT_GAME_CREATED;
 
 typedef struct {
