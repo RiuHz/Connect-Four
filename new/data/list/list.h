@@ -9,11 +9,13 @@
 typedef struct ListaClient {
     pthread_mutex_t mutex;
     Client * head;
+    unsigned int contatore;
 } ListaClient;
 
 typedef struct ListaPartite {
     pthread_mutex_t mutex;
     Partita * head;
+    unsigned int contatore;
 } ListaPartite;
 
 void aggiungiClient(ListaClient * lista, Client * client);

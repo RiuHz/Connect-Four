@@ -10,6 +10,7 @@ void aggiungiClient(ListaClient * lista, Client * client) {
 
     client -> next = lista -> head;
     lista -> head = client;
+    lista -> contatore += 1;
 
     pthread_mutex_unlock(& lista -> mutex);
 }
@@ -54,6 +55,8 @@ void rimuoviClient(ListaClient * lista, Client * client) {
         }
 
         free(corrente);
+        lista -> contatore -= 1;
+
     }
 
     pthread_mutex_unlock(& lista -> mutex);
@@ -64,6 +67,7 @@ void aggiungiPartita(ListaPartite * lista, Partita * partita) {
 
         partita -> next = lista -> head;
         lista -> head = partita;
+        lista -> contatore += 1;
 
         pthread_mutex_unlock(& lista -> mutex);
 
@@ -112,6 +116,8 @@ void rimuoviPartita(ListaPartite * lista, Partita * partita) {
         }
 
         free(corrente);
+        lista -> contatore -= 1;
+
     }
 
     pthread_mutex_unlock(& lista -> mutex);

@@ -7,7 +7,10 @@ Messaggio eventoPartitaCreata(Game partitaCreata){
     messagioRisposta.tipo=EVT_GAME_CREATED;
     messagioRisposta.payload = malloc(sizeof(Payload_EVT_GAME_CREATED));
 
-    ((Payload_EVT_GAME_CREATED *)messagioRisposta.payload)->idPartitaCreato=htonl(partitaCreata.id);
+    ((Payload_EVT_GAME_CREATED *)messagioRisposta.payload)->partita.id=htonl(partitaCreata.id);
+    strcpy(((Payload_EVT_GAME_CREATED *) messagioRisposta.payload) -> partita.proprietario, partitaCreata.proprietario);
+    strcpy(((Payload_EVT_GAME_CREATED *) messagioRisposta.payload) -> partita.avversario, partitaCreata.avversario);
+    ((Payload_EVT_GAME_CREATED *)messagioRisposta.payload)->partita.stato=htonl(partitaCreata.stato);
 
     return messagioRisposta;
 }
