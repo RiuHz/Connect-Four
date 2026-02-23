@@ -28,7 +28,7 @@ typedef struct {
 typedef struct {
     uint32_t rows[BOARD_ROWS];
     uint32_t columns[BOARD_COLUMNS];
-}
+} Board;
 
 // (REQ = Request) Richieste effettuate dal client
 // (RES = Response) Riposte inviate dal server
