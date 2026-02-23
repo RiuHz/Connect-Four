@@ -25,6 +25,11 @@ typedef struct {
     uint32_t stato;
 } Game;
 
+typedef struct {
+    uint32_t rows[BOARD_ROWS];
+    uint32_t columns[BOARD_COLUMNS];
+}
+
 // (REQ = Request) Richieste effettuate dal client
 // (RES = Response) Riposte inviate dal server
 // (EVT = Event) Eventi inviati dal server
@@ -52,10 +57,10 @@ typedef enum {
     EVT_GAME_ENDED, // Payload = Game List
     
     REQ_MOVE,
-    RES_MOVE_ACCEPTED,
     RES_BAD_MOVE,
 
-    EVT_NEXT_MOVE, // Payload = Board
+    EVT_UPDATE_BOARD, // Payload = Board
+    EVT_NEXT_TURN,
     EVT_GAME_WON,
     EVT_GAME_LOST,
     EVT_GAME_DRAW,
