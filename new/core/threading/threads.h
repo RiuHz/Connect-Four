@@ -7,16 +7,29 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <stdint.h>
-
 #include <string.h>
 #include <sys/socket.h>
 
-#include "../handler/handlers.h"
+#include "../handler/request/requests.h"
 
 #include "../../data/client/client.h"
 
-void associaThreadConnessione(int socket);
+#include "../../network/messaggio/messaggio.h"
+#include "../../network/tcp/TCPServer.h"
 
-void gestioneConnessioneThread(Client * client);
+typedef struct ServerData ServerData;
+
+typedef struct ThreadData {
+    Client * client;
+    ServerData * server;
+} ThreadData;
+
+ThreadData * creaThreadData(Client * client, ServerData * sever);
+
+void associaThreadSocket(ServerData * server, int socket);
+
+void * wrapperAssociaThreadClient(void * args);
+
+void associaThreadClient(ServerData * server, Client * client);
 
 #endif

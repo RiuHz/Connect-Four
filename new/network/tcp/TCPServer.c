@@ -37,11 +37,13 @@ void impostaParametriServer(ServerData * server) {
 }
 
 void inizializzaListeServer(ServerData * server) {
-    pthread_mutex_init(& server -> listaClient.mutex, NULL);
-    server -> listaClient.head = NULL;
+    server -> listaClient = malloc(sizeof(ListaClient));
+    pthread_mutex_init(& server -> listaClient -> mutex, NULL);
+    server -> listaClient -> head = NULL;
 
-    pthread_mutex_init(& server -> listaPartite.mutex, NULL);
-    server -> listaPartite.head = NULL;
+    server -> listaPartite = malloc(sizeof(ListaPartite));
+    pthread_mutex_init(& server -> listaPartite -> mutex, NULL);
+    server -> listaPartite -> head = NULL;
 }
 
 void avviaServer(ServerData * server) {
@@ -61,25 +63,91 @@ void avviaServer(ServerData * server) {
 
         printf("Nuova connessione: socket fd %d, ip %s\n", socket, inet_ntoa(indirizzo.sin_addr));
 
-        associaThreadConnessione(socket);
+        associaThreadSocket(server, socket);
     } 
 }
 
-void inviaBroadcast(ServerData * server, void * datiPacchetto, size_t dimensioneTotale) {
+void inviaBroadcast(ServerData * server, Messaggio messaggio) {
     
-    pthread_mutex_lock(& server -> listaClient.mutex); 
+    pthread_mutex_lock(& server -> listaClient -> mutex); 
 
-    Client * client = server -> listaClient.head;
+    Client * client = server -> listaClient -> head;
     
     while (client != NULL) {
-        ssize_t byteInviati = send(client -> socket, datiPacchetto, dimensioneTotale, 0);
-        
-        if (byteInviati < 0) {
-            fprintf(stderr, "Error nell invio broadcast al client %d - %s", client -> socket, client -> nome);
-        }
+        inviaMessaggio(client, messaggio);
 
         client = client -> next;
     }
 
-    pthread_mutex_unlock(& server -> listaClient.mutex);
+    pthread_mutex_unlock(& server -> listaClient -> mutex);
+}
+
+Messaggio attendiMessaggio(Client * client) {
+    MessageHeader header;
+    uint32_t * buffer = NULL;
+
+    leggiFlussoDati(client, &header, sizeof(header));
+
+    header.type = ntohl(header.type);
+    header.length = ntohl(header.length);
+
+    if (header.length > 0) {
+        buffer = malloc(sizeof(header.length));
+        leggiFlussoDati(client, buffer, sizeof(header.length));
+    }
+
+    return creaMessaggio(header.type, buffer);
+}
+
+void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
+    size_t bytesLetti = 0;
+    char * ptr = (char *) buffer;
+
+    while (bytesLetti < lunghezza) {
+        ssize_t byteRimanenti = recv(client -> socket, ptr + bytesLetti, lunghezza - bytesLetti, 0);
+        
+        if (byteRimanenti <= 0) {
+            fprintf(
+                stderr,
+                "Impossibile leggere dal buffer TCP del thread %lu (%s)",
+                (unsigned long) pthread_self(),
+                client -> nome
+            );
+            exit(1);
+        }
+        
+        bytesLetti += (size_t) byteRimanenti;
+    }
+}
+
+void inviaMessaggio(Client * client, Messaggio messaggio) {
+    uint32_t tipo = messaggio.tipo;
+    uint32_t lunghezza = sizeof(messaggio.payload);
+    uint32_t * payload = messaggio.payload;
+
+
+    inviaFlussoDati(client, & tipo, sizeof(uint32_t));
+    inviaFlussoDati(client, & lunghezza, sizeof(uint32_t));
+    inviaFlussoDati(client, payload, sizeof(messaggio.payload));
+
+}
+
+void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {
+    size_t byteInviati = 0;
+
+    while (byteInviati < dimensione) {
+        ssize_t byteRimanenti = send(client -> socket, buffer + byteInviati, dimensione - byteInviati, 0);
+
+        if (byteRimanenti <= 0) {
+            fprintf(
+                stderr,
+                "Impossibile leggere dal buffer TCP del thread %lu (%s)",
+                (unsigned long) pthread_self(),
+                client -> nome
+            );
+            exit(1);
+        }
+
+        byteInviati += (size_t) byteRimanenti;
+    }
 }

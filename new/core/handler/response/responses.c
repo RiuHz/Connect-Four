@@ -1,47 +1,60 @@
 #include "responses.h"
 
 
-Messaggio rispostaConnessione(){
-    Messaggio messaggioRisposta;
-
-    messaggioRisposta.tipo=RES_CONNECT_ACCEPTED;
-    messaggioRisposta.payload=NULL;
-
-    return messaggioRisposta;
+Messaggio rispostaCreaPartita(Partita * partita) {
+    Game game = serializzaPartita(partita);
     
+    uint32_t * buffer = malloc(sizeof(Game) / sizeof(uint32_t));
+    unsigned int offset = 0;
+
+    buffer[offset++] = game.id;
+
+    memcpy(& buffer[offset], game.proprietario, NAME_LEN);
+    offset += (NAME_LEN + 3) / 4;
+
+    memcpy(& buffer[offset], game.avversario, NAME_LEN);
+    offset += (NAME_LEN + 3) / 4;
+
+    buffer[offset++] = game.stato;
+
+    return creaMessaggio(RES_CREATE_GAME, buffer);
 }
 
+Messaggio rispostaAccessoPartita(unsigned int risposta) {
+    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    unsigned int offset = 0;
+
+    buffer[offset++] = htonl(risposta);
+
+    return creaMessaggio(RES_JOIN_GAME, buffer);
+}
 
 Messaggio rispostaListaPartite(ListaPartite * lista){
-    // Invio il pacchetto di tutto ok
-    Messaggio messagioRisposta;
-    messagioRisposta.tipo=RES_GAMES_LIST;
-    messagioRisposta.payload=malloc(sizeof(Payload_RES_GAMES_LIST) / sizeof(unsigned int));
-    ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->games=malloc(sizeof(Game) * lista->contatore);
+    uint32_t * buffer = malloc(sizeof(Game) * lista -> contatore / sizeof(unsigned int));
+    unsigned int offset = 0;
 
-    /* La struttur del messaggio si compone come header, lunghezza ? usint 32_t e payload che sono i dati della struct
-    sarà il client che interpreta il payload sulla base della struct*/
+    for (Partita * partita = lista -> head; partita != NULL; partita = partita -> next) {
+        Game game = serializzaPartita(partita);
 
-    for(int i=0;i<lista->contatore;i++){
-        ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->games[i]=malloc(sizeof(Game));
-        
-        (Payload_RES_GAMES_LIST *)messagioRisposta.payload[i]
+        buffer[offset++] = game.id;
+
+        memcpy(& buffer[offset], game.proprietario, NAME_LEN);
+        offset += (NAME_LEN + 3) / 4;
+
+        memcpy(& buffer[offset], game.avversario, NAME_LEN);
+        offset += (NAME_LEN + 3) / 4;
+
+        buffer[offset++] = game.stato;
     }
     
-
-
-    
-    // 1) messagioRisposta.payload= associare il puntatore allo stream di byte
-
-    // 2) ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->games associare il vettore di partite o lo stream di byte
-
-    // ((Payload_RES_GAMES_LIST *)messagioRisposta.payload)->numberOfGames=htonl(numeroGiochi) 
-    
+    return creaMessaggio(RES_GAMES_LIST, buffer);
 }
 
+Messaggio rispostaRivincita(unsigned int risposta) {
+    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    unsigned int offset = 0;
 
+    buffer[offset++] = htonl(risposta);
 
-// ListaPartite -> Game 1 -> Game2 -> Game3...
-
-// Header tipo = ListaPartite, length = (sizeof(Game) * sizeof(uint32_t))
-// payload -> [ByteGame1][ByteGame2][ByteGame3]
+    return creaMessaggio(RES_REMATCH, buffer);
+}

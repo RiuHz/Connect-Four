@@ -1,116 +1,65 @@
 #include "events.h"
 
+Messaggio eventoAggiornamentoListaPartite(ListaPartite * lista) {
+    uint32_t * buffer = malloc(sizeof(Game) * lista -> contatore / sizeof(unsigned int));
+    unsigned int offset = 0;
 
-Messaggio eventoPartitaCreata(Game partitaCreata){
-    Messaggio messagioRisposta;
+    for (Partita * partita = lista -> head; partita != NULL; partita = partita -> next) {
+        Game game = serializzaPartita(partita);
 
-    messagioRisposta.tipo=EVT_GAME_CREATED;
-    messagioRisposta.payload = malloc(sizeof(Payload_EVT_GAME_CREATED));
+        buffer[offset++] = game.id;
 
-    ((Payload_EVT_GAME_CREATED *)messagioRisposta.payload)->partita.id=htonl(partitaCreata.id);
-    strcpy(((Payload_EVT_GAME_CREATED *) messagioRisposta.payload) -> partita.proprietario, partitaCreata.proprietario);
-    strcpy(((Payload_EVT_GAME_CREATED *) messagioRisposta.payload) -> partita.avversario, partitaCreata.avversario);
-    ((Payload_EVT_GAME_CREATED *)messagioRisposta.payload)->partita.stato=htonl(partitaCreata.stato);
+        memcpy(& buffer[offset], game.proprietario, NAME_LEN);
+        offset += (NAME_LEN + 3) / 4;
 
-    return messagioRisposta;
+        memcpy(& buffer[offset], game.avversario, NAME_LEN);
+        offset += (NAME_LEN + 3) / 4;
+
+        buffer[offset++] = game.stato;
+    }
+    
+    return creaMessaggio(EVT_GAMES_LIST_UPDATED, buffer);
 }
 
-Messaggio eventoPartitaAccettata(){
-    Messaggio messagioRisposta;
+Messaggio eventoPartitaCreata(Partita * partita) {
+    Game game = serializzaPartita(partita);
+    
+    uint32_t * buffer = malloc(sizeof(Game) / sizeof(uint32_t));
+    unsigned int offset = 0;
 
-    messagioRisposta.tipo=EVT_GAME_ACCEPTED;
-    messagioRisposta.payload=NULL;
+    buffer[offset++] = game.id;
 
-    return messagioRisposta;
+    memcpy(& buffer[offset], game.proprietario, NAME_LEN);
+    offset += (NAME_LEN + 3) / 4;
+
+    memcpy(& buffer[offset], game.avversario, NAME_LEN);
+    offset += (NAME_LEN + 3) / 4;
+
+    buffer[offset++] = game.stato;
+
+    return creaMessaggio(EVT_GAME_CREATED, buffer);
 }
 
-Messaggio eventoPartitaRifiutata(){
-    Messaggio messagioRisposta;
+Messaggio eventoPartitaTerminata(unsigned int id) {
+    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    unsigned int offset = 0;
 
-    messagioRisposta.tipo=EVT_GAME_DENIED;
-    messagioRisposta.payload=NULL;
+    buffer[offset++] = htonl(id);
 
-    return messagioRisposta;
+    return creaMessaggio(EVT_GAME_CREATED, buffer);
 }
 
-Messaggio eventoPartitaTerminata(Game partitaTerminata){
-   Messaggio messagioRisposta;
+Messaggio eventoAggiornamentoBoard(Partita * partita) {
+    Board board = serializzaBoard(partita);
 
-   messagioRisposta.tipo=EVT_GAME_ENDED;
-   messagioRisposta.payload = malloc(sizeof(Payload_EVT_GAME_ENDED));
+    uint32_t * buffer = malloc(sizeof(Board) / sizeof(uint32_t));
+    unsigned int offset = 0;
 
-   ((Payload_EVT_GAME_ENDED *)messagioRisposta.payload)->partita.id=htonl(partitaTerminata.id);
-    strcpy(((Payload_EVT_GAME_ENDED *) messagioRisposta.payload) -> partita.proprietario, partitaTerminata.proprietario);
-    strcpy(((Payload_EVT_GAME_ENDED *) messagioRisposta.payload) -> partita.avversario, partitaTerminata.avversario);
-   ((Payload_EVT_GAME_ENDED *)messagioRisposta.payload)->partita.stato=htonl(partitaTerminata.stato);
+    for (uint32_t row = 0; row < BOARD_ROWS; row++) {
+        for (uint32_t column = 0; column < BOARD_COLUMNS; column++) {
+            buffer[offset++] = board.grid[row][column];
+        }
+    }
 
-   return messagioRisposta;
-}
-
-Messaggio eventoMossaAvversario(uint32_t mossaAvversario){
-   Messaggio messagioRisposta;
-
-   messagioRisposta.tipo=EVT_OPPONENT_MOVE;
-   messagioRisposta.payload = malloc(sizeof(Payload_EVT_OPPONENT_MOVE));
-
-   ((Payload_EVT_OPPONENT_MOVE *)messagioRisposta.payload) ->column =htonl(mossaAvversario);
-
-   return messagioRisposta;
-}
-
-Messaggio eventoPartitaVinta(){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_GAME_WON;
-    messagioRisposta.payload=NULL;
-
-    return messagioRisposta;
-}
-
-Messaggio eventoPartitaPersa(){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_GAME_LOST;
-    messagioRisposta.payload=NULL;
-
-    return messagioRisposta;
-}
-
-Messaggio eventoPartitaPareggio(){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_GAME_DRAW;
-    messagioRisposta.payload=NULL;
-
-    return messagioRisposta;
-}
-
-Messaggio eventoRivincitaAccettata(){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_REMATCH_ACCEPTED;
-    messagioRisposta.payload=NULL;
-
-    return messagioRisposta;
-}
-
-Messaggio eventoRivincitaRifiutata(){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_REMATCH_DENIED;
-    messagioRisposta.payload=NULL;
-
-    return messagioRisposta;
-}
-
-Messaggio eventoAggiornamentoListaPartite(Game partitaDaAggiornare){
-    Messaggio messagioRisposta;
-
-    messagioRisposta.tipo=EVT_GAMES_LIST_UPDATED;
-    messagioRisposta.payload = malloc(sizeof(Payload_EVT_GAMES_LIST_UPDATED));
-
-    ((Payload_EVT_GAMES_LIST_UPDATED *)messagioRisposta.payload)->partita.stato=htonl(partitaDaAggiornare.stato);
-
-    return messagioRisposta;
-
+    return creaMessaggio(EVT_UPDATE_BOARD, buffer);
 }

@@ -12,10 +12,8 @@
 #define SERVER_PORT 1926
 
 typedef enum {
-    GAME_CREATED = 1,
-    GAME_WAITING,
-    GAME_IN_PROGRESS,
-    GAME_ENDED
+    GAME_WAITING = 1,
+    GAME_IN_PROGRESS
 } GameState;
 
 typedef struct {
@@ -26,8 +24,7 @@ typedef struct {
 } Game;
 
 typedef struct {
-    uint32_t rows[BOARD_ROWS];
-    uint32_t columns[BOARD_COLUMNS];
+    uint32_t grid[BOARD_ROWS][BOARD_COLUMNS];
 } Board;
 
 // (REQ = Request) Richieste effettuate dal client
@@ -35,28 +32,32 @@ typedef struct {
 // (EVT = Event) Eventi inviati dal server
 
 typedef enum {
+    // ==== Connessione ====
     REQ_CONNECT = 1, // Payload = char nome[NAME_LEN]
-
     REQ_DISCONNECT,
 
+    // ==== Creazione Partita ====
     REQ_CREATE_GAME,
     RES_CREATE_GAME, // Payload = Game
     
-    REQ_JOIN_GAME,
-    EVT_OPPONENT_JOIN_GAME,
-    REQ_RESPOND_OPPONENT_JOIN_GAME, // Payload = Boolean
+    // ==== Ingresso Partita ====
+    REQ_JOIN_GAME, // Payload = Unsigned int
+    EVT_JOIN_REQUEST,
+    REQ_JOIN_DECISION, // Payload = Boolean
     RES_JOIN_GAME, // Payload = Boolean
     
     REQ_LEAVE_GAME,
     
+    // ==== Lista Partite ====
     REQ_GAMES_LIST,
     RES_GAMES_LIST, // Payload = Game List
     
     EVT_GAMES_LIST_UPDATED, // Payload = Game List
-    EVT_GAME_CREATED, // Payload = Game List
-    EVT_GAME_ENDED, // Payload = Game List
+    EVT_GAME_CREATED, // Payload = Game
+    EVT_GAME_ENDED, // Payload = Game id
     
-    REQ_MOVE,
+    // ==== Svolgimento Partita ====
+    REQ_MOVE, // Payload = Unsigned int
     RES_BAD_MOVE,
 
     EVT_UPDATE_BOARD, // Payload = Board

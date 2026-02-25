@@ -1,104 +1,29 @@
 #include "requests.h"
 
-Messaggio richiestaConnessione(uint32_t * payload) {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_CONNECT;
-    messaggio.payload = malloc(sizeof(Payload_REQ_CONNECT));
-
-    strcpy(((Payload_REQ_CONNECT *) messaggio.payload) -> nome, (char *) payload);
-
-    return messaggio;
+void richiestaConnessione(Client * client, uint32_t * payload) {
+    memcpy(client -> nome, payload, NAME_LEN - 1);
 }
 
-Messaggio richiestaDisconnessione() {
-    Messaggio messaggio;
+unsigned int richiestaPartecipaPartita(uint32_t * payload) {
+    unsigned int idPartita = ntohl(* payload);
 
-    messaggio.tipo = REQ_DISCONNECT;
-    messaggio.payload = NULL;
-
-    return messaggio;
+    return idPartita;
 }
 
-Messaggio richiestaCreaPartita() {
-    Messaggio messaggio;
+unsigned int richiestaRispostaAccessoPartita(uint32_t * payload) {
+    unsigned int risposta = ntohl(* payload);
 
-    messaggio.tipo = REQ_CREATE_GAME;
-    messaggio.payload = NULL;
-
-    return messaggio;
+    return risposta;
 }
 
-Messaggio richiestaPartecipaPartita(uint32_t * payload) {
-    Messaggio messaggio;
+unsigned int richiestaMossa(uint32_t * payload) {
+    unsigned int colonna = ntohl(* payload);
 
-    messaggio.tipo = REQ_JOIN_GAME;
-    messaggio.payload = malloc(sizeof(unsigned int));
-
-    *(unsigned int *) messaggio.payload = ntohl(* payload);
-
-    return messaggio;
+    return colonna;
 }
 
-Messaggio richiestaLasciaPartita() {
-    Messaggio messaggio;
+unsigned int richiestaRivincita(uint32_t * payload) {
+    unsigned int rivincita = ntohl(* payload);
 
-    messaggio.tipo = REQ_LEAVE_GAME;
-    messaggio.payload = NULL;
-
-    return messaggio;
-}
-
-Messaggio richiestaAccettaPartita() {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_GAME_ACCEPTED;
-    messaggio.payload = NULL;
-
-    return messaggio;
-}
-
-Messaggio richiestaRifiutaPartita() {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_GAME_DENIED;
-    messaggio.payload = NULL;
-
-    return messaggio;
-}
-
-Messaggio richiestaListaPartite() {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_GAMES_LIST;
-    messaggio.payload = NULL;
-
-    return messaggio;
-}
-
-Messaggio richiestaMossa(uint32_t * payload) {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_MOVE;
-    messaggio.payload = malloc(sizeof(unsigned int));
-
-    *(unsigned int *) messaggio.payload = ntohl(* payload);
-}
-
-Messaggio richiestaAccettaRivincita() {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_REMATCH_ACCEPTED;
-    messaggio.payload = NULL;
-
-    return messaggio;
-}
-
-Messaggio richiestaRifiutaRivincita() {
-    Messaggio messaggio;
-
-    messaggio.tipo = REQ_REMATCH_DENIED;
-    messaggio.payload = NULL;
-
-    return messaggio;
+    return rivincita;
 }

@@ -9,6 +9,10 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
     partita -> proprietario = proprietario;
     partita -> avversario = NULL;
 
+    memset(partita -> board, 0, sizeof(partita -> board));
+    
+    partita -> stato = GAME_WAITING;
+
     partita -> next = NULL;
 
     return partita;
@@ -22,158 +26,151 @@ void aggiungiAvversario(Partita * partita, Client * avversario) {
     partita -> avversario = avversario;
 }
 
-void aggiungiMossa(Partita *partita, int colonna, unsigned int simbolo){
-    // si prende la board della partita
-    // si cicla sulle rows finche non trova un valore a 0 
-    // e inserisce come valore il simbolo
-    
-    for(int numeroRiga=1;numeroRiga<=BOARD_ROWS;numeroRiga++){
-        if(partita->board[numeroRiga][colonna]==0){
-            partita->board[numeroRiga][colonna]=simbolo;
-        }
-    }
-}
-
-unsigned int esitoPartita(Partita *partita,unsigned int simbolo){
-
-    // LEGGENDA FLAG: 0 si continua, 1 vittoria, 2 pareggio
-
-    // logica per capire se una persona ha vinto (ORIZZONTALE)
-    if(verificaCombinazioneOrizzontale(partita,simbolo) == 1){
-        return 1;
-    }
-    
-
-    // logica per capire se una persona ha vinto (VERTICALE)
-    if(verificaCombinazioneVerticale(partita,simbolo) == 1){
-        return 1;
-    }
-
-    // logica per capire se una persona ha vinto (DIAGONALE PRINCIPALE)
-    if(verificaCombinazioneDiagonalePrincipale(partita,simbolo) == 1){
-        return 1;
-    }
-    
-    // logica per capire se una persona ha vinto (DIAGONALE SECONDARIA)
-    if(verificaCombinazioneDiagonaleSecondaria(partita,simbolo) == 1){
-        return 1;
-    }    
-
-    //logica di pareggio alla fine : prima controllo se ci sono combinazioni vincenti e poi verifico la board, se è piena pareggio
-    if(verificaPareggio(partita) == 2){
-        return 2;
-    }
-
-    return 0;
-
-}
-unsigned int verificaCombinazioneOrizzontale(Partita *partita,unsigned int simbolo){
-    unsigned int contatore=0;
-
-    for(unsigned int numeroRiga=1; numeroRiga<=BOARD_ROWS; numeroRiga++){
-        for(unsigned int numeroColonna=1; numeroColonna<=BOARD_COLUMNS; numeroColonna++){
-            for(unsigned int gettoneAdiacente=numeroColonna; numeroColonna + 3 <= BOARD_COLUMNS && gettoneAdiacente<=BOARD_COLUMNS && gettoneAdiacente - numeroColonna < 4; gettoneAdiacente++){
-                if(partita->board[numeroRiga][gettoneAdiacente]==simbolo){
-                    contatore += 1;
-                    if(contatore == 4){
-                        return 1;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    return 0;
-}
-
-unsigned int verificaCombinazioneVerticale(Partita *partita,unsigned int simbolo){
-    unsigned int contatore=0;
-
-    for(unsigned int numeroColonna=1; numeroColonna<=BOARD_COLUMNS; numeroColonna++){
-        for(unsigned int numeroRiga=1; numeroRiga<=BOARD_ROWS; numeroRiga++){
-            for(unsigned int gettoneSuperiore=numeroRiga; numeroRiga + 3 <= BOARD_ROWS && gettoneSuperiore<=BOARD_ROWS && gettoneSuperiore - numeroRiga < 4; gettoneSuperiore++){
-                if(partita->board[gettoneSuperiore][numeroRiga]==simbolo){
-                    contatore += 1;
-                    if(contatore == 4){
-                        return 1;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    return 0;
-}
-
-unsigned int verificaCombinazioneDiagonalePrincipale(Partita *partita,unsigned int simbolo){
-    unsigned int contatore=0;
-
-    for(unsigned int numeroRiga=1; numeroRiga<=BOARD_ROWS - 3; numeroRiga++){
-        for(unsigned int numeroColonna=1; numeroColonna<=BOARD_COLUMNS - 3; numeroColonna++){
-            for(unsigned int colonnaDiagonale=numeroColonna, rigaDiagonale = numeroRiga; colonnaDiagonale <= BOARD_COLUMNS && rigaDiagonale <= BOARD_ROWS; colonnaDiagonale++, rigaDiagonale++){
-                if(partita->board[rigaDiagonale][colonnaDiagonale]==simbolo){
-                    contatore += 1;
-                    if(contatore == 4){
-                        return 1;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }    
-    }
-}
-
-unsigned int verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbolo){
-    unsigned int contatore=0;
-
-    for(unsigned int numeroRiga=4; numeroRiga<=BOARD_ROWS; numeroRiga++){
-        for(unsigned int numeroColonna=1; numeroColonna<=BOARD_COLUMNS - 3; numeroColonna++){
-            for(unsigned int colonnaDiagonale=numeroColonna, rigaDiagonale = numeroRiga; colonnaDiagonale <= BOARD_COLUMNS && rigaDiagonale >= 1; colonnaDiagonale++, rigaDiagonale--){
-                if(partita->board[rigaDiagonale][colonnaDiagonale]==simbolo){
-                    contatore += 1;
-                    if(contatore == 4){
-                        return 1;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }    
-    }
-}
-
-unsigned int verificaPareggio(Partita *partita){
-    unsigned int contatore=0;
-    
-    for(unsigned int numeroRiga=1; numeroRiga<=BOARD_ROWS; numeroRiga++){
-        for(unsigned int numeroColonna=1; numeroColonna<=BOARD_COLUMNS; numeroColonna++){
-            if(partita->board[numeroRiga][numeroColonna] != 0){
-                contatore += 1;
-                if(contatore == 42){
-                    return 2;
-                }
-            }
-        }
-    }
-
-    return 0;
-}
-
 void rimuoviProprietario(Partita * partita) {
     partita -> proprietario = NULL;
 }
 
+bool controllaValiditaMossa(Partita * partita, unsigned int colonna) {
+    return colonna < BOARD_COLUMNS && partita -> board[0][colonna] == 0;
+}
 
+void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo) {    
+    for (unsigned int riga = 0; riga < BOARD_ROWS; riga++) {
+        if (partita -> board[riga][colonna] == 0) {
+            partita -> board[riga][colonna] = simbolo;
+            break;
+        }
+    }
+}
+
+void aggiungiMossaProprietario(Partita *partita, unsigned int colonna) {
+    aggiungiMossa(partita, colonna, SIMBOLO_PROPRIETARIO);
+}
+
+void aggiungiMossaAvversario(Partita *partita, unsigned int colonna) {
+    aggiungiMossa(partita, colonna, SIMBOLO_AVVERSARIO);
+}
+
+EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo) {
+
+    if (verificaCombinazioneOrizzontale(partita,simbolo)) {
+        return VITTORIA;
+    }
+    
+    if (verificaCombinazioneVerticale(partita,simbolo)) {
+        return VITTORIA;
+    }
+
+    if (verificaCombinazioneDiagonale(partita,simbolo)) {
+        return VITTORIA;
+    }
+
+    if (verificaPareggio(partita)) {
+        return PAREGGIO;
+    }
+
+    return NON_TERMINATA;
+}
+
+bool verificaCombinazioneOrizzontale(Partita * partita, unsigned int simbolo) {
+
+    for (unsigned int riga = 0; riga < BOARD_ROWS; riga++) {
+        for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
+            if (
+                partita -> board[riga][colonna] == simbolo &&
+                partita -> board[riga][colonna] == partita -> board[riga][colonna + 1] == partita -> board[riga][colonna + 2] == partita -> board[riga][colonna + 3]
+            ) {
+                return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+bool verificaCombinazioneVerticale(Partita *partita,unsigned int simbolo){
+
+    for (unsigned int colonna = 0; colonna < BOARD_COLUMNS; colonna++) {
+        for (unsigned int riga = 0; riga < BOARD_ROWS - 3; riga++) {
+            if (
+                partita -> board[riga][colonna] == simbolo &&
+                partita -> board[riga][colonna] == partita -> board[riga + 1][colonna] == partita -> board[riga + 2][colonna] == partita -> board[riga + 3][colonna ]
+            ) {
+                return true;
+            } 
+        }
+    }
+
+    return false;
+}
+
+bool verificaCombinazioneDiagonale(Partita * partita, unsigned int simbolo) {
+    return verificaCombinazioneDiagonalePrincipale(partita, simbolo) || verificaCombinazioneDiagonaleSecondaria(partita, simbolo);
+}
+
+bool verificaCombinazioneDiagonalePrincipale(Partita *partita,unsigned int simbolo){
+
+    for (unsigned int riga = 3; riga < BOARD_ROWS; riga++) {
+        for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
+            if (
+                partita -> board[riga][colonna] == simbolo &&
+                partita -> board[riga][colonna] == partita -> board[riga - 1][colonna + 1] == partita -> board[riga - 2][colonna + 2] == partita -> board[riga - 3][colonna + 3]
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbolo){
+       
+    for (unsigned int riga = 0; riga < BOARD_ROWS - 3; riga++) {
+        for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
+            if (
+                partita -> board[riga][colonna] == simbolo &&
+                partita -> board[riga][colonna] == partita -> board[riga + 1][colonna + 1] == partita -> board[riga + 2][colonna + 2] == partita -> board[riga + 3][colonna + 3]
+            ) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool verificaPareggio(Partita * partita) {
+    unsigned int primaRiga = 0;
+    
+    for (unsigned int colonna = 0; colonna < BOARD_COLUMNS; colonna++) {
+        if (partita -> board[primaRiga][colonna] == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+Game serializzaPartita(Partita * partita) {
+    Game game;
+
+    game.id = htonl(partita -> id);
+    strcpy(game.proprietario, partita -> proprietario -> nome);
+    strcpy(game.avversario, partita -> avversario -> nome);
+    game.stato = htonl(partita -> stato);
+
+    return game;
+}
+
+Board serializzaBoard(Partita * partita) {
+    Board board;
+
+    for (unsigned int row = 0; row < BOARD_ROWS; row++) {
+        for (unsigned int column = 0; column < BOARD_COLUMNS; column++) {
+            board.grid[row][column] = partita -> board[row][column];
+        }
+    }
+
+    return board;
+}

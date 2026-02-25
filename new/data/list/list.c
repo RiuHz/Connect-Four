@@ -85,8 +85,8 @@ void stampaListaPartite(ListaPartite * lista) {
 
         while (corrente != NULL) {
             printf("%d\n", corrente -> id);
-            printf("%d - %s\n", corrente -> proprietario -> nome, corrente -> proprietario -> socket);
-            printf("%d - %s\n", corrente -> avversario -> nome, corrente -> avversario -> socket);
+            printf("%s - %d\n", corrente -> proprietario -> nome, corrente -> proprietario -> socket);
+            printf("%s - %d\n", corrente -> avversario -> nome, corrente -> avversario -> socket);
 
             corrente = corrente -> next;
         }  

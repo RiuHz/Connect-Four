@@ -1,33 +1,75 @@
 #include "threads.h"
 
-void associaThreadConnessione(int socket) {
+ThreadData * creaThreadData(Client * client, ServerData * server) {
+    ThreadData * thread = malloc(sizeof(ThreadData));
+    
+    thread -> client = client;
+    thread -> server = server;
+
+    return thread;
+}
+
+void associaThreadSocket(ServerData * server, int socket) {
     pthread_t tid;
+    bool attesaConnessione = true;
 
     Client * client = creaClient(socket);
 
-    Messaggio messaggio = attendiMessaggio(client, REQ_CONNECT);
-    strcpy(client -> nome, messaggio.payload);
+    while (attesaConnessione) {
+        Messaggio messaggio = attendiMessaggio(client);
 
-    if (pthread_create(&tid, NULL, & gestioneConnessioneThread, client) != 0) {
+        switch (messaggio.tipo) {
+            case REQ_CONNECT:
+                richiestaConnessione(client, messaggio.payload);
+                aggiungiClient(server -> listaClient, client);
+                
+                attesaConnessione = false;
+
+                eliminaMessaggio(& messaggio);
+            break;
+
+            default:
+                eliminaMessaggio(& messaggio);
+        }
+    }
+
+    ThreadData * threadData = creaThreadData(client, server);
+
+    if (pthread_create(&tid, NULL, wrapperAssociaThreadClient, (void *) threadData) != 0) {
         perror("Errore creazione thread");
         exit(1);
     }
 }
 
-void gestioneConnessioneThread(Client * client) {
+void * wrapperAssociaThreadClient(void * args) {
+    ThreadData * threadData = (ThreadData *) args;
 
-    while (true) {
-       // Leggo flusso dati con header
-       // In caso leggo payload
-       // Processo il messaggio
-       // Agisco
+    associaThreadClient(threadData -> server, threadData -> client);
+
+    return NULL;
+}
+
+void associaThreadClient(ServerData * server, Client * client) {
+    bool richiestaDisconnessione = false;
+
+    while ( !richiestaDisconnessione ) {
+        Messaggio messaggio = attendiMessaggio(client);
+
+        switch (messaggio.tipo) {
+            case REQ_DISCONNECT:
+                richiestaDisconnessione = true;      
+            break;
+
+            // Qui vanno aggiunti tutti gli altri casi!
+
+            default:
+                eliminaMessaggio(& messaggio);
+        }
     }
 
-    close(socketClient);
+    close(client -> socket);
 
-    rimuoviClient(socketClient);
+    rimuoviClient(server -> listaClient, client);
 
     pthread_exit(NULL);
 }
-
-// C1 -> T1 -> P <- T2 <- C2

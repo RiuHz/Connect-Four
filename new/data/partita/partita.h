@@ -1,38 +1,57 @@
 #ifndef PARTITA_H
 #define PARTITA_H
 
-#include "../client/client.h"
 #include <pthread.h>
+#include <stdbool.h>
+
+#include "../client/client.h"
+
 #include "../../network/shared/protocol.h"
 
 #define SIMBOLO_PROPRIETARIO 1
 #define SIMBOLO_AVVERSARIO 2
 
+typedef enum {
+    VITTORIA = 1,
+    SCONFITTA,
+    PAREGGIO,
+    NON_TERMINATA
+} EsitoPartita;
+
 typedef struct Partita {
+    pthread_mutex_t mutex;
     unsigned int id;
     Client * proprietario;
     Client * avversario;
-    pthread_mutex_t mutex;
     unsigned int board[BOARD_ROWS][BOARD_COLUMNS];
-    Partita * next;
+    GameState stato;
+    struct Partita * next;
 } Partita;
 
 Partita * creaPartita(unsigned int id, Client * proprietario);
 
 void aggiungiProprietario(Partita * partita, Client * proprietario);
 void aggiungiAvversario(Partita * partita, Client * avversario);
-
-void aggiungiMossa(Partita *partita, int colonna, unsigned int simbolo);
-void aggiungiMossaProprietario(Partita *partita, unsigned int colonna){aggiungiMossa(partita, colonna, SIMBOLO_PROPRIETARIO);}
-void aggiungiMossaAvversario(Partita *partita, unsigned int colonna){aggiungiMossa(partita, colonna, SIMBOLO_AVVERSARIO);}
-
-unsigned int esitoPartita(Partita *partita,unsigned int simbolo); // 2 diagonali, orzziontale e verticale (capire come avvisare chi ha vinto, nella stessa funzione?) 
-unsigned int verificaCombinazioneOrizzontale(Partita *partita,unsigned int simbolo); 
-unsigned int verificaCombinazioneVerticale(Partita *partita,unsigned int simbolo); 
-unsigned int verificaCombinazioneDiagonalePrincipale(Partita *partita,unsigned int simbolo);
-unsigned int verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbolo); 
-unsigned int verificaPareggio(Partita *partita); 
-
 void rimuoviProprietario(Partita * partita);
+
+bool controllaValiditaMossa(Partita * partita, unsigned int colonna);
+
+void aggiungiMossa(Partita * partita, unsigned int colonna, unsigned int simbolo);
+void aggiungiMossaProprietario(Partita * partita, unsigned int colonna);
+void aggiungiMossaAvversario(Partita * partita, unsigned int colonna);
+
+EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo);
+
+bool verificaCombinazioneOrizzontale(Partita * partita, unsigned int simbolo); 
+bool verificaCombinazioneVerticale(Partita * partita, unsigned int simbolo);
+
+bool verificaCombinazioneDiagonale(Partita * partita, unsigned int simbolo);
+bool verificaCombinazioneDiagonalePrincipale(Partita * partita, unsigned int simbolo);
+bool verificaCombinazioneDiagonaleSecondaria(Partita * partita, unsigned int simbolo); 
+
+bool verificaPareggio(Partita * partita); 
+
+Game serializzaPartita(Partita * partita);
+Board serializzaBoard(Partita * partita);
 
 #endif
