@@ -24,7 +24,7 @@ ServerData * creaSocketServerTCP() {
         exit(1);
     }
 
-    printf("Server TCP pronto sulla porta %d...\n", SERVER_PORT);
+    printf("[Thread: %lu] Server avviato sulla porta %d...\n", (unsigned long) pthread_self(), SERVER_PORT);
 
     return server;
 }
@@ -49,7 +49,7 @@ void inizializzaListeServer(ServerData * server) {
 void avviaServer(ServerData * server) {
     struct sockaddr_in indirizzo;
 
-    printf("Server in ascolto (LOOP)...\n");
+    printf("[Thread: %lu] Server in ascolto sulla porta %d...\n", (unsigned long) pthread_self(), SERVER_PORT);
 
     while (true) {
         socklen_t lunghezza = sizeof(indirizzo);
@@ -61,13 +61,15 @@ void avviaServer(ServerData * server) {
             continue;
         }
 
-        printf("Nuova connessione: socket fd %d, ip %s\n", socket, inet_ntoa(indirizzo.sin_addr));
+        printf("[Thread: %lu] Nuova connessione da ip %s spostata sul socket %d\n", (unsigned long) pthread_self(), inet_ntoa(indirizzo.sin_addr), socket);
 
         associaThreadSocket(server, socket);
     } 
 }
 
 void inviaBroadcast(ServerData * server, Messaggio messaggio) {
+
+    printf("[Thread: %lu] Invio del messaggio in broadcast\n", (unsigned long) pthread_self());
     
     pthread_mutex_lock(& server -> listaClient -> mutex); 
 

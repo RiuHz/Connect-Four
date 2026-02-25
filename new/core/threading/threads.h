@@ -20,16 +20,18 @@
 typedef struct ServerData ServerData;
 
 typedef struct ThreadData {
-    Client * client;
     ServerData * server;
+    int socket;
 } ThreadData;
 
-ThreadData * creaThreadData(Client * client, ServerData * sever);
+ThreadData * creaThreadData(ServerData * sever, int socket);
 
 void associaThreadSocket(ServerData * server, int socket);
 
-void * wrapperAssociaThreadClient(void * args);
+void * wrapperThread(void * arg);
 
-void associaThreadClient(ServerData * server, Client * client);
+Client * attendiConnessioneClient(ServerData * server, int socket);
+
+void gestisciRichiesteClient(ServerData * server, Client * client);
 
 #endif
