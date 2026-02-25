@@ -44,7 +44,7 @@ Client * attendiConnessioneClient(ServerData * server, int socket) {
                 aggiungiClient(server -> listaClient, client);
                 
                 attesaConnessione = false;
-                printf("[Thread %lu] Client %s connesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
+                printf("[Thread: %lu] Client %s connesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
 
                 eliminaMessaggio(& messaggio);
             break;
@@ -66,7 +66,7 @@ void gestisciRichiesteClient(ServerData * server, Client * client) {
         switch (messaggio.tipo) {
             case REQ_DISCONNECT:
                 richiestaDisconnessione = true;   
-                printf("[Thread %lu] Client %s disconnesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
+                printf("[Thread: %lu] Client %s disconnesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
             break;
 
             // Qui vanno aggiunti tutti gli altri casi!
@@ -77,10 +77,10 @@ void gestisciRichiesteClient(ServerData * server, Client * client) {
     }
 
     close(client -> socket);
-    printf("[Thread %lu] Chiusa la socket %d\n", (unsigned long) pthread_self(), client -> socket);
+    printf("[Thread: %lu] Chiusa la socket %d\n", (unsigned long) pthread_self(), client -> socket);
 
     rimuoviClient(server -> listaClient, client);
-    printf("[Thread %lu] Rimosso il Client, chiusura del thread...\n", (unsigned long) pthread_self());
+    printf("[Thread: %lu] Rimosso il Client, chiusura del thread...\n", (unsigned long) pthread_self());
 
     pthread_exit(NULL);
 }
