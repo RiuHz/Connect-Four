@@ -1,6 +1,6 @@
 #include "TCPServer.h"
 
-ServerData * creaSocketServerTCP() {
+ServerData * creaSocketServerTCP(void) {
     ServerData * server = malloc(sizeof(ServerData));
 
     server -> socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,7 +61,7 @@ void avviaServer(ServerData * server) {
             continue;
         }
 
-        printf("[Thread: %lu] Nuova connessione da ip %s spostata sul socket %d\n", (unsigned long) pthread_self(), inet_ntoa(indirizzo.sin_addr), socket);
+        printf("[Thread: %lu] Nuova connessione da ip %s assegnata al socket %d\n", (unsigned long) pthread_self(), inet_ntoa(indirizzo.sin_addr), socket);
 
         associaThreadSocket(server, socket);
     } 
@@ -94,7 +94,7 @@ Messaggio attendiMessaggio(Client * client) {
     header.length = ntohl(header.length);
 
     if (header.length > 0) {
-        buffer = malloc(sizeof(header.length));
+        buffer = malloc(header.length);
         leggiFlussoDati(client, buffer, header.length);
     }
 
@@ -127,11 +127,9 @@ void inviaMessaggio(Client * client, Messaggio messaggio) {
     uint32_t lunghezza = sizeof(messaggio.payload);
     uint32_t * payload = messaggio.payload;
 
-
     inviaFlussoDati(client, & tipo, sizeof(uint32_t));
     inviaFlussoDati(client, & lunghezza, sizeof(uint32_t));
     inviaFlussoDati(client, payload, sizeof(messaggio.payload));
-
 }
 
 void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {

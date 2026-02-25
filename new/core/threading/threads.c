@@ -32,7 +32,7 @@ void * wrapperThread(void * arg) {
 
 Client * attendiConnessioneClient(ServerData * server, int socket) {
     bool attesaConnessione = true;
-
+ 
     Client * client = creaClient(socket);
 
     while (attesaConnessione) {

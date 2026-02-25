@@ -28,7 +28,7 @@ typedef struct ServerData {
     ListaPartite * listaPartite;
 } ServerData;
 
-ServerData * creaSocketServerTCP();
+ServerData * creaSocketServerTCP(void);
 
 void impostaParametriServer(ServerData * server);
 void inizializzaListeServer(ServerData * server);
