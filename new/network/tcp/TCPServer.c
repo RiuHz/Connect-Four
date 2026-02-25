@@ -95,7 +95,7 @@ Messaggio attendiMessaggio(Client * client) {
 
     if (header.length > 0) {
         buffer = malloc(sizeof(header.length));
-        leggiFlussoDati(client, buffer, sizeof(header.length));
+        leggiFlussoDati(client, buffer, header.length);
     }
 
     return creaMessaggio(header.type, buffer);

@@ -1,7 +1,7 @@
 #include "requests.h"
 
 void richiestaConnessione(Client * client, uint32_t * payload) {
-    memcpy(client -> nome, payload, NAME_LEN - 1);
+    memcpy(client -> nome, payload, NAME_LEN);
 }
 
 unsigned int richiestaPartecipaPartita(uint32_t * payload) {
