@@ -3,11 +3,12 @@
 namespace lso {
 
     void Board::print() const noexcept {
-        for (unsigned int row = 0; row < rows; row++)
+        for (unsigned int row = 0; row < rows; row++){
             Board::printRow(row);
 
             Board::printSeparator();
             Board::printColumnNumbers();
+        }
     }
 
     void Board::printRow(const unsigned int row) const noexcept {
