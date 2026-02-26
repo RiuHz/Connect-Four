@@ -31,7 +31,7 @@ namespace lso {
 
         header.type = htonl(message.getType());
         header.length = htonl(message.getLength());
-
+ 
         size_t totalSent = 0;
         const char* headerPtr = reinterpret_cast<const char *>(& header);
 
@@ -56,7 +56,7 @@ namespace lso {
         size_t totalSent = 0;
 
         const char* payloadPtr = reinterpret_cast<const char *>(payload.data());
-        size_t payloadSize = payload.size() * sizeof(uint32_t);
+        size_t payloadSize = message.getLength();
 
         while (totalSent < payloadSize) {
             ssize_t sent = send(

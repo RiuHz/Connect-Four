@@ -46,7 +46,6 @@ int main() {
             
             case 3:
                 client -> sendMessage(lso::Message(REQ_DISCONNECT));
-                // Devo aspettare la risposta di disconnessione?
                 lso::Screen::briefDisplay("Uscendo...");
                 break;
                 

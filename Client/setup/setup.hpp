@@ -18,6 +18,7 @@ namespace lso {
         private:
             
             static bool validPlayerName(const std::string name) noexcept;
+            static std::unique_ptr<TCPClient> connectTCPClient(const std::string name);
         
         protected:
         
@@ -35,7 +36,7 @@ namespace lso {
             Setup(const Setup &) = delete;
             Setup(Setup &&) noexcept = delete;
 
-            ~Setup() = default;
+            ~Setup() = delete;
 
             Setup &operator = (const Setup &) = delete;
             Setup &operator = (Setup &&) noexcept = delete;

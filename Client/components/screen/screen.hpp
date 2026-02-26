@@ -31,7 +31,7 @@ namespace lso {
             Screen(const Screen &) = delete;
             Screen(Screen &&) noexcept = delete;
 
-            ~Screen() = default;
+            ~Screen() = delete;
 
             Screen &operator = (const Screen &) = delete;
             Screen &operator = (Screen &&) noexcept = delete;

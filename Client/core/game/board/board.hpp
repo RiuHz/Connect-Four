@@ -6,8 +6,10 @@
 #include <climits>
 #include <string_view>
 
-#include "../../../enum/TextStyles.hpp"
-#include "../../../enum/TextColors.hpp"
+#include "../../enum/TextStyles.hpp"
+
+#include "../../enum/TextStyles.hpp"
+#include "../../enum/TextColors.hpp"
 
 namespace lso {
 

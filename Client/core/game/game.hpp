@@ -121,7 +121,7 @@ namespace lso {
 
             void start();
 
-            inline void reset() { board = Board(); };
+            inline void reset() { board = Board(); }; // Non sono sicuro questa sia public
 
         public:
 

@@ -21,7 +21,7 @@ namespace lso {
 
             MessageType getType() const noexcept { return static_cast<MessageType>(type); };
 
-            std::size_t getLength() const noexcept { return message.size(); };
+            std::size_t getLength() const noexcept { return message.size() * sizeof(uint32_t); };
 
             const std::vector<uint32_t> & getPayload() const noexcept { return message; };
 

@@ -11,8 +11,8 @@ namespace lso {
     class Spinner {
         private:
         
-            static inline constexpr char symbols[] = {'|', '/', '-', '\\'};
-            static inline constexpr int length = sizeof(symbols);
+            static inline const char symbols[] = {'|', '/', '-', '\\'};
+            static inline const int length = sizeof(symbols);
             
         protected:
             
@@ -20,10 +20,10 @@ namespace lso {
             
         public:
             
-            template <typename Data>
-            static Data showLoadingTextOnFunction(const std::string & text, std::function<Data()> function) {
+            template <typename Data, typename Function, typename... Args>
+            static Data showLoadingTextOnFunction(const std::string & text, Function && function, Args &&... args) {
                 
-                std::future<Data> future = std::async(std::launch::async, function);
+                std::future<Data> future = std::async(std::launch::async, std::forward<Function>(function), std::forward<Args>(args)...);
                 
                 for (unsigned int i = 0; future.wait_for(std::chrono::milliseconds(500)) != std::future_status::ready; i++) {
                     std::cout << "\r"
@@ -47,7 +47,7 @@ namespace lso {
                 Spinner(const Spinner &) = delete;
                 Spinner(Spinner &&) noexcept = delete;
 
-                ~Spinner() = default;
+                ~Spinner() = delete;
 
                 Spinner &operator = (const Spinner &) = delete;
                 Spinner &operator = (Spinner &&) noexcept = delete;
