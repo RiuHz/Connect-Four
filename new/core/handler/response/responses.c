@@ -21,7 +21,7 @@ Messaggio rispostaCreaPartita(Partita * partita) {
 }
 
 Messaggio rispostaAccessoPartita(unsigned int risposta) {
-    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    uint32_t * buffer = malloc(sizeof(unsigned int));
     unsigned int offset = 0;
 
     buffer[offset++] = htonl(risposta);
@@ -51,7 +51,7 @@ Messaggio rispostaListaPartite(ListaPartite * lista){
 }
 
 Messaggio rispostaRivincita(unsigned int risposta) {
-    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    uint32_t * buffer = malloc(sizeof(unsigned int));
     unsigned int offset = 0;
 
     buffer[offset++] = htonl(risposta);
