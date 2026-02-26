@@ -2,6 +2,7 @@
 #define RESPONSES_H
 
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 #include "../../../data/list/list.h"
 
