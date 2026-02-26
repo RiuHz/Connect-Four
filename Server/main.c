@@ -1,15 +1,19 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <arpa/inet.h>
 
-#include "core/network/TCPServer.h"
+#include "network/shared/protocol.h"
+#include "network/tcp/TCPServer.h"
 
-int main()
-{   
-        int socketServer = creaSocketServerTCP();
+int main(void) {
 
-        avviaServer(socketServer);
+    ServerData * server = creaSocketServerTCP();
 
-        close(socketServer); // Per sicurezza anche se nin verrà mai raggiunto perchè il server è sempre in ascolto continuamente
+    avviaServer(server);
 
-        return 0;
+    close(server -> socket);
+
+    return 0;
 }
-

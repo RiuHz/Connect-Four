@@ -11,7 +11,7 @@ namespace lso {
         memset(&serverAddress, 0, sizeof(serverAddress));
 
         serverAddress.sin_family = AF_INET;
-        serverAddress.sin_port = htons(server_port);
+        serverAddress.sin_port = htons(static_cast<uint16_t>(server_port));
         serverAddress.sin_addr.s_addr = inet_addr(server_ip.c_str());
 
         if (connect(clientSocket, reinterpret_cast<sockaddr *>(& serverAddress), sizeof(serverAddress)) < 0) {
@@ -30,7 +30,7 @@ namespace lso {
         MessageHeader header;
 
         header.type = htonl(message.getType());
-        header.length = htonl(message.getLength());
+        header.length = htonl(static_cast<uint32_t>(message.getLength()));
  
         size_t totalSent = 0;
         const char* headerPtr = reinterpret_cast<const char *>(& header);

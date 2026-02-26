@@ -1,66 +1,86 @@
-#include "../global/globals.h" 
 #include "threads.h"
-#include "../handler/handlers.h"
 
+ThreadData * creaThreadData(ServerData * server, int socket) {
+    ThreadData * thread = malloc(sizeof(ThreadData));
+    
+    thread -> server = server;
+    thread -> socket = socket;
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <stdint.h>
-
-#include <string.h>
-#include <sys/socket.h>
-
-#define DIMENSIONE_BUFFER 1024
-
-
-void associaThreadClient(int nuovoClientConnesso) {
-        // Creo il thread
-        pthread_t tid;
-
-        int *clientData = malloc(sizeof(int));
-        *clientData = nuovoClientConnesso;
-
-        if (pthread_create(&tid, NULL, gestioneClientThread,clientData) != 0) {
-                perror("Errore creazione thread");
-        }
-
+    return thread;
 }
 
-void *gestioneClientThread(void *arg){
-        int socketClient = *(int*)arg;
-        free(arg); // Rilascio subito la memoria utilizzata e la rendo disponibile immediatamente
+void associaThreadSocket(ServerData * server, int socket) {
+    pthread_t thread;
 
-        ClientInfo clientInfo;
-        clientInfo.socketClient=socketClient;
-        memset(clientInfo.nomeClient, 0, 20); // Pulizia di tutti i caratteri
+    ThreadData * threadData = creaThreadData(server, socket);
 
-        while(1) 
-        {
-            MessageHeader intestazionePacchetto = identificaPacchetto(&clientInfo);
+    if (pthread_create(& thread, NULL, wrapperThread, (void *) threadData) != 0) {
+        perror("Errore creazione thread");
+        exit(1);
+    }
+}
 
-            if(intestazionePacchetto.type<=0) break; // client disconnesso/errore
+void * wrapperThread(void * arg) {
+    ThreadData * thread = (ThreadData *) arg;
 
-            processaPacchetto(intestazionePacchetto,&clientInfo);
+    Client * client = attendiConnessioneClient(thread -> server, thread -> socket);
 
-            // fare operazioni varie e introdurre logica di gestione del tipo di messaggi ricevuti
+    gestisciRichiesteClient(thread -> server, client);
 
-            // SCENARIO 1: CLIENT APPENA CONNESSO - SCOPO: INVIO MESSAGGIO DI BENVENUTO
-            // S_Benvenuto pacchetto;
-            // pacchetto.tipoMessaggio=S_BENVENUTO;
-            // strncpy(pacchetto.messaggioBenvenuto,"Ciao <nomeClient> ti diamo il benvenuto a Forza 4!",sizeof(pacchetto.messaggioBenvenuto));
-                    
-            //     char risposta[DIMENSIONE_BUFFER];
-            //     strcpy(risposta, "Messaggio ricevuto no corrispondenza dal Server!");
-            //     sendto(dati->socketServer, risposta, strlen(risposta), 0, (struct sockaddr *)&dati->indirizzoClient, sizeof(dati->indirizzoClient));    
+    return NULL;
+}
 
+Client * attendiConnessioneClient(ServerData * server, int socket) {
+    bool attesaConnessione = true;
+ 
+    Client * client = creaClient(socket);
+
+    while (attesaConnessione) {
+        Messaggio messaggio = attendiMessaggio(client);
+
+        switch (messaggio.tipo) {
+            case REQ_CONNECT:
+                richiestaConnessione(client, messaggio.payload);
+                aggiungiClient(server -> listaClient, client);
+                
+                attesaConnessione = false;
+                printf("[Thread: %lu] Client %s connesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
+
+                eliminaMessaggio(& messaggio);
+            break;
+
+            default:
+                eliminaMessaggio(& messaggio);
         }
+    }
 
-        close(clientInfo.socketClient); // client disconnesso mi chiudo la socket dal server verso quel client
+    return client;
+}
 
-        rimuoviClient(clientInfo.socketClient);
+void gestisciRichiesteClient(ServerData * server, Client * client) {
+    bool richiestaDisconnessione = false;
 
-        pthread_exit(NULL);
-        
+    while ( !richiestaDisconnessione ) {
+        Messaggio messaggio = attendiMessaggio(client);
+
+        switch (messaggio.tipo) {
+            case REQ_DISCONNECT:
+                richiestaDisconnessione = true;   
+                printf("[Thread: %lu] Client %s disconnesso su socket %d\n", (unsigned long) pthread_self(), client -> nome, client -> socket);
+            break;
+
+            // Qui vanno aggiunti tutti gli altri casi!
+
+            default:
+                eliminaMessaggio(& messaggio);
+        }
+    }
+
+    close(client -> socket);
+    printf("[Thread: %lu] Chiusa la socket %d\n", (unsigned long) pthread_self(), client -> socket);
+
+    rimuoviClient(server -> listaClient, client);
+    printf("[Thread: %lu] Rimosso il Client, chiusura del thread...\n", (unsigned long) pthread_self());
+
+    pthread_exit(NULL);
 }

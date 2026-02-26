@@ -78,7 +78,9 @@ bool verificaCombinazioneOrizzontale(Partita * partita, unsigned int simbolo) {
         for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
             if (
                 partita -> board[riga][colonna] == simbolo &&
-                partita -> board[riga][colonna] == partita -> board[riga][colonna + 1] == partita -> board[riga][colonna + 2] == partita -> board[riga][colonna + 3]
+                partita -> board[riga][colonna + 1] == simbolo && 
+                partita -> board[riga][colonna + 2] == simbolo &&
+                partita -> board[riga][colonna + 3] == simbolo
             ) {
                 return true;
             } 
@@ -94,7 +96,9 @@ bool verificaCombinazioneVerticale(Partita *partita,unsigned int simbolo){
         for (unsigned int riga = 0; riga < BOARD_ROWS - 3; riga++) {
             if (
                 partita -> board[riga][colonna] == simbolo &&
-                partita -> board[riga][colonna] == partita -> board[riga + 1][colonna] == partita -> board[riga + 2][colonna] == partita -> board[riga + 3][colonna ]
+                partita -> board[riga + 1][colonna] == simbolo && 
+                partita -> board[riga + 2][colonna] == simbolo &&
+                partita -> board[riga + 3][colonna ] == simbolo
             ) {
                 return true;
             } 
@@ -114,7 +118,9 @@ bool verificaCombinazioneDiagonalePrincipale(Partita *partita,unsigned int simbo
         for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
             if (
                 partita -> board[riga][colonna] == simbolo &&
-                partita -> board[riga][colonna] == partita -> board[riga - 1][colonna + 1] == partita -> board[riga - 2][colonna + 2] == partita -> board[riga - 3][colonna + 3]
+                partita -> board[riga - 1][colonna + 1] == simbolo &&
+                partita -> board[riga - 2][colonna + 2] == simbolo &&
+                partita -> board[riga - 3][colonna + 3] == simbolo
             ) {
                 return true;
             }
@@ -130,7 +136,9 @@ bool verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbo
         for (unsigned int colonna = 0; colonna < BOARD_COLUMNS - 3; colonna++) {
             if (
                 partita -> board[riga][colonna] == simbolo &&
-                partita -> board[riga][colonna] == partita -> board[riga + 1][colonna + 1] == partita -> board[riga + 2][colonna + 2] == partita -> board[riga + 3][colonna + 3]
+                partita -> board[riga + 1][colonna + 1] == simbolo &&
+                partita -> board[riga + 2][colonna + 2] == simbolo && 
+                partita -> board[riga + 3][colonna + 3] == simbolo
             ) {
                 return true;
             }

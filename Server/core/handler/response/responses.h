@@ -1,6 +1,8 @@
 #ifndef RESPONSES_H
 #define RESPONSES_H
 
+#include <arpa/inet.h>
+
 #include "../../../data/list/list.h"
 
 #include "../../../network/messaggio/messaggio.h"

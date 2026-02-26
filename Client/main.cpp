@@ -3,10 +3,10 @@
 #include "components/screen/screen.hpp"
 
 #include "core/game/game.hpp"
-#include "core/network/tcp/TCPClient.hpp"
-#include "core/setup/setup.hpp"
+#include "network/tcp/TCPClient.hpp"
+#include "setup/setup.hpp"
 
-#include "enum/TextStyles.hpp"
+#include "core/enum/TextStyles.hpp"
 
 using namespace std;
 

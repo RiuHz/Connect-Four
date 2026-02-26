@@ -41,7 +41,7 @@ Messaggio eventoPartitaCreata(Partita * partita) {
 }
 
 Messaggio eventoPartitaTerminata(unsigned int id) {
-    uint32_t * buffer = malloc(sizeof(unsigned int) / sizeof(uint32_t));
+    uint32_t * buffer = malloc(sizeof(unsigned int));
     unsigned int offset = 0;
 
     buffer[offset++] = htonl(id);

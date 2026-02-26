@@ -7,7 +7,7 @@
 
 #include "board/board.hpp"
 
-#include "../../enum/TextColors.hpp"
+#include "../enum/TextColors.hpp"
 
 namespace lso {
 

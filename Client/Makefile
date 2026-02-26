@@ -5,8 +5,8 @@ CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-po
 SRC = main.cpp \
 	core/game/board/board.cpp \
 	core/game/game.cpp \
-	core/network/tcp/TCPClient.cpp \
-	core/setup/setup.cpp 
+	network/tcp/TCPClient.cpp \
+	setup/setup.cpp 
 
 OBJ = $(SRC:.cpp=.o)
 

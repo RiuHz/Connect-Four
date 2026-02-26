@@ -6,8 +6,8 @@
 #include <chrono>
 #include <string>
 
-#include "../../components/spinner/spinner.hpp"
-#include "../../components/screen/screen.hpp"
+#include "../components/spinner/spinner.hpp"
+#include "../components/screen/screen.hpp"
 
 #include "../network/tcp/TCPClient.hpp"
 

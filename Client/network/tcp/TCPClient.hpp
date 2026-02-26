@@ -6,6 +6,7 @@
 #include <stdexcept>    
 #include <sys/socket.h> 
 #include <arpa/inet.h>
+#include <cstring>
 
 #include "../message/Message.hpp"
 #include "../shared/protocol.h"

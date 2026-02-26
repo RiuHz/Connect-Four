@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include <arpa/inet.h>
 
 #include "../client/client.h"
 
