@@ -31,7 +31,7 @@ Messaggio rispostaAccessoPartita(unsigned int risposta) {
 }
 
 Messaggio rispostaListaPartite(ListaPartite * lista){
-    unsigned int dimensione = sizeof(Game) * lista -> contatore / sizeof(unsigned int);
+    unsigned int dimensione = (unsigned int) (sizeof(Game) * lista -> contatore / sizeof(unsigned int));
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 

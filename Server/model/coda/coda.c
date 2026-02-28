@@ -32,7 +32,7 @@ void accodaMessaggioBroadcast(CodaBroadcast * coda, Messaggio messaggio) {
     }
 
     pthread_mutex_unlock(& coda -> mutex);
-    dispatch_semaphore_signal(coda -> semaforo);
+    sem_post(& coda -> semaforo);
 }
 
 void stampaCodaBroadcast(CodaBroadcast * coda) {

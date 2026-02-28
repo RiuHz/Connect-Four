@@ -5,7 +5,7 @@ void avviaBroadcast(Server * server) {
     printf("[Broadcast] [Thread: %lu] Servizio di broadcast avviato correttamente\n", (unsigned long) pthread_self());
     
     while (true) {
-        dispatch_semaphore_wait(server -> codaBroadcast -> semaforo, DISPATCH_TIME_FOREVER);
+        sem_wait(& server -> codaBroadcast -> semaforo);
         
         pthread_mutex_lock(& server -> codaBroadcast -> mutex); 
         pthread_mutex_lock(& server -> listaClient -> mutex); 

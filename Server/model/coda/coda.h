@@ -1,8 +1,8 @@
 #ifndef CODA_H
 #define CODA_H
 
-#include <dispatch/dispatch.h>
 #include <pthread.h>
+#include <semaphore.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -15,7 +15,7 @@ typedef struct MessaggioBroadcast {
 
 typedef struct CodaBroadcast {
     pthread_mutex_t mutex;
-    dispatch_semaphore_t semaforo;
+    sem_t semaforo;
     MessaggioBroadcast * head;
     MessaggioBroadcast * tail;
 } CodaBroadcast;

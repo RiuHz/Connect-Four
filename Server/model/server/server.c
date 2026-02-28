@@ -18,7 +18,7 @@ void inizializzaListeServer(Server * server) {
 
     server -> codaBroadcast = malloc(sizeof(CodaBroadcast));
     pthread_mutex_init(& server -> codaBroadcast -> mutex, NULL);
-    server -> codaBroadcast -> semaforo = dispatch_semaphore_create(0);
+    sem_init(& server -> codaBroadcast -> semaforo, 0, 1);
     server -> codaBroadcast -> head = NULL;
     server -> codaBroadcast -> tail = NULL;
 }
