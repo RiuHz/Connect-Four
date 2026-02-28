@@ -2,59 +2,45 @@
 #define TCPCLIENT_HPP
 
 #include <string>
-#include <unistd.h>
-#include <stdexcept>    
-#include <sys/socket.h> 
+#include <iostream>
+#include <vector>
+#include <cstring> 
+#include <sys/socket.h>
 #include <arpa/inet.h>
-#include <cstring>
-
-#include "../message/Message.hpp"
-#include "../shared/protocol.h"
-
-namespace lso {
+#include <unistd.h>
+#include <cstdint> 
 
     class TCPClient {
         private:
 
             int clientSocket;
 
-            struct sockaddr_in serverAddress;
-
-            void sendMessageHeader(const Message & message) const;
-
-            void sendMessagePayload(const Message & message) const;
-
-            MessageHeader receiveMessageHeader() const;
-
-            std::vector<uint32_t> receiveMessagePayload(const unsigned int length) const;
+            bool connected;
             
         protected:
             
             // ...
-            
-        public:
-            
-            void sendMessage(const Message message) const;
-
-            Message receiveMessage() const;
 
         public:
 
-            TCPClient(const std::string server_ip, const unsigned int server_port);
+            TCPClient();
+            ~TCPClient();
+
+            // Tenta la connessione. Restituisce true se ha successo.
+            bool connectToServer(const std::string& serverIp, uint16_t serverPort);
             
-            TCPClient(const TCPClient &) = delete;
-            TCPClient(TCPClient &&) noexcept = default;
+            // Chiude il socket
+            void disconnect();
+            
+            // Verifica lo stato
+            bool isConnected() const;
 
-            ~TCPClient() { close(clientSocket); }
-
-            TCPClient &operator = (const TCPClient &) = delete;
-            TCPClient &operator = (TCPClient &&) noexcept = default;
-
-            bool operator == (const TCPClient & other) const noexcept;
-            bool operator != (const TCPClient & other) const noexcept { return ! operator == (other); };
+            // Invia una stringa al server
+            bool sendData(const std::string& data);
+            
+            // Riceve una stringa dal server (ATTENZIONE: bloccante! da risolvere con thread e vedere come fare)
+            std::string receiveData();
 
     };
-
-}
 
 #endif
