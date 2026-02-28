@@ -12,10 +12,8 @@
 #define SERVER_PORT 1926
 
 typedef enum {
-    GAME_CREATED = 1,
-    GAME_WAITING,
-    GAME_IN_PROGRESS,
-    GAME_ENDED
+    GAME_WAITING = 1,
+    GAME_IN_PROGRESS
 } GameState;
 
 typedef struct {
@@ -25,35 +23,51 @@ typedef struct {
     uint32_t stato;
 } Game;
 
+typedef struct {
+    uint32_t grid[BOARD_ROWS][BOARD_COLUMNS];
+} Board;
+
 // (REQ = Request) Richieste effettuate dal client
 // (RES = Response) Riposte inviate dal server
 // (EVT = Event) Eventi inviati dal server
 
 typedef enum {
-    REQ_CONNECT = 1,
+    // ==== Connessione ====
+    REQ_CONNECT = 1, // Payload = char nome[NAME_LEN]
     REQ_DISCONNECT,
+
+    // ==== Creazione Partita ====
     REQ_CREATE_GAME,
-    REQ_JOIN_GAME,
+    RES_CREATE_GAME, // Payload = Game
+    
+    // ==== Ingresso Partita ====
+    REQ_JOIN_GAME, // Payload = Unsigned int
+    EVT_JOIN_REQUEST,
+    REQ_JOIN_DECISION, // Payload = Boolean
+    RES_JOIN_GAME, // Payload = Boolean
+    
     REQ_LEAVE_GAME,
-    EVT_OPPONENT_JOIN,
-    REQ_GAME_ACCEPTED,
-    REQ_GAME_DENIED,
-    EVT_GAME_ACCEPTED,
-    EVT_GAME_DENIED,
+    
+    // ==== Lista Partite ====
     REQ_GAMES_LIST,
-    RES_GAMES_LIST,
-    EVT_GAMES_LIST_UPDATED,
-    EVT_GAME_CREATED,
-    EVT_GAME_ENDED,
-    REQ_MOVE,
-    EVT_OPPONENT_MOVE,
+    RES_GAMES_LIST, // Payload = Game List
+    
+    EVT_GAMES_LIST_UPDATED, // Payload = Game List
+    EVT_GAME_CREATED, // Payload = Game
+    EVT_GAME_ENDED, // Payload = Game id
+    
+    // ==== Svolgimento Partita ====
+    REQ_MOVE, // Payload = Unsigned int
+    RES_BAD_MOVE,
+
+    EVT_UPDATE_BOARD, // Payload = Board
+    EVT_NEXT_TURN,
     EVT_GAME_WON,
     EVT_GAME_LOST,
     EVT_GAME_DRAW,
-    REQ_REMATCH_ACCEPTED,
-    REQ_REMATCH_DENIED,
-    EVT_REMATCH_ACCEPTED,
-    EVT_REMATCH_DENIED
+    
+    REQ_REMATCH, // Payload = Boolean
+    RES_REMATCH // Payload = Boolean
 } MessageType;
 
 // Ogni messaggio è della struttura [MessageHeader][Message] così anche in TCP sappiamo quanti byte aspettare
@@ -63,32 +77,46 @@ typedef struct {
     uint32_t length;
 } MessageHeader;
 
-typedef struct {
-    char playerName[NAME_LEN];
-} Payload_REQ_CREATE_GAME;
-
-typedef struct {
-    uint32_t numberOfGames;
-} Payload_RES_GAMES_LIST;
-
-typedef struct {
-    uint32_t numberOfGames;
-} Payload_EVT_GAMES_LIST_UPDATED;
-
-typedef struct {
-    Game partita;
-} Payload_EVT_GAME_CREATED;
-
-typedef struct {
-    Game partita;
-} Payload_EVT_GAME_ENDED;
-
-typedef struct {
-    uint32_t column;
-} Payload_REQ_MOVE;
-
-typedef struct {
-    uint32_t column;
-} Payload_EVT_OPPONENT_MOVE;
-
 #endif
+
+/* 
+Mappa STATI - RICHIESTE 
+
+LOGIN:
+    REQ_CONNECT 
+    
+MENU:
+    REQ_CREATE_GAME
+    REQ_GAMES_LIST
+    REQ_DISCONNECT
+
+
+PARTITA:
+    RES_CREATE_GAME
+    EVT_JOIN_REQUEST
+    REQ_JOIN_DECISION
+
+
+LOBBY:
+    REQ_LEAVE_GAME
+    REQ_MOVE
+    RES_BAD_MOVE
+    EVT_UPDATE_BOARD
+    EVT_NEXT_TURN
+    EVT_GAME_WON
+    EVT_GAME_LOST
+    EVT_GAME_DRAW
+    REQ_REMATCH
+    RES_REMATCH
+
+
+LISTA_PARTITE:
+    RES_GAMES_LIST
+    EVT_GAMES_LIST_UPDATED
+    EVT_GAME_CREATED
+    EVT_GAME_ENDED
+    REQ_JOIN_GAME
+    RES_JOIN_GAME
+
+
+*/
