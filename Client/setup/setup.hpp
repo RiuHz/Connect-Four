@@ -5,6 +5,7 @@
 #include <thread>
 #include <chrono>
 #include <string>
+#include <cstdlib> 
 
 #include "../components/spinner/spinner.hpp"
 #include "../components/screen/screen.hpp"

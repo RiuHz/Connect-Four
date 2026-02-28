@@ -22,7 +22,7 @@ namespace lso {
         do {
             Screen::clear();
 
-            std::cout << "Inserisci il tuo nome"
+            std::cout << "Inserisci il tuo nome: "
                     << std::endl
                     << "> ";
             std::cin >> playerName;
@@ -52,11 +52,22 @@ namespace lso {
     std::unique_ptr<TCPClient> Setup::connectToServer(const std::string name) {
         Screen::clear();
 
-        return Spinner::showLoadingTextOnFunction< std::unique_ptr<TCPClient> >(
-            std::string("Connessione al server"),
-            connectTCPClient,
-            name
-        );
-    }
+        std::unique_ptr<lso::TCPClient> client;
 
+        try{
+            client = Spinner::showLoadingTextOnFunction< std::unique_ptr<TCPClient> >(
+                std::string("Connessione al server"),
+                connectTCPClient,
+                name
+            );
+        } catch(const std::runtime_error& e){
+            std::cout << "Errore di connessione al Server, riprova più tardi !\n" ;
+            std::exit(EXIT_FAILURE);
+        } catch (const std::exception& e) {
+            std::cout << "Errore imprevisto: " << e.what() << '\n';
+            std::exit(EXIT_FAILURE);
+        }
+
+        return client;
+    }
 }
