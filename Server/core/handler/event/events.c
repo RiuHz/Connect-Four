@@ -1,7 +1,8 @@
 #include "events.h"
 
 Messaggio eventoAggiornamentoListaPartite(ListaPartite * lista) {
-    uint32_t * buffer = malloc(sizeof(Game) * lista -> contatore / sizeof(unsigned int));
+    unsigned int dimensione = sizeof(Game) * lista -> contatore / sizeof(unsigned int);
+    uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
     for (Partita * partita = lista -> head; partita != NULL; partita = partita -> next) {
@@ -18,13 +19,14 @@ Messaggio eventoAggiornamentoListaPartite(ListaPartite * lista) {
         buffer[offset++] = game.stato;
     }
     
-    return creaMessaggio(EVT_GAMES_LIST_UPDATED, buffer);
+    return creaMessaggio(EVT_GAMES_LIST_UPDATED, dimensione, buffer);
 }
 
 Messaggio eventoPartitaCreata(Partita * partita) {
     Game game = serializzaPartita(partita);
     
-    uint32_t * buffer = malloc(sizeof(Game) / sizeof(uint32_t));
+    unsigned int dimensione = sizeof(Game) / sizeof(uint32_t);
+    uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
     buffer[offset++] = game.id;
@@ -37,22 +39,24 @@ Messaggio eventoPartitaCreata(Partita * partita) {
 
     buffer[offset++] = game.stato;
 
-    return creaMessaggio(EVT_GAME_CREATED, buffer);
+    return creaMessaggio(EVT_GAME_CREATED, dimensione, buffer);
 }
 
 Messaggio eventoPartitaTerminata(unsigned int id) {
-    uint32_t * buffer = malloc(sizeof(unsigned int));
+    unsigned int dimensione = sizeof(unsigned int);
+    uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
     buffer[offset++] = htonl(id);
 
-    return creaMessaggio(EVT_GAME_CREATED, buffer);
+    return creaMessaggio(EVT_GAME_CREATED, dimensione, buffer);
 }
 
 Messaggio eventoAggiornamentoBoard(Partita * partita) {
     Board board = serializzaBoard(partita);
 
-    uint32_t * buffer = malloc(sizeof(Board) / sizeof(uint32_t));
+    unsigned int dimensione = sizeof(Board) / sizeof(uint32_t);
+    uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
     for (uint32_t row = 0; row < BOARD_ROWS; row++) {
@@ -61,5 +65,5 @@ Messaggio eventoAggiornamentoBoard(Partita * partita) {
         }
     }
 
-    return creaMessaggio(EVT_UPDATE_BOARD, buffer);
+    return creaMessaggio(EVT_UPDATE_BOARD, dimensione, buffer);
 }

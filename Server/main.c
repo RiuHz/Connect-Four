@@ -4,13 +4,15 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
+#include "core/threading/broadcast/broadcast.h"
 #include "network/shared/protocol.h"
-#include "network/tcp/TCPServer.h"
+#include "network/tcp/core/TCPServer.h"
 
 int main(void) {
 
-    ServerData * server = creaSocketServerTCP();
+    Server * server = creaSocketServerTCP();
 
+    avviaThreadBroadcast(server);
     avviaServer(server);
 
     close(server -> socket);

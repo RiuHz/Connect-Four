@@ -3,7 +3,7 @@
 
 #include <arpa/inet.h>
 
-#include "../../../data/client/client.h"
+#include "../../../model/client/client.h"
 
 #include "../../../network/shared/protocol.h"
 

@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 
-#include "../../../data/list/list.h"
+#include "../../../model/lista/lista.h"
+#include "../../../model/messaggio/messaggio.h"
 
-#include "../../../network/messaggio/messaggio.h"
 #include "../../../network/shared/protocol.h"
 
 Messaggio eventoAggiornamentoListaPartite(ListaPartite * lista);

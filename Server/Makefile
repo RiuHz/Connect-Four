@@ -1,17 +1,22 @@
-CCompiler = gcc-14
+CCompiler = gcc
 CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c23 -flto -fstack-protector-strong
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O3 -std=c17 -fsanitize=address -flto -fstack-protector-strong
 
 SRC = main.c \
+	core/controller/client/client.c \
 	core/handler/event/events.c \
 	core/handler/request/requests.c \
 	core/handler/response/responses.c \
-	core/threading/threads.c \
+	core/threading/broadcast/broadcast.c \
+	core/threading/client/client.c \
 	data/client/client.c \
-	data/list/list.c \
+	data/coda/coda.c \
+	data/lista/lista.c \
 	data/partita/partita.c \
+	data/server/server.c \
 	network/messaggio/messaggio.c \
-	network/tcp/TCPServer.c
+	network/tcp/broadcast/TCPBroadcast.c \
+	network/tcp/core/TCPServer.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -27,4 +32,3 @@ clean:
 
 %.o: %.c
 	$(CCompiler) $(CFlags) -c $< -o $@
-

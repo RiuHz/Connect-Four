@@ -1,7 +1,7 @@
 #include "TCPServer.h"
 
-ServerData * creaSocketServerTCP(void) {
-    ServerData * server = malloc(sizeof(ServerData));
+Server * creaSocketServerTCP(void) {
+    Server * server = malloc(sizeof(Server));
 
     server -> socket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -29,24 +29,7 @@ ServerData * creaSocketServerTCP(void) {
     return server;
 }
 
-void impostaParametriServer(ServerData * server) {
-    memset(& server -> address, 0, sizeof(server -> address));
-    server -> address.sin_family = AF_INET;
-    server -> address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server -> address.sin_port = htons(SERVER_PORT);
-}
-
-void inizializzaListeServer(ServerData * server) {
-    server -> listaClient = malloc(sizeof(ListaClient));
-    pthread_mutex_init(& server -> listaClient -> mutex, NULL);
-    server -> listaClient -> head = NULL;
-
-    server -> listaPartite = malloc(sizeof(ListaPartite));
-    pthread_mutex_init(& server -> listaPartite -> mutex, NULL);
-    server -> listaPartite -> head = NULL;
-}
-
-void avviaServer(ServerData * server) {
+void avviaServer(Server * server) {
     struct sockaddr_in indirizzo;
 
     printf("[Server] [Thread: %lu] Server in ascolto sulla porta %d...\n", (unsigned long) pthread_self(), SERVER_PORT);
@@ -63,25 +46,8 @@ void avviaServer(ServerData * server) {
 
         printf("[Server] [Thread: %lu] Nuova connessione da ip %s assegnata al socket %d\n", (unsigned long) pthread_self(), inet_ntoa(indirizzo.sin_addr), socket);
 
-        associaThreadSocket(server, socket);
+        avviaThreadSocket(server, socket);
     } 
-}
-
-void inviaBroadcast(ServerData * server, Messaggio messaggio) {
-
-    printf("[Broadcast] [Thread: %lu] Invio del messaggio in broadcast\n", (unsigned long) pthread_self());
-    
-    pthread_mutex_lock(& server -> listaClient -> mutex); 
-
-    Client * client = server -> listaClient -> head;
-    
-    while (client != NULL) {
-        inviaMessaggio(client, messaggio);
-
-        client = client -> next;
-    }
-
-    pthread_mutex_unlock(& server -> listaClient -> mutex);
 }
 
 Messaggio attendiMessaggio(Client * client) {
@@ -98,7 +64,7 @@ Messaggio attendiMessaggio(Client * client) {
         leggiFlussoDati(client, buffer, header.length);
     }
 
-    return creaMessaggio(header.type, buffer);
+    return creaMessaggio(header.type, header.length, buffer);
 }
 
 void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
@@ -123,13 +89,13 @@ void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
 }
 
 void inviaMessaggio(Client * client, Messaggio messaggio) {
-    uint32_t tipo = messaggio.tipo;
-    uint32_t lunghezza = sizeof(messaggio.payload);
+    uint32_t tipo = messaggio.header.type;
+    uint32_t dimensione = messaggio.header.length;
     uint32_t * payload = messaggio.payload;
 
     inviaFlussoDati(client, & tipo, sizeof(uint32_t));
-    inviaFlussoDati(client, & lunghezza, sizeof(uint32_t));
-    inviaFlussoDati(client, payload, sizeof(messaggio.payload));
+    inviaFlussoDati(client, & dimensione, sizeof(uint32_t));
+    inviaFlussoDati(client, payload, dimensione);
 }
 
 void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {

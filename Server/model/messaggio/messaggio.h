@@ -3,14 +3,14 @@
 
 #include <stdlib.h>
 
-#include "../shared/protocol.h"
+#include "../../network/shared/protocol.h"
 
 typedef struct Messaggio {
-    MessageType tipo;
+    MessageHeader header;
     uint32_t * payload;
 } Messaggio;
 
-Messaggio creaMessaggio(MessageType tipo, uint32_t * payload);
+Messaggio creaMessaggio(MessageType tipo, uint32_t dimensione, uint32_t * payload);
 
 void eliminaMessaggio(Messaggio * messaggio);
 
