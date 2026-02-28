@@ -52,7 +52,7 @@ typedef enum {
     REQ_GAMES_LIST,
     RES_GAMES_LIST, // Payload = Game List
     
-    EVT_GAMES_LIST_UPDATED, // Payload = Game List
+    EVT_GAME_UPDATE, // Payload = Game
     EVT_GAME_CREATED, // Payload = Game
     EVT_GAME_ENDED, // Payload = Game id
     

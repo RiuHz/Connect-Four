@@ -9,7 +9,7 @@
 
 #include "../../../network/shared/protocol.h"
 
-Messaggio eventoAggiornamentoListaPartite(ListaPartite * lista);
+Messaggio eventoAggiornamentoPartita(Partita * partita);
 
 Messaggio eventoPartitaCreata(Partita * partita);
 Messaggio eventoPartitaTerminata(unsigned int id);
