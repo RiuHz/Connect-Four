@@ -9,12 +9,12 @@ SRC = main.c \
 	core/handler/response/responses.c \
 	core/threading/broadcast/broadcast.c \
 	core/threading/client/client.c \
-	data/client/client.c \
-	data/coda/coda.c \
-	data/lista/lista.c \
-	data/partita/partita.c \
-	data/server/server.c \
-	network/messaggio/messaggio.c \
+	model/client/client.c \
+	model/coda/coda.c \
+	model/lista/lista.c \
+	model/messaggio/messaggio.c \
+	model/partita/partita.c \
+	model/server/server.c \
 	network/tcp/broadcast/TCPBroadcast.c \
 	network/tcp/core/TCPServer.c
 
