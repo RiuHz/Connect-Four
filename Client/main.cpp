@@ -8,55 +8,17 @@
 
 #include "core/enum/TextStyles.hpp"
 
+#include "core/state/context/ClientContext.hpp"
+#include "core/state/login/LoginState.hpp"
+
 using namespace std;
 
 int main() {
-
-    lso::Screen::open();
-
-    std::string name = lso::Setup::getPlayerName();
-
-    std::unique_ptr<lso::TCPClient> client = lso::Setup::connectToServer(name);
-
-    int scelta = 0;
+    // Creiamo il client partendo dal Menu
+    ClientContext clientConnesso(std::make_unique<LoginState>());
     
-    do {
-        
-        lso::Screen::clear();
-
-        cout << "|---| Menu |---|" << endl
-        << "1) Crea Lobby" << endl
-        << "2) Visualizza lobby" << endl
-        << "3) Esci" << endl
-        << endl
-        << "> ";
-        
-        cin >> scelta;
-        
-        switch (scelta) {
-            case 1:
-                // Qua apro la lobby
-                cout << "Hai scelto crea lobby" << endl;
-                break;
-            
-            case 2:
-                // Qua visualizzo le lobby
-                cout << "Hai scelto visualizza lobby" << endl;
-                break;
-            
-            case 3:
-                client -> sendMessage(lso::Message(REQ_DISCONNECT));
-                lso::Screen::briefDisplay("Uscendo...");
-                break;
-                
-            default:
-                lso::Screen::briefDisplay("Scelta non valida");
-                
-        }
-        
-    } while (scelta != 3);
-
-    lso::Screen::close();
+    // Avviamo il loop del gioco (esco quando invoco clientConnesso.stop())
+    clientConnesso.run();
 
     return 0;
 }
