@@ -23,21 +23,9 @@ namespace lso {
         {TextColor::YELLOW, "\033[33m"}
     };
 
-    inline std::ostream & operator << (TextColor color, std::ostream & os) {
-        return os << textColors.at(color);
-    };
-
     inline std::ostream & operator << (std::ostream & os, TextColor color) {
         return os << textColors.at(color);
     };
-
-    inline std::string operator + (TextColor color, const std::string & text) {
-        return textColors.at(color) + text;
-    }
-
-    inline std::string operator + (const std::string & text, TextColor color) {
-        return text + textColors.at(color);
-    }
 
 }
 
