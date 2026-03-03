@@ -10,6 +10,9 @@
 #include "../components/spinner/spinner.hpp"
 #include "../components/screen/screen.hpp"
 
+#include "../model/message/Message.hpp"
+
+#include "../network/shared/protocol.h"
 #include "../network/tcp/TCPClient.hpp"
 
 namespace lso {

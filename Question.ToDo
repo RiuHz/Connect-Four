@@ -1,0 +1,16 @@
+Supponiamo un client voglia entrare in una partita vuota
+    - REQ_JOIN_GAME
+    - RES_JOIN_GAME flag = true
+
+Supponiamo un client voglia entrare in una partita con proprietario
+    - C1 -> S: REQ_JOIN_GAME
+    - S -> C2: EVT_OPPONENT_JOIN
+    - C2 -> S: REQ_OPPONENT_JOIN flag = X
+    - S -> C1: RES_JOIN_GAME flag = X
+
+Supponiamo un client voglia entrare in una partita già piena:
+    - C -> S: REQ_JOIN_GAME
+    - S -> C: RES_JOIN_GAME flag = false
+
+
+Client > Packetbuilder > "isValid" ? In che senso?

@@ -2,45 +2,58 @@
 #define TCPCLIENT_HPP
 
 #include <string>
-#include <iostream>
-#include <vector>
-#include <cstring> 
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
-#include <cstdint> 
+#include <stdexcept>
+
+#include "../../model/message/Message.hpp"
+
+#include "../shared/protocol.h"
+
+namespace lso {
 
     class TCPClient {
         private:
 
-            int clientSocket;
+            int TCPSocket;
 
-            bool connected;
+        private:
             
+            void connectTCPClient();
+            inline void disconnectTCPClient() { close(TCPSocket); };
+
+            void sendData(const uint32_t data) const;
+            void sendData(const std::vector<uint32_t> & payload, const size_t length) const;
+
+            const std::vector<uint32_t> receiveData(const uint32_t length) const;
+
         protected:
             
             // ...
 
         public:
-
-            TCPClient();
-            ~TCPClient();
-
-            // Tenta la connessione. Restituisce true se ha successo.
-            bool connectToServer(const std::string& serverIp, uint16_t serverPort);
             
-            // Chiude il socket
-            void disconnect();
+            void sendMessage(const Message & message) const;
             
-            // Verifica lo stato
-            bool isConnected() const;
+            const Message receiveMessage() const;
 
-            // Invia una stringa al server
-            bool sendData(const std::string& data);
-            
-            // Riceve una stringa dal server (ATTENZIONE: bloccante! da risolvere con thread e vedere come fare)
-            std::string receiveData();
+        public:
+        
+            TCPClient() { connectTCPClient(); };
+            TCPClient(const TCPClient &) = delete;
+            TCPClient(TCPClient &&) noexcept = delete;
+
+            ~TCPClient() { disconnectTCPClient(); };
+
+            TCPClient &operator = (const TCPClient &) = delete;
+            TCPClient &operator = (TCPClient &&) noexcept = delete;
+
+            bool operator == (const TCPClient &) const noexcept = delete;
+            bool operator != (const TCPClient &) const noexcept = delete;
 
     };
+
+}
 
 #endif

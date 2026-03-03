@@ -35,7 +35,7 @@ namespace lso {
     std::unique_ptr<TCPClient> Setup::connectTCPClient(const std::string name) {
         std::unique_ptr<TCPClient> client = std::make_unique<TCPClient>(SERVER_ADDRESS, SERVER_PORT);
 
-        std::vector<uint32_t> payload(NAME_LEN / sizeof(uint32_t), 0);
+        std::vector<uint32_t> payload(NAME_LEN / sizeof(uint32_t));
 
         std::memcpy(
             payload.data(),
@@ -48,26 +48,13 @@ namespace lso {
         return client;
     }
 
-    // Sta funzione fa troppo
     std::unique_ptr<TCPClient> Setup::connectToServer(const std::string name) {
         Screen::clear();
 
-        std::unique_ptr<lso::TCPClient> client;
-
-        try{
-            client = Spinner::showLoadingTextOnFunction< std::unique_ptr<TCPClient> >(
-                std::string("Connessione al server"),
-                connectTCPClient,
-                name
-            );
-        } catch(const std::runtime_error& e){
-            std::cout << "Errore di connessione al Server, riprova più tardi !\n" ;
-            std::exit(EXIT_FAILURE);
-        } catch (const std::exception& e) {
-            std::cout << "Errore imprevisto: " << e.what() << '\n';
-            std::exit(EXIT_FAILURE);
-        }
-
-        return client;
+        return Spinner::showLoadingTextOnFunction< std::unique_ptr<TCPClient> >(
+            std::string("Connessione al server"),
+            connectTCPClient,
+            name
+        );
     }
 }

@@ -1,8 +1,6 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
-#include <stdint.h>
-
 #define NAME_LEN 20
 
 #define BOARD_ROWS 6
@@ -52,7 +50,7 @@ typedef enum {
     REQ_GAMES_LIST,
     RES_GAMES_LIST, // Payload = Game List
     
-    EVT_GAMES_LIST_UPDATED, // Payload = Game List
+    EVT_GAME_UPDATE, // Payload = Game
     EVT_GAME_CREATED, // Payload = Game
     EVT_GAME_ENDED, // Payload = Game id
     
@@ -76,8 +74,6 @@ typedef struct {
     uint32_t type;
     uint32_t length;
 } MessageHeader;
-
-#endif
 
 /* 
 Mappa STATI - RICHIESTE 
@@ -120,3 +116,5 @@ LISTA_PARTITE:
 
 
 */
+
+#endif

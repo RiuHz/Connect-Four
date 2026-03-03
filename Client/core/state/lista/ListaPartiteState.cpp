@@ -2,9 +2,9 @@
 
 
 void ListaPartiteState::onEnter(ClientContext* /*context*/) {
-    std::cout << "\n=== LISTA DELLE PARTITE ===\n";
-    std::cout << "Qui in futuro appariranno le partite disponibili dal server...\n";
-    std::cout << "Scrivi 'esci' per tornare al Menu Principale.\n> ";
+    std::cout << "=== LISTA DELLE PARTITE ===" << std::endl
+        << "Qui in futuro appariranno le partite disponibili dal server...\n"
+        << "Scrivi 'esci' per tornare al Menu Principale." << std::endl;
 }
 
 void ListaPartiteState::handleUserInput(ClientContext* context, const std::string& input) {

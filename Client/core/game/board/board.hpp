@@ -11,16 +11,19 @@
 #include "../../enum/TextStyles.hpp"
 #include "../../enum/TextColors.hpp"
 
+#include "../../../network/shared/protocol.h"
+
 namespace lso {
 
     class Board {
 
         private:
 
-            static inline constexpr unsigned int invalidGridValue = UINT_MAX;
+            // * Potrebbe dover sparire
+            static inline unsigned int invalidGridValue = UINT_MAX;
 
-            static inline constexpr unsigned int columns = 6;
-            static inline constexpr unsigned int rows = 7;
+            static inline unsigned int columns = BOARD_COLUMNS;
+            static inline unsigned int rows = BOARD_ROWS;
 
             std::vector< std::vector<std::string> > grid;
 
@@ -32,8 +35,6 @@ namespace lso {
             void printSeparator() const noexcept;
 
             void printColumnNumbers() const noexcept;
-
-            unsigned int findDeepestEmptyRow(const unsigned int column) const;
             
         protected:
             
@@ -42,8 +43,6 @@ namespace lso {
         public:
             
             Board() : grid(rows, std::vector<std::string>(columns, emptySymbol)) {}
-
-            void addMove(const unsigned int column, const TextColor color);
             
             void print() const noexcept; 
 

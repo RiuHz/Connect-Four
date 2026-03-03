@@ -1,86 +1,89 @@
 #include "TCPClient.hpp"
 
-// Inizializzo il costruttore per buona pratica del TCPClient
-TCPClient::TCPClient() : clientSocket(-1), connected(false) {}
+void lso::TCPClient::connectTCPClient() {
 
-// Distruttore che quando invocato disconnette il client, chiude la socket
-TCPClient::~TCPClient() {
-    disconnect();
+    TCPSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (TCPSocket < 0)
+        throw std::runtime_error("[Rete] Impossibile creare il socket.");
+
+    struct sockaddr_in serverAddress;
+    memset(& serverAddress, 0, sizeof(serverAddress));
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(SERVER_PORT);
+
+    if (inet_pton(AF_INET, SERVER_ADDRESS, & serverAddress.sin_addr) <= 0)
+        throw std::runtime_error("[Rete] Indirizzo IP del server non valido.");
+
+    if (connect(TCPSocket, (struct sockaddr*) & serverAddress, sizeof(serverAddress)) < 0)
+        throw std::runtime_error("[Rete] Connessione al server " + std::string(SERVER_ADDRESS) + ":" + std::to_string(SERVER_PORT) + " fallita.");
 }
 
-bool TCPClient::connectToServer(const std::string& serverIp, uint16_t serverPort) {
-    if (connected) return true;
-
-    clientSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (clientSocket < 0) {
-        std::cerr << "[Errore di Rete] Impossibile creare il socket.\n";
-        return false;
-    }
-
-    struct sockaddr_in serverAddr;
-    memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_port = htons(serverPort); 
-
-    if (inet_pton(AF_INET, serverIp.c_str(), &serverAddr.sin_addr) <= 0) {
-        std::cerr << "[Errore di Rete] Indirizzo IP non valido o non supportato.\n";
-        close(clientSocket);
-        return false;
-    }
-
-    if (connect(clientSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-        std::cerr << "[Errore di Rete] Connessione al server " << serverIp << ":" << serverPort << " fallita.\n";
-        close(clientSocket);
-        return false;
-    }
-
-    connected = true;
-    return true;
+void lso::TCPClient::sendMessage(const Message & message) const {
+    sendData(message.getType());
+    sendData(message.getLength());
+    sendData(message.getPayload(), message.getLength());
 }
 
-void TCPClient::disconnect() {
-    if (connected && clientSocket >= 0) {
-        close(clientSocket);
-        clientSocket = -1;
-        connected = false;
-        std::cout << "[Rete] Disconnesso dal server.\n";
+void lso::TCPClient::sendData(const uint32_t data) const {
+    size_t bytesSent = 0;
+    size_t totalBytes = sizeof(data);
+    const uint8_t * buffer = reinterpret_cast<const uint8_t *>(& data);
+
+    while (bytesSent < totalBytes) {
+        ssize_t remainingBytes = send(TCPSocket, buffer + bytesSent, totalBytes - bytesSent, 0);
+
+        if (remainingBytes <= 0)
+            throw std::runtime_error("[Rete] Impossibile leggere dal buffer TCP.");
+
+        bytesSent += (size_t) remainingBytes;
     }
 }
 
-bool TCPClient::isConnected() const {
-    return connected;
+void lso::TCPClient::sendData(const std::vector<uint32_t> & payload, const size_t length) const {
+    size_t bytesSent = 0;
+    size_t totalBytes = length;
+    const uint8_t * buffer = reinterpret_cast<const uint8_t *>(payload.data());
+
+    while (bytesSent < totalBytes) {
+        ssize_t remainingBytes = send(TCPSocket, buffer + bytesSent, totalBytes - bytesSent, 0);
+
+        if (remainingBytes <= 0)
+            throw std::runtime_error("[Rete] Impossibile scrivere sul buffer TCP.");
+
+        bytesSent += static_cast<size_t>(remainingBytes);
+    }
 }
 
-bool TCPClient::sendData(const std::string& data) {
-    if (!connected) return false;
+const lso::Message lso::TCPClient::receiveMessage() const {
+    std::vector<uint32_t> header = receiveData(2);
 
-    ssize_t bytesSent = send(clientSocket, data.c_str(), data.length(), 0);
-    
-    if (bytesSent < 0) {
-        std::cerr << "[Errore di Rete] Invio dati fallito.\n";
-        disconnect(); // Se l'invio fallisce gravemente, probabilmente la connessione è caduta
-        return false;
-    }
-    return true;
+    MessageType type = static_cast<MessageType>(ntohl(header[0]));
+    uint32_t length = ntohl(header[1]);
+
+    if (length == 0)
+        return lso::Message(type);
+
+    std::vector<uint32_t> payload = receiveData(length);
+
+    return lso::Message(type, payload);
 }
 
-std::string TCPClient::receiveData() {
-    if (!connected) return "";
+const std::vector<uint32_t> lso::TCPClient::receiveData(const uint32_t length) const {
+    std::vector<uint32_t> payload(length);
 
-    std::vector<char> buffer(4096);
-    
-    // recv è bloccante, finché non arrivano dati
-    ssize_t bytesReceived = recv(clientSocket, buffer.data(), buffer.size() - 1, 0);
+    size_t readBytes = 0;
+    size_t totalBytes = sizeof(uint32_t) * payload.size();
+    uint8_t * buffer = reinterpret_cast<uint8_t *>(& payload[0]);
 
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Terminatore di stringa
-        return std::string(buffer.data());
-    } else if (bytesReceived == 0) {
-        std::cout << "[Rete] Il server ha chiuso la connessione.\n";
-        disconnect();
-    } else {
-        std::cerr << "[Errore di Rete] Errore durante la ricezione.\n";
-        disconnect();
+    while (readBytes < totalBytes) {
+        ssize_t remainingBytes = recv(TCPSocket, buffer + readBytes, length - readBytes, 0);
+
+        if (remainingBytes <= 0)
+            throw std::runtime_error("[Rete] Impossibile leggere dal buffer TCP.");
+
+        readBytes += static_cast<size_t>(remainingBytes);
     }
-    return "";
+
+    return payload;
 }
