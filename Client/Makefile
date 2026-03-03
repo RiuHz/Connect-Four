@@ -3,13 +3,10 @@ CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c++23 -flto -fsta
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong
 
 SRC = main.cpp \
-	network/tcp/TCPClient.cpp \
-	core/state/context/ClientContext.cpp \
-	core/state/login/LoginState.cpp \
-	core/state/menu/MenuState.cpp \
-	core/state/partita/PartitaState.cpp \
-	core/state/lista/ListaPartiteState.cpp \
-	network/packet/PacketBuilder.cpp
+	core/board/Board.cpp \
+	core/client/Client.cpp \
+	network/tcp/TCPClient.cpp
+
 OBJ = $(SRC:.cpp=.o)
 
 main: $(OBJ)

@@ -9,13 +9,13 @@ namespace lso {
 
     enum class MenuOption {
         CREATE_MATCH,
-        LIST_MATCHES,
+        LIST_GAMES,
         EXIT
     };
 
     const std::unordered_map<MenuOption, const std::string> menuOptions = {
         {MenuOption::CREATE_MATCH, "Crea Partita"},
-        {MenuOption::LIST_MATCHES, "Lista Partite"},
+        {MenuOption::LIST_GAMES, "Lista Partite"},
         {MenuOption::EXIT, "Esci"}
     };
 

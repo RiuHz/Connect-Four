@@ -1,9 +1,16 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
+#include <iostream>
 #include <memory>
 
+#include "../board/Board.hpp"
+
+#include "../../enum/menu/MenuOption.hpp"
+
 #include "../../model/message/Message.hpp"
+
+#include "../../network/tcp/TCPClient.hpp"
 
 namespace lso {
 
@@ -22,19 +29,11 @@ namespace lso {
 
                 public:
 
-                    /* 
-                        Facciamo la stampa in base al tipo di stato in cui ci troviamo:
-                            Menu: stampo il menu iniziale aspettando una richiesta
-                            Partita: Invio richiesta creazione partita, bla bla bla
-                            Lobby: Tutto ciò dedicato alla partita in corso
-                            Lista: Invio richiesta partite globali, bla bla bla
-                    */
-
                     virtual void print() const = 0;
 
                     virtual void handleUserInput(const std::string & input) const = 0;
 
-                    virtual void handleNetworkEvents(Message message) const = 0;
+                    virtual void handleNetworkEvents(const Message & message) const = 0;
 
                 public:
 
@@ -63,40 +62,100 @@ namespace lso {
 
                 public:
 
-                    using State::State(const Client &); // Come va sistemata sta cosa del costruttore?
+                    using State::State;
 
-                    virtual void print() const;
+                    void print() const override;
 
-                    virtual void handleUserInput(const std::string & input) const;
+                    void handleUserInput(const std::string & input) const override;
 
-                    virtual void handleNetworkEvents(Message message) const;
+                    void handleNetworkEvents(const Message & message) const override;
 
             };
 
             class MenuState: public State {
+                private:
 
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State;
+
+                    void print() const override;
+
+                    void handleUserInput(const std::string & input) const override;
+
+                    void handleNetworkEvents(const Message & message) const override;
             };
 
             class LobbyState: public State {
+                private:
 
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State;
+
+                    void print() const override;
+
+                    void handleUserInput(const std::string & input) const override;
+
+                    void handleNetworkEvents(const Message & message) const override;
             };
 
             class InGameState: public State {
-                // board come attr
+                private:
+                
+                    const Board & board;
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State;
+
+                    void print() const override;
+
+                    void handleUserInput(const std::string & input) const override;
+                    
+                    void handleNetworkEvents(const Message & message) const override;
             };
 
             class GameListState: public State {
+                private:
 
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State;
+
+                    void print() const override;
+
+                    void handleUserInput(const std::string & input) const override;
+
+                    void handleNetworkEvents(const Message & message) const override;
             };
 
         private:
 
             std::unique_ptr<State> state;
-    
-            /*
-                pointer tcp
-                nome (?)
-            */
+            std::unique_ptr<TCPClient> serverConnection;
 
         private:
 
