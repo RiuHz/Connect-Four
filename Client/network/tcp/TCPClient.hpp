@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <stdexcept>
+#include <cstring>
 
 #include "../../model/message/Message.hpp"
 

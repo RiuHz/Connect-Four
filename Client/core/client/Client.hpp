@@ -2,6 +2,7 @@
 #define CLIENT_HPP
 
 #include <memory>
+#include <iostream>
 
 #include "../../model/message/Message.hpp"
 
@@ -65,27 +66,98 @@ namespace lso {
 
                     using State::State(const Client &); // Come va sistemata sta cosa del costruttore?
 
-                    virtual void print() const;
+                    virtual void print() const override;
 
-                    virtual void handleUserInput(const std::string & input) const;
+                    virtual void handleUserInput(const std::string & input) const override;
 
-                    virtual void handleNetworkEvents(Message message) const;
+                    virtual void handleNetworkEvents(Message message) const override;
 
             };
 
             class MenuState: public State {
+                private:
+
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State; // dovrebbe workare cosi?
+
+                    virtual void print() const override;
+
+                    virtual void handleUserInput(const std::string & input) const override;
+
+                    virtual void handleNetworkEvents(Message message) const override;
 
             };
 
             class LobbyState: public State {
+                private:
+
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State; // dovrebbe workare cosi?
+
+                    virtual void print() const override;
+
+                    virtual void handleUserInput(const std::string & input) const override;
+
+                    virtual void handleNetworkEvents(Message message) const override;
+
+                    void onEnter() const; // dubbio dubbioso
 
             };
 
             class InGameState: public State {
-                // board come attr
+
+                private:
+                    // board come attr
+
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State; // dovrebbe workare cosi?
+
+                    virtual void print() const override;
+
+                    virtual void handleUserInput(const std::string & input) const override;
+
+                    virtual void handleNetworkEvents(Message message) const override;
             };
 
             class GameListState: public State {
+                private:
+
+                    // ...
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    using State::State; // dovrebbe workare cosi?
+
+                    virtual void print() const override;
+
+                    virtual void handleUserInput(const std::string & input) const override;
+
+                    virtual void handleNetworkEvents(Message message) const override;
 
             };
 
