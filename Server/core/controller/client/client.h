@@ -8,7 +8,7 @@
 #include "../../../model/client/client.h"
 #include "../../../model/server/server.h"
 
-#include "../../../network/tcp/core/TCPServer.h"
+#include "../../../network/tcp/server/TCPServer.h"
 
 Client * attendiConnessioneClient(Server * server, int socket);
 

@@ -6,7 +6,7 @@
 
 #include "core/threading/broadcast/broadcast.h"
 #include "network/shared/protocol.h"
-#include "network/tcp/core/TCPServer.h"
+#include "network/tcp/server/TCPServer.h"
 
 int main(void) {
 
