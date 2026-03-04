@@ -8,7 +8,7 @@
 namespace lso {
 
     enum class MenuOption {
-        CREATE_MATCH,
+        CREATE_MATCH = 1,
         LIST_GAMES,
         EXIT
     };
