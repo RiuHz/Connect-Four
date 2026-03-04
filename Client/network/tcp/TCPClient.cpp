@@ -20,9 +20,21 @@ void lso::TCPClient::connectTCPClient() {
 }
 
 void lso::TCPClient::sendMessage(const Message & message) const {
-    sendData(message.getType());
-    sendData(message.getLength());
-    sendData(message.getPayload(), message.getLength());
+    uint32_t type = htonl(message.getType());
+    uint32_t length = htonl(message.getLength());
+
+    sendData(type);
+    sendData(length);
+
+    if (length == 0)
+        return;
+
+    std::vector<uint32_t> payload(message.getPayload());
+
+    for (uint32_t & word: payload)
+        word = htonl(word);
+
+    sendData(payload, message.getLength());
 }
 
 void lso::TCPClient::sendData(const uint32_t data) const {
@@ -65,6 +77,9 @@ const lso::Message lso::TCPClient::receiveMessage() const {
         return lso::Message(type);
 
     std::vector<uint32_t> payload = receiveData(length);
+
+    for (uint32_t & word: payload)
+        word = ntohl(word);
 
     return lso::Message(type, payload);
 }
