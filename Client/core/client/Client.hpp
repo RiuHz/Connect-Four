@@ -5,9 +5,8 @@
 #include <memory>
 #include <iostream>
 
-#include "../../components/screen/Screen.hpp"
-
 #include "../board/Board.hpp"
+#include "../screen/Screen.hpp"
 
 #include "../../enum/menu/MenuOption.hpp"
 
