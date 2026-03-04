@@ -13,21 +13,25 @@ namespace lso {
 
             MessageType type;
             std::vector<uint32_t> payload;
+
             
-        protected:
+            protected:
             
             // ...
-
-        public:
+            
+            public:
             
             inline const MessageType & getType() const noexcept { return type; };
             inline uint32_t getLength() const noexcept { return payload.size(); };
             inline const std::vector<uint32_t> & getPayload() const noexcept { return payload; };
-
-        public:
-        
+            
+            public:
+            
             Message(const MessageType type) : type(type), payload(std::vector<uint32_t>()) {};
-            Message(const MessageType type, const std::vector<uint32_t> & payload) : type(type), payload(std::vector<uint32_t>(payload)) {};
+            Message(const MessageType type, const std::vector<uint32_t> & payload) : type(type), payload(payload) {};
+            
+            Message(const MessageType type, const std::string & string);
+            Message(const MessageType type, const unsigned int number);
             
             Message(const Message & other) : type(other.type), payload(other.payload) {};
             Message(Message && other) noexcept : type(std::move(other.type)), payload(std::move(other.payload)) {};
