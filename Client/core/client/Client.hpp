@@ -5,6 +5,8 @@
 #include <memory>
 #include <iostream>
 
+#include "../../components/screen/Screen.hpp"
+
 #include "../board/Board.hpp"
 
 #include "../../enum/menu/MenuOption.hpp"
@@ -22,11 +24,11 @@ namespace lso {
             class State {
                 private:
 
-                    const Client & context;
-
-                protected:
-
                     // ...
+                
+                protected:
+                
+                    Client & context; 
 
                 public:
 
@@ -38,7 +40,7 @@ namespace lso {
 
                 public:
 
-                    State(const Client & client) : context(client) {};
+                    State(Client & client) : context(client) {};
                     State(const State &) = delete;
                     State(State &&) = delete;
 
@@ -97,6 +99,7 @@ namespace lso {
                 private:
 
                     // ...
+                    // Lobby
 
                 protected:
 
@@ -137,6 +140,7 @@ namespace lso {
                 private:
 
                     // ...
+                    // Lobby List
 
                 protected:
 
@@ -158,7 +162,11 @@ namespace lso {
             std::unique_ptr<State> state;
             std::unique_ptr<TCPClient> serverConnection;
 
+            bool isRunning;
+
         private:
+
+            void setup();
 
             void transitionTo(std::unique_ptr<State> nextState) { state = std::move(nextState); };
 
@@ -168,15 +176,15 @@ namespace lso {
 
         public:
 
-            void run() const;
+            void run();
 
         public:
 
-            Client() = default;
+            Client() { Screen::open(); };
             Client(const Client &) = delete;
             Client(Client &&) = delete;
 
-            ~Client() = default;
+            ~Client() { Screen::close(); };
 
             Client &operator = (const Client &) = delete;
             Client &operator = (Client &&) = delete;

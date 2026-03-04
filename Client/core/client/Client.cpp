@@ -8,15 +8,29 @@ void lso::Client::LoginState::print() const {
         << "      (: BENVENUTO A CONNECT FOUR :)       " << std::endl
         << "===========================================" << std::endl
         << std::endl
-        << "Inserisci il tuo nome giocatore";
+        << "Inserisci il tuo nome giocatore" << std::endl;
 }
 
 void lso::Client::LoginState::handleUserInput(const std::string & input) const {
+    if (input.empty()) {
+        Screen::briefDisplay("Inserire un nome con almeno un carattere");
+        return;
+    }
 
+    if (input.length() >= NAME_LEN) {
+        Screen::briefDisplay("Inserire un nome con al massimo " + std::to_string(NAME_LEN - 1) + " caratteri");
+        return;
+    }
+
+    context.serverConnection -> sendMessage(
+        Message(REQ_CONNECT, input)
+    );
+
+    context.transitionTo((std::make_unique<MenuState>(context)));
 }
 
 void lso::Client::LoginState::handleNetworkEvents(const Message & message) const {
-
+    // ! BHO
 }
 
 // --------------------------------------------------------------------------------
@@ -28,21 +42,67 @@ void lso::Client::MenuState::print() const {
         << "2. " << MenuOption::LIST_GAMES << std::endl
         << "3. " << MenuOption::EXIT << std::endl
         << std::endl
-        << "Inserisci la tua scelta";
+        << "Inserisci la tua scelta" << std::endl;
 }
 
 void lso::Client::MenuState::handleUserInput(const std::string & input) const {
+    if (input.empty()) {
+        Screen::briefDisplay("Scelta vuota non supportata");
+        return;
+    }
+
+    if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
+        Screen::briefDisplay("Scelta numerica non supportata");
+        return;
+    }
+
+    const int option = std::stoi(input);
+
+    switch (static_cast<MenuOption>(option)) {
+        case MenuOption::CREATE_MATCH:
+            // * Invia richiesta REQ_CREATE_GAME
+            // * Gestisci richiesta
+
+            context.transitionTo(std::make_unique<LobbyState>(context));
+        break;
+
+        case MenuOption::LIST_GAMES:
+            // * Gestisci cosa succede se chiedo la lista di lobby
+
+            context.transitionTo(std::make_unique<GameListState>(context));
+        break;
+
+        case MenuOption::EXIT:
+            context.serverConnection -> sendMessage(
+                Message(REQ_DISCONNECT)
+            );
+
+            context.isRunning = false;
+            Screen::briefDisplay("Uscendo...");
+        break;
+
+        default:
+            Screen::briefDisplay("Scelta numerica non supportata");
+    }
 
 }
 
 void lso::Client::MenuState::handleNetworkEvents(const Message & message) const {
-
+    // ! BHO
 }
 
 // --------------------------------------------------------------------------------
 
 void lso::Client::LobbyState::print() const {
+    // ! Devono diventare attr del Lobby Model
 
+    std::cout
+        << "============ Dettagli Partita ============" << std::endl
+        << "ID Partita : " << 1 << std::endl
+        << "Proprietario : " << " <NomeProprietario> " << std::endl
+        << "Avversario : " << " < In attesa di un giocatore > " << std::endl
+        << std::endl
+        << "Scrivi 'esci' per tornare al Menu Principale." << std::endl;
 }
 
 void lso::Client::LobbyState::handleUserInput(const std::string & input) const {
@@ -70,7 +130,18 @@ void lso::Client::InGameState::handleNetworkEvents(const Message & message) cons
 // --------------------------------------------------------------------------------
 
 void lso::Client::GameListState::print() const {
+    std::cout 
+    << "============== Lista Partite ==============" << std::endl;
 
+    // For lobby in listaLobby stampa lobby;
+    // * 1) Mario VS ... (In Attesa / In Gioco / Appena Creata / Terminata)
+    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
+    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
+    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
+
+    std::cout
+        << "Digita 0 per tornare al Menu Principale." << std::endl
+        << "Inserisci il numero della lobby" << std::endl;
 }
 
 void lso::Client::GameListState::handleUserInput(const std::string & input) const {
@@ -83,77 +154,27 @@ void lso::Client::GameListState::handleNetworkEvents(const Message & message) co
 
 // --------------------------------------------------------------------------------
 
-void lso::Client::run() const {
+void lso::Client::setup() {
+    // * Thread per gestione eventi dal server
 
+    serverConnection = std::make_unique<TCPClient>();
+    state = std::make_unique<LoginState>(*this);
+    isRunning = true;
 }
 
-void lso::Client::LoginState::print() const {
-    std::cout << std::endl
-    << "=========================================" << std::endl 
-    << "     (: BENVENUTO A CONNECT FOUR :)      " << std::endl
-    << "=========================================" << std::endl
-    << "Inserisci il tuo nome giocatore: ";
+void lso::Client::run() {
+    setup();
+
+    std::string input;
+
+    while (isRunning) {
+        Screen::clear();
+
+        state -> print();
+        
+        std::cout << "> ";
+        std::cin >> input;
+
+        state -> handleUserInput(input);
+    };
 }
-
-void lso::Client::MenuState::print() const {
-    std::cout << std::endl
-    << "=====  MENU PRINCIPALE =====" << std::endl 
-    << "1. Crea partita " << std::endl
-    << "2. Visualizza lista partite " << std::endl
-    << "3. Esci dal gioco " << std::endl
-    << "Scelta: ";
-}
-
-void lso::Client::LobbyState::print() const {
-   /* 
-        No stampe statiche? 
-        Spostiamo tutto su onEnter che stampa e fa le effettive richieste
-   */
-}
-
-void lso::Client::LobbyState::onEnter() const {
-    std::cout << "\n[REQUEST] Invio della richiesta di creazione partita... \n";
-
-    // Invio effettivamente la richiesta
-
-    std::cout << "\n[REQUEST] Richiesta inviata, in attesa della richiesta di creazione partita... \n";
-
-    // Attendo la risposta dal server che la partita è stata effettivamente creata
-
-    std::cout << "[RESPONSE] Risposta ricevuta correttamente !\n";
-
-    // Una volta ricevuta la risposta come la elaboro?
-
-    // Creo un oggetto di tipo game e una funzione di supporto che mi processa i dati?
-
-    // Stampiamo i dettagli del match creato
-    std::cout << 
-    std::endl << "=== DETTAGLI PARTITA CREATA ===" << std::endl
-    << "ID Partita : " << 1 << std::endl
-    << "Proprietario : " << " <NomeProprietario> " << std::endl
-    << "Avversario : " << " < In attesa di un giocatore > " << std::endl
-    << "Stato : " << " < GAME_WAITING > " << std::endl
-    <<" === FINE DETTAGLI PARTITA === " << std::endl;
-
-    std::cout << "Scrivi 'esci' per tornare al Menu Principale." << std::endl;
-
-}
-
-void lso::Client::GameListState::print() const {
-    std::cout << 
-    std::endl << "=== LISTA PARTITE GLOBALI ===" << std::endl
-    << "ID | PROPRIETARIO | AVVERSARIO | STATO " << std::endl
-    << " 1 | Mario        | ...        | in attesa... " << std::endl
-    << " 2 | Luigi        | Lucia      | in gioco " << std::endl
-    << " 3 | Paolo        | ...        | in attesa... " << std::endl
-    <<" === FINE LISTA PARTITE GLOBALI === " << std::endl;
-
-    std::cout << 
-    std::endl << "=== LISTA NOTIFICA NUOVO MATCH (stampa da omettere) ===" << std::endl
-    << " *NUOVA PARTITA CREATA* Sfida Luigi, digita 4 per unirti alla partita " << std::endl
-    << " *NUOVA PARTITA CREATA* Sfida Simona, digita 5 per unirti alla partita " << std::endl;
-
-    std::cout << "Scrivi 'esci' per tornare al Menu Principale." << std::endl;
-
-}
-
