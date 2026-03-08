@@ -16,7 +16,7 @@ SRC = main.c \
 	model/partita/partita.c \
 	model/server/server.c \
 	network/tcp/broadcast/TCPBroadcast.c \
-	network/tcp/sever/TCPServer.c
+	network/tcp/server/TCPServer.c
 
 OBJ = $(SRC:.c=.o)
 

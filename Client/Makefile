@@ -1,10 +1,12 @@
 CCompiler = g++
-CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c++23 -flto -fstack-protector-strong
-CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong
+CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c++23 -flto -fstack-protector-strong -lncurses
+CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong -lncurses
+CTestFlags = -Wconversion -Wall -Wextra -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong -lncurses
 
 SRC = main.cpp \
 	core/board/Board.cpp \
 	core/client/Client.cpp \
+	model/message/Message.cpp \
 	network/tcp/TCPClient.cpp
 
 OBJ = $(SRC:.cpp=.o)
@@ -15,6 +17,10 @@ main: $(OBJ)
 debug: CFlags := $(CDebugFlags)
 debug: $(OBJ)
 	$(CCompiler) $(CDebugFlags) $^ -o $@
+
+test: CFlags := $(CTestFlags)
+test: $(OBJ)
+	$(CCompiler) $(CTestFlags) $^ -o $@
 
 clean:
 	clear; rm -rfv $(OBJ); rm -fv main debug
