@@ -31,12 +31,12 @@ void rimuoviProprietario(Partita * partita) {
 }
 
 bool controllaValiditaMossa(Partita * partita, unsigned int colonna) {
-    return colonna < BOARD_COLUMNS && partita -> board[0][colonna] == 0;
+    return colonna < BOARD_COLUMNS && partita -> board[0][colonna] == CELLA_VUOTA;
 }
 
 void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo) {    
     for (unsigned int riga = 0; riga < BOARD_ROWS; riga++) {
-        if (partita -> board[riga][colonna] == 0) {
+        if (partita -> board[riga][colonna] == CELLA_VUOTA) {
             partita -> board[riga][colonna] = simbolo;
             break;
         }
@@ -44,11 +44,11 @@ void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo)
 }
 
 void aggiungiMossaProprietario(Partita *partita, unsigned int colonna) {
-    aggiungiMossa(partita, colonna, SIMBOLO_PROPRIETARIO);
+    aggiungiMossa(partita, colonna, CELLA_PROPRIETARIO);
 }
 
 void aggiungiMossaAvversario(Partita *partita, unsigned int colonna) {
-    aggiungiMossa(partita, colonna, SIMBOLO_AVVERSARIO);
+    aggiungiMossa(partita, colonna, CELLA_AVVERSARIO);
 }
 
 EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo) {
@@ -152,7 +152,7 @@ bool verificaPareggio(Partita * partita) {
     unsigned int primaRiga = 0;
     
     for (unsigned int colonna = 0; colonna < BOARD_COLUMNS; colonna++) {
-        if (partita -> board[primaRiga][colonna] == 0) {
+        if (partita -> board[primaRiga][colonna] == CELLA_VUOTA) {
             return false;
         }
     }
@@ -163,10 +163,10 @@ bool verificaPareggio(Partita * partita) {
 Game serializzaPartita(Partita * partita) {
     Game game;
 
-    game.id = htonl(partita -> id);
+    game.id = partita -> id;
     strcpy(game.proprietario, partita -> proprietario -> nome);
     strcpy(game.avversario, partita -> avversario -> nome);
-    game.stato = htonl(partita -> stato);
+    game.stato = partita -> stato;
 
     return game;
 }

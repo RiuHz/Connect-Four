@@ -45,7 +45,7 @@ Messaggio eventoPartitaTerminata(unsigned int id) {
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
-    buffer[offset++] = htonl(id);
+    buffer[offset++] = id;
 
     return creaMessaggio(EVT_GAME_CREATED, dimensione, buffer);
 }

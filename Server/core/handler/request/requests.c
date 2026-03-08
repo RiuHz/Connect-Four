@@ -5,25 +5,25 @@ void richiestaConnessione(Client * client, uint32_t * payload) {
 }
 
 unsigned int richiestaPartecipaPartita(uint32_t * payload) {
-    unsigned int idPartita = ntohl(* payload);
+    unsigned int idPartita = * payload;
 
     return idPartita;
 }
 
 unsigned int richiestaRispostaAccessoPartita(uint32_t * payload) {
-    unsigned int risposta = ntohl(* payload);
+    unsigned int risposta = * payload;
 
     return risposta;
 }
 
 unsigned int richiestaMossa(uint32_t * payload) {
-    unsigned int colonna = ntohl(* payload);
+    unsigned int colonna = * payload;
 
     return colonna;
 }
 
 unsigned int richiestaRivincita(uint32_t * payload) {
-    unsigned int rivincita = ntohl(* payload);
+    unsigned int rivincita = * payload;
 
     return rivincita;
 }

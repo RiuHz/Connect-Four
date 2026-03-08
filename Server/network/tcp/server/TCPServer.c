@@ -62,6 +62,9 @@ Messaggio attendiMessaggio(Client * client) {
     if (header.length > 0) {
         buffer = malloc(header.length);
         leggiFlussoDati(client, buffer, header.length);
+
+        for (uint32_t i = 0; i < header.length / sizeof(uint32_t); i++)
+            buffer[i] = ntohl(buffer[i]);
     }
 
     return creaMessaggio(header.type, header.length, buffer);
@@ -89,13 +92,21 @@ void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
 }
 
 void inviaMessaggio(Client * client, Messaggio messaggio) {
-    uint32_t tipo = messaggio.header.type;
-    uint32_t dimensione = messaggio.header.length;
-    uint32_t * payload = messaggio.payload;
-
+    uint32_t tipo = htonl(messaggio.header.type);
+    uint32_t dimensione = htonl(messaggio.header.length);
+    
     inviaFlussoDati(client, & tipo, sizeof(uint32_t));
     inviaFlussoDati(client, & dimensione, sizeof(uint32_t));
-    inviaFlussoDati(client, payload, dimensione);
+    
+    if (dimensione == 0)
+        return;
+    
+    uint32_t * payload = messaggio.payload;
+
+    for (uint32_t i = 0; i < dimensione; i++)
+        payload[i] = htonl(payload[i]);
+    
+    inviaFlussoDati(client, payload, messaggio.header.length);
 }
 
 void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {

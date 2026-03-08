@@ -9,9 +9,6 @@
 
 #include "../../network/shared/protocol.h"
 
-#define SIMBOLO_PROPRIETARIO 1
-#define SIMBOLO_AVVERSARIO 2
-
 typedef enum {
     VITTORIA = 1,
     SCONFITTA,

@@ -25,7 +25,7 @@ Messaggio rispostaAccessoPartita(unsigned int risposta) {
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
-    buffer[offset++] = htonl(risposta);
+    buffer[offset++] = risposta;
 
     return creaMessaggio(RES_JOIN_GAME, dimensione, buffer);
 }
@@ -57,7 +57,7 @@ Messaggio rispostaRivincita(unsigned int risposta) {
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
-    buffer[offset++] = htonl(risposta);
+    buffer[offset++] = risposta;
 
     return creaMessaggio(RES_REMATCH, dimensione, buffer);
 }

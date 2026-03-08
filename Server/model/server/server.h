@@ -1,6 +1,8 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include <dispatch/dispatch.h>
+
 #include "../coda/coda.h"
 #include "../lista/lista.h"
 
