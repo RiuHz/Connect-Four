@@ -8,6 +8,10 @@
 #define BOARD_ROWS 6
 #define BOARD_COLUMNS 7
 
+#define CELLA_VUOTA 0
+#define CELLA_PROPRIETARIO 1
+#define CELLA_AVVERSARIO 2
+
 #define SERVER_ADDRESS "127.0.0.1"
 #define SERVER_PORT 1926
 
