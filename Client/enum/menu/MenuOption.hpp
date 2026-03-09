@@ -19,6 +19,10 @@ namespace lso {
         {MenuOption::EXIT, "Esci"}
     };
 
+    inline std::ostream & operator << (std::ostream & os, MenuOption opzione) {
+        return os << toString.at(opzione);
+    };
+
 }
 
 #endif
