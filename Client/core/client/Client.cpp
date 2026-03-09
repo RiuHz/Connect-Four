@@ -17,27 +17,29 @@ lso::Client::LoginState::LoginState(lso::Client & context) : State(context) {
 }
 
 void lso::Client::LoginState::print() const {
-    outputWindow -> print(
-        "===========================================" "\n"
-        "      (: BENVENUTO A CONNECT FOUR :)       " "\n"
-        "===========================================" "\n"
-    );
+    std::ostringstream stream;
+
+    stream
+        << "===========================================" << std::endl
+        << "      (: BENVENUTO A CONNECT FOUR :)       " << std::endl
+        << "===========================================" << std::endl;
+
+    outputWindow -> print(stream.str());
 }
 
 void lso::Client::LoginState::handleUserInput() const {
-    const std::string input = inputWindow -> getInput();
+    std::string name = inputWindow -> getInput();
 
-    if (input.empty()) {
+    if (name.empty()) {
         inputWindow -> addTitle("Inserire un nome con almeno un carattere");
         return;
     }
 
-    if (input.length() >= NAME_LEN) {
+    if (name.length() >= NAME_LEN) {
         inputWindow -> addTitle("Inserire un nome con al massimo " + std::to_string(NAME_LEN - 1) + " caratteri");
         return;
     }
 
-    std::string name(input);
     name.resize(NAME_LEN);
 
     context.serverConnection -> sendMessage(
@@ -58,12 +60,15 @@ lso::Client::MenuState::MenuState(Client & context) : State(context) {
 }
 
 void lso::Client::MenuState::print() const {
-    outputWindow -> print(
-        std::string("MENU PRINCIPALE") + "\n" +
-        "1. " + toString.at(MenuOption::CREATE_MATCH) + "\n" +
-        "2. " + toString.at(MenuOption::LIST_GAMES) + "\n" +
-        "3. " + toString.at(MenuOption::EXIT) + "\n"
-    );
+    std::ostringstream stream;
+
+    stream
+        << "MENU PRINCIPALE" << std::endl
+        << "1. " << MenuOption::CREATE_MATCH << std::endl
+        << "2. " << MenuOption::LIST_GAMES << std::endl
+        << "3. " << MenuOption::EXIT << std::endl;
+    
+    outputWindow -> print(stream.str());
 }
 
 void lso::Client::MenuState::handleUserInput() const {
@@ -101,7 +106,6 @@ void lso::Client::MenuState::handleUserInput() const {
             );
 
             context.isRunning = false;
-            inputWindow -> addTitle("Uscendo...");
         break;
     }
 
@@ -118,15 +122,17 @@ lso::Client::LobbyState::LobbyState(Client & context) : State(context) {
 }
 
 void lso::Client::LobbyState::print() const {
-    outputWindow -> print(
-        std::string("============ Dettagli Partita ============") + "\n" +
-        "ID Partita: " + "Num lobby" + "\n" +
-        "Proprietario: " + "Nome Proprietario" + "\n" +
-        "Avversario: " + "Nome Avversario" + "\n" +
-        "\n" +
-        "Digita 'esci' per tornare al Menu Principale"
-    );
+    std::ostringstream stream;
 
+    stream
+        << "============ Dettagli Partita ============" << std::endl
+        << "ID Partita: " <<  "Num lobby" << std::endl
+        << "Proprietario: " <<  "Nome Proprietario" << std::endl
+        << "Avversario: " <<  "Nome Avversario" << std::endl
+        << std::endl
+        << "Digita 'esci' per tornare al Menu Principale";
+    
+    outputWindow -> print(stream.str());
 }
 
 void lso::Client::LobbyState::handleUserInput() const {
@@ -163,12 +169,15 @@ lso::Client::GameListState::GameListState(Client & context) : State(context) {
 }
 
 void lso::Client::GameListState::print() const {
-    outputWindow -> print(
-        std::string("============== Lista Partite ==============") + "\n" +
-        "1) Proprietario VS Avversario (In Attesa / In Gioco / Appena Creata / Terminata)" + "\n" +
-        "\n" +
-        "Digita '0' per tornare la Menu Principale"
-    );
+    std::ostringstream stream;
+
+    stream
+        << "============== Lista Partite ==============" << std::endl
+        << "1) Proprietario VS Avversario (In Attesa / In Gioco / Appena Creata / Terminata)" << std::endl
+        << std::endl
+        << "Digita '0' per tornare al Menu Principale";
+    
+    outputWindow -> print(stream.str());
 }
 
 void lso::Client::GameListState::handleUserInput() const {
@@ -191,8 +200,6 @@ void lso::Client::setup() {
 
 void lso::Client::run() {
     setup();
-
-    std::string input;
 
     while (isRunning) {
         state -> print();
