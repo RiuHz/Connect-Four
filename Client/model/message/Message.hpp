@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include "../shared/protocol.h"
+#include "../../network/shared/protocol.h"
 
 namespace lso {
 
@@ -14,18 +14,17 @@ namespace lso {
             MessageType type;
             std::vector<uint32_t> payload;
 
-            
-            protected:
+        protected:
             
             // ...
             
-            public:
+        public:
             
             inline const MessageType & getType() const noexcept { return type; };
-            inline uint32_t getLength() const noexcept { return payload.size(); };
+            inline size_t getLength() const noexcept { return payload.size() * sizeof(uint32_t); };
             inline const std::vector<uint32_t> & getPayload() const noexcept { return payload; };
             
-            public:
+        public:
             
             Message(const MessageType type) : type(type), payload(std::vector<uint32_t>()) {};
             Message(const MessageType type, const std::vector<uint32_t> & payload) : type(type), payload(payload) {};
