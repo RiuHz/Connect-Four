@@ -2,7 +2,7 @@
 #define TEXT_COLORS_HPP
 
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <string>
 
 namespace lso {
@@ -15,7 +15,7 @@ namespace lso {
         YELLOW
     };
 
-    const std::unordered_map<TextColor, const std::string> textColors = {
+    const std::map<TextColor, const std::string> colorToString = {
         {TextColor::WHITE, "\033[37m"},
         {TextColor::RED, "\033[31m"},
         {TextColor::BLUE, "\033[34m"},
@@ -24,7 +24,7 @@ namespace lso {
     };
 
     inline std::ostream & operator << (std::ostream & os, TextColor color) {
-        return os << textColors.at(color);
+        return os << colorToString.at(color);
     };
 
 }

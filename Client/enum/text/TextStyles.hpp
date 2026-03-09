@@ -2,7 +2,7 @@
 #define TEXT_STYLE_HPP
 
 #include <iostream>
-#include <unordered_map>
+#include <map>
 #include <string>
 
 namespace lso {
@@ -13,14 +13,14 @@ namespace lso {
         BOLD
     };
 
-    const std::unordered_map<TextStyle, const std::string> textStyles = {
+    const std::map<TextStyle, const std::string> styleToString = {
         {TextStyle::RESET, "\033[0m"},
         {TextStyle::ITALIC, "\033[3m"},
         {TextStyle::BOLD, "\033[1m"}
     };
 
     inline std::ostream & operator << (std::ostream & os, TextStyle style) {
-        return os << textStyles.at(style);
+        return os << styleToString.at(style);
     };
 
 }
