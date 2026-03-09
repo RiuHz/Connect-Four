@@ -1,58 +1,81 @@
 #include "Client.hpp"
 
-// --------------------------------------------------------------------------------
+lso::Client::State::State(lso::Client & client) : context(client) {
+    int maxHeight;
+    int maxWidth;
 
-void lso::Client::LoginState::print() const {
-    std::cout
-        << "===========================================" << std::endl
-        << "      (: BENVENUTO A CONNECT FOUR :)       " << std::endl
-        << "===========================================" << std::endl
-        << std::endl
-        << "Inserisci il tuo nome giocatore" << std::endl;
+    getmaxyx(stdscr, maxHeight, maxWidth);
+
+    outputWindow = std::make_unique<OutputWindow>(maxHeight - 3, maxWidth, 0, 0);
+    inputWindow = std::make_unique<InputWindow>(3, maxWidth, maxHeight - 3, 0);
 }
 
-void lso::Client::LoginState::handleUserInput(const std::string & input) const {
+// --------------------------------------------------------------------------------
+
+lso::Client::LoginState::LoginState(lso::Client & context) : State(context) {
+    inputWindow -> addTitle("Inserisci il tuo nome");    
+}
+
+void lso::Client::LoginState::print() const {
+    outputWindow -> print(
+        "===========================================" "\n"
+        "      (: BENVENUTO A CONNECT FOUR :)       " "\n"
+        "===========================================" "\n"
+    );
+}
+
+void lso::Client::LoginState::handleUserInput() const {
+    const std::string input = inputWindow -> getInput();
+
     if (input.empty()) {
-        Screen::briefDisplay("Inserire un nome con almeno un carattere");
+        inputWindow -> addTitle("Inserire un nome con almeno un carattere");
         return;
     }
 
     if (input.length() >= NAME_LEN) {
-        Screen::briefDisplay("Inserire un nome con al massimo " + std::to_string(NAME_LEN - 1) + " caratteri");
+        inputWindow -> addTitle("Inserire un nome con al massimo " + std::to_string(NAME_LEN - 1) + " caratteri");
         return;
     }
 
+    std::string name(input);
+    name.resize(NAME_LEN);
+
     context.serverConnection -> sendMessage(
-        Message(REQ_CONNECT, input)
+        Message(REQ_CONNECT, name)
     );
 
-    context.transitionTo((std::make_unique<MenuState>(context)));
+    context.transitionTo(std::make_unique<MenuState>(context));
 }
 
 void lso::Client::LoginState::handleNetworkEvents(const Message & message) const {
-    // ! BHO
+    // ! Vuoto
 }
 
 // --------------------------------------------------------------------------------
 
-void lso::Client::MenuState::print() const {
-    std::cout
-        << "=== MENU PRINCIPALE ===" << std::endl
-        << "1. " << MenuOption::CREATE_MATCH << std::endl
-        << "2. " << MenuOption::LIST_GAMES << std::endl
-        << "3. " << MenuOption::EXIT << std::endl
-        << std::endl
-        << "Inserisci la tua scelta" << std::endl;
+lso::Client::MenuState::MenuState(Client & context) : State(context) {
+    inputWindow -> addTitle("Inserisci la tua scelta");
 }
 
-void lso::Client::MenuState::handleUserInput(const std::string & input) const {
+void lso::Client::MenuState::print() const {
+    outputWindow -> print(
+        std::string("MENU PRINCIPALE") + "\n" +
+        "1. " + toString.at(MenuOption::CREATE_MATCH) + "\n" +
+        "2. " + toString.at(MenuOption::LIST_GAMES) + "\n" +
+        "3. " + toString.at(MenuOption::EXIT) + "\n"
+    );
+}
+
+void lso::Client::MenuState::handleUserInput() const {
+    const std::string input = inputWindow -> getInput();
+
     if (input.empty()) {
-        Screen::briefDisplay("Scelta vuota non supportata");
+        inputWindow -> addTitle("Scelta vuota non supportata");
         return;
     }
 
     if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
-        Screen::briefDisplay("Scelta numerica non supportata");
+        inputWindow -> addTitle("Scelta non numerica non supportata");
         return;
     }
 
@@ -61,7 +84,7 @@ void lso::Client::MenuState::handleUserInput(const std::string & input) const {
     switch (static_cast<MenuOption>(option)) {
         case MenuOption::CREATE_MATCH:
             // * Invia richiesta REQ_CREATE_GAME
-            // * Gestisci richiesta
+            // * Gestisci risposta
 
             context.transitionTo(std::make_unique<LobbyState>(context));
         break;
@@ -78,78 +101,82 @@ void lso::Client::MenuState::handleUserInput(const std::string & input) const {
             );
 
             context.isRunning = false;
-            Screen::briefDisplay("Uscendo...");
+            inputWindow -> addTitle("Uscendo...");
         break;
-
-        default:
-            Screen::briefDisplay("Scelta numerica non supportata");
     }
 
 }
 
 void lso::Client::MenuState::handleNetworkEvents(const Message & message) const {
-    // ! BHO
+    // ! Vuoto
 }
 
 // --------------------------------------------------------------------------------
 
-void lso::Client::LobbyState::print() const {
-    // ! Devono diventare attr del Lobby Model
-
-    std::cout
-        << "============ Dettagli Partita ============" << std::endl
-        << "ID Partita : " << 1 << std::endl
-        << "Proprietario : " << " <NomeProprietario> " << std::endl
-        << "Avversario : " << " < In attesa di un giocatore > " << std::endl
-        << std::endl
-        << "Scrivi 'esci' per tornare al Menu Principale." << std::endl;
+lso::Client::LobbyState::LobbyState(Client & context) : State(context) {
+    inputWindow -> addTitle("Inserisci la tua scelta");
 }
 
-void lso::Client::LobbyState::handleUserInput(const std::string & input) const {
+void lso::Client::LobbyState::print() const {
+    outputWindow -> print(
+        std::string("============ Dettagli Partita ============") + "\n" +
+        "ID Partita: " + "Num lobby" + "\n" +
+        "Proprietario: " + "Nome Proprietario" + "\n" +
+        "Avversario: " + "Nome Avversario" + "\n" +
+        "\n" +
+        "Digita 'esci' per tornare al Menu Principale"
+    );
 
+}
+
+void lso::Client::LobbyState::handleUserInput() const {
+    // TODO
 }
 
 void lso::Client::LobbyState::handleNetworkEvents(const Message & message) const {
-
+    // TODO
 }
 
 // --------------------------------------------------------------------------------
 
+lso::Client::InGameState::InGameState(Client & context) : State(context) {
+    inputWindow -> addTitle("Inserisci la colonna");
+}
+
 void lso::Client::InGameState::print() const {
+    // TODO
     // * Quindi andra il print della board, perché siamo in partita
 }
 
-void lso::Client::InGameState::handleUserInput(const std::string & input) const {
-
+void lso::Client::InGameState::handleUserInput() const {
+    // TODO
 }
 
 void lso::Client::InGameState::handleNetworkEvents(const Message & message) const {
-
+    // TODO
 }
 
 // --------------------------------------------------------------------------------
 
-void lso::Client::GameListState::print() const {
-    std::cout 
-    << "============== Lista Partite ==============" << std::endl;
-
-    // For lobby in listaLobby stampa lobby;
-    // * 1) Mario VS ... (In Attesa / In Gioco / Appena Creata / Terminata)
-    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
-    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
-    // * 1) Mario VS ... In Attesa / In Gioco / Appena Creata / Terminata
-
-    std::cout
-        << "Digita 0 per tornare al Menu Principale." << std::endl
-        << "Inserisci il numero della lobby" << std::endl;
+lso::Client::GameListState::GameListState(Client & context) : State(context) {
+    inputWindow -> addTitle("Inserisci il numero della lobby");
 }
 
-void lso::Client::GameListState::handleUserInput(const std::string & input) const {
+void lso::Client::GameListState::print() const {
+    outputWindow -> print(
+        std::string("============== Lista Partite ==============") + "\n" +
+        "1) Proprietario VS Avversario (In Attesa / In Gioco / Appena Creata / Terminata)" + "\n" +
+        "\n" +
+        "Digita '0' per tornare la Menu Principale"
+    );
+}
 
+void lso::Client::GameListState::handleUserInput() const {
+    // TODO
 }
 
 void lso::Client::GameListState::handleNetworkEvents(const Message & message) const {
-
+    // TODO
 }
 
 // --------------------------------------------------------------------------------
@@ -168,13 +195,7 @@ void lso::Client::run() {
     std::string input;
 
     while (isRunning) {
-        Screen::clear();
-
         state -> print();
-        
-        std::cout << "> ";
-        std::cin >> input;
-
-        state -> handleUserInput(input);
+        state -> handleUserInput();
     };
 }

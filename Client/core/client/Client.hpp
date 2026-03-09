@@ -3,10 +3,12 @@
 
 #include <iostream>
 #include <memory>
-#include <iostream>
+#include <algorithm>
 
-#include "../board/Board.hpp"
-#include "../screen/Screen.hpp"
+#include <ncurses.h>
+
+#include "../board/GameBoard.hpp"
+#include "../window/Window.hpp"
 
 #include "../../enum/menu/MenuOption.hpp"
 
@@ -27,19 +29,22 @@ namespace lso {
                 
                 protected:
                 
-                    Client & context; 
+                    Client & context;
+                    
+                    std::unique_ptr<OutputWindow> outputWindow;
+                    std::unique_ptr<InputWindow> inputWindow;
 
                 public:
 
                     virtual void print() const = 0;
 
-                    virtual void handleUserInput(const std::string & input) const = 0;
+                    virtual void handleUserInput() const = 0;
 
                     virtual void handleNetworkEvents(const Message & message) const = 0;
 
                 public:
 
-                    State(Client & client) : context(client) {};
+                    State(Client & client);
                     State(const State &) = delete;
                     State(State &&) = delete;
 
@@ -64,11 +69,11 @@ namespace lso {
 
                 public:
 
-                    using State::State;
+                    LoginState(Client & client);
 
-                    void print() const override;
+                    inline void print() const override;
 
-                    void handleUserInput(const std::string & input) const override;
+                    void handleUserInput() const override;
 
                     void handleNetworkEvents(const Message & message) const override;
 
@@ -85,11 +90,11 @@ namespace lso {
 
                 public:
 
-                    using State::State;
+                    MenuState(Client & context);
 
                     void print() const override;
 
-                    void handleUserInput(const std::string & input) const override;
+                    void handleUserInput() const override;
 
                     void handleNetworkEvents(const Message & message) const override;
             };
@@ -106,19 +111,19 @@ namespace lso {
 
                 public:
 
-                    using State::State;
+                    LobbyState(Client & context);
 
                     void print() const override;
 
-                    void handleUserInput(const std::string & input) const override;
+                    void handleUserInput() const override;
 
                     void handleNetworkEvents(const Message & message) const override;
             };
 
             class InGameState: public State {
                 private:
-                
-                    const Board & board;
+                    // TODO
+                    // *const Board & board;
 
                 protected:
 
@@ -126,11 +131,11 @@ namespace lso {
 
                 public:
 
-                    using State::State;
+                    InGameState(Client & context);
 
                     void print() const override;
 
-                    void handleUserInput(const std::string & input) const override;
+                    void handleUserInput() const override;
                     
                     void handleNetworkEvents(const Message & message) const override;
             };
@@ -147,11 +152,11 @@ namespace lso {
 
                 public:
 
-                    using State::State;
+                    GameListState(Client & context);
 
                     void print() const override;
 
-                    void handleUserInput(const std::string & input) const override;
+                    void handleUserInput() const override;
 
                     void handleNetworkEvents(const Message & message) const override;
             };
@@ -179,11 +184,11 @@ namespace lso {
 
         public:
 
-            Client() { Screen::open(); };
+            Client() { initscr(); };
             Client(const Client &) = delete;
             Client(Client &&) = delete;
 
-            ~Client() { Screen::close(); };
+            ~Client() { endwin(); };
 
             Client &operator = (const Client &) = delete;
             Client &operator = (Client &&) = delete;
