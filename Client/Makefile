@@ -4,8 +4,9 @@ CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-po
 CTestFlags = -Wconversion -Wall -Wextra -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong -lncurses
 
 SRC = main.cpp \
-	core/board/Board.cpp \
+	core/board/GameBoard.cpp \
 	core/client/Client.cpp \
+	core/window/Window.cpp \
 	model/message/Message.cpp \
 	network/tcp/TCPClient.cpp
 
