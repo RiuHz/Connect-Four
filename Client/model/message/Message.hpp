@@ -25,6 +25,8 @@ namespace lso {
             inline const std::vector<uint32_t> & getPayload() const noexcept { return payload; };
             
         public:
+
+            Message() {};
             
             Message(const MessageType type) : type(type), payload(std::vector<uint32_t>()) {};
             Message(const MessageType type, const std::vector<uint32_t> & payload) : type(type), payload(payload) {};
@@ -37,8 +39,8 @@ namespace lso {
 
             ~Message() = default;
 
-            Message &operator = (const Message &) = delete;
-            Message &operator = (Message &&) noexcept = delete;
+            Message & operator = (const Message &) = default;
+            Message & operator = (Message &&) noexcept = default;
 
             bool operator == (const Message & other) const noexcept { return type == other.type && payload == other.payload; };
             bool operator != (const Message & other) const noexcept { return ! (*this == other); };
