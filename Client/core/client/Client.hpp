@@ -4,15 +4,19 @@
 #include <iostream>
 #include <memory>
 #include <algorithm>
+#include <mutex>
 #include <thread>
+#include <atomic>
 
 #include <ncurses.h>
 
 #include "../board/GameBoard.hpp"
+#include "../queue/Queue.hpp"
 #include "../window/Window.hpp"
 
 #include "../../enum/menu/MenuOption.hpp"
 
+#include "../../model/lobby/Lobby.hpp"
 #include "../../model/message/Message.hpp"
 
 #include "../../network/tcp/TCPClient.hpp"
@@ -41,7 +45,7 @@ namespace lso {
 
                     virtual void handleUserInput() const = 0;
 
-                    virtual void handleNetworkEvents(const Message & message) const = 0;
+                    virtual void handleServerEvents(const Message & message);
 
                 public:
 
@@ -76,8 +80,6 @@ namespace lso {
 
                     void handleUserInput() const override;
 
-                    void handleNetworkEvents(const Message & message) const override;
-
             };
 
             class MenuState: public State {
@@ -96,15 +98,13 @@ namespace lso {
                     void print() const override;
 
                     void handleUserInput() const override;
-
-                    void handleNetworkEvents(const Message & message) const override;
+                
             };
 
             class LobbyState: public State {
                 private:
 
-                    // ...
-                    // Lobby
+                    Lobby lobby; // TODO va fatto il model
 
                 protected:
 
@@ -118,13 +118,13 @@ namespace lso {
 
                     void handleUserInput() const override;
 
-                    void handleNetworkEvents(const Message & message) const override;
+                    void handleServerEvents(const Message & message) override;
             };
 
             class InGameState: public State {
                 private:
-                    // TODO
-                    // *const Board & board;
+                    
+                    GameBoard board; // TODO va gestita questa
 
                 protected:
 
@@ -138,13 +138,14 @@ namespace lso {
 
                     void handleUserInput() const override;
                     
-                    void handleNetworkEvents(const Message & message) const override;
+                    void handleServerEvents(const Message & message) override;
             };
 
             class GameListState: public State {
                 private:
 
-                    // ...
+                    // TODO
+                    // ? Vettore
                     // Lobby List
 
                 protected:
@@ -159,7 +160,7 @@ namespace lso {
 
                     void handleUserInput() const override;
 
-                    void handleNetworkEvents(const Message & message) const override;
+                    void handleServerEvents(const Message & message) override;
             };
 
         private:
@@ -167,13 +168,32 @@ namespace lso {
             std::unique_ptr<State> state;
             std::unique_ptr<TCPClient> serverConnection;
 
-            bool isRunning;
+            std::atomic<bool> isRunning;
+
+            std::thread senderThread;
+            std::thread eventHandlerThread;
+            std::thread receiverThread;
+
+            Queue<Message> sendQueue;
+            Queue<Message> receiveQueue;
+            Queue<Message> eventQueue;
+
+            std::mutex stateTransition;
 
         private:
 
-            void setup();
+            void startThreads();
 
-            void transitionTo(std::unique_ptr<State> nextState) { state = std::move(nextState); };
+            void handleEventLoop();
+            void sendLoop();
+            void receiveLoop();
+            
+            void transitionTo(std::unique_ptr<State>);
+
+            inline void send(const Message & message) { sendQueue.Enqueue(message); };
+            bool receive(Message & message) { return receiveQueue.Dequeue(message); };
+
+            void stop();
 
         protected:
 
@@ -185,7 +205,7 @@ namespace lso {
 
         public:
 
-            Client() { initscr(); };
+            Client() : serverConnection(std::make_unique<TCPClient>()) { initscr(); };
             Client(const Client &) = delete;
             Client(Client &&) = delete;
 

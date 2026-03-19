@@ -10,6 +10,16 @@ lso::Client::State::State(lso::Client & client) : context(client) {
     inputWindow = std::make_unique<InputWindow>(3, maxWidth, maxHeight - 3, 0);
 }
 
+void lso::Client::State::handleServerEvents(const Message & message) {
+    // TODO Switch con tutti gli eventi in break
+
+    switch (message.getType()) {
+
+        default:
+            context.receiveQueue.Enqueue(message);
+    }
+}
+
 // --------------------------------------------------------------------------------
 
 lso::Client::LoginState::LoginState(lso::Client & context) : State(context) {
@@ -42,15 +52,9 @@ void lso::Client::LoginState::handleUserInput() const {
 
     name.resize(NAME_LEN);
 
-    context.serverConnection -> sendMessage(
-        Message(REQ_CONNECT, name)
-    );
+    context.send(Message(REQ_CONNECT, name));
 
     context.transitionTo(std::make_unique<MenuState>(context));
-}
-
-void lso::Client::LoginState::handleNetworkEvents(const Message & message) const {
-    // ! Vuoto
 }
 
 // --------------------------------------------------------------------------------
@@ -88,31 +92,30 @@ void lso::Client::MenuState::handleUserInput() const {
 
     switch (static_cast<MenuOption>(option)) {
         case MenuOption::CREATE_MATCH:
-            // * Invia richiesta REQ_CREATE_GAME
+            context.send(Message(REQ_CREATE_GAME));
+            // Message response = context.receive();
+
             // * Gestisci risposta
 
             context.transitionTo(std::make_unique<LobbyState>(context));
         break;
 
         case MenuOption::LIST_GAMES:
+            context.send(Message(REQ_GAMES_LIST));
+
             // * Gestisci cosa succede se chiedo la lista di lobby
 
             context.transitionTo(std::make_unique<GameListState>(context));
         break;
 
         case MenuOption::EXIT:
-            context.serverConnection -> sendMessage(
-                Message(REQ_DISCONNECT)
-            );
+            inputWindow -> addTitle("Disconnessione in corso...");
+            context.send(Message(REQ_DISCONNECT));
 
             context.isRunning = false;
         break;
     }
 
-}
-
-void lso::Client::MenuState::handleNetworkEvents(const Message & message) const {
-    // ! Vuoto
 }
 
 // --------------------------------------------------------------------------------
@@ -139,8 +142,14 @@ void lso::Client::LobbyState::handleUserInput() const {
     // TODO
 }
 
-void lso::Client::LobbyState::handleNetworkEvents(const Message & message) const {
+void lso::Client::LobbyState::handleServerEvents(const Message & message) {
     // TODO
+
+    switch (message.getType()) {
+
+        default:
+            State::handleServerEvents(message);
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -158,8 +167,14 @@ void lso::Client::InGameState::handleUserInput() const {
     // TODO
 }
 
-void lso::Client::InGameState::handleNetworkEvents(const Message & message) const {
+void lso::Client::InGameState::handleServerEvents(const Message & message) {
     // TODO
+
+    switch (message.getType()) {
+
+        default:
+            State::handleServerEvents(message);
+    }
 }
 
 // --------------------------------------------------------------------------------
@@ -184,25 +199,76 @@ void lso::Client::GameListState::handleUserInput() const {
     // TODO
 }
 
-void lso::Client::GameListState::handleNetworkEvents(const Message & message) const {
+void lso::Client::GameListState::handleServerEvents(const Message & message) {
     // TODO
+
+    switch (message.getType()) {
+
+        default:
+            State::handleServerEvents(message);
+    }
 }
 
 // --------------------------------------------------------------------------------
 
-void lso::Client::setup() {
-    // * Thread per gestione eventi dal server
+void lso::Client::handleEventLoop() {
+    Message event;
 
-    serverConnection = std::make_unique<TCPClient>();
-    state = std::make_unique<LoginState>(*this);
-    isRunning = true;
+    while (eventQueue.Dequeue(event)) {
+        std::lock_guard<std::mutex> lock(stateTransition);
+
+        state -> handleServerEvents(event);
+    }
+}
+
+void lso::Client::sendLoop() {
+    Message message;
+
+    while (sendQueue.Dequeue(message)) {
+        serverConnection -> sendMessage(message);
+    };
+}
+
+void lso::Client::receiveLoop() {
+    Message message;
+
+    while (serverConnection -> receiveMessage(message)) {
+        eventQueue.Enqueue(message);
+    }
+}
+
+void lso::Client::transitionTo(std::unique_ptr<State> nextState) {
+    std::lock_guard<std::mutex> lock(stateTransition);
+
+    state = std::move(nextState); 
+}
+
+void lso::Client::startThreads() {
+    senderThread = std::thread(& Client::sendLoop, this);
+    eventHandlerThread = std::thread(& Client::handleEventLoop, this);
+    receiverThread = std::thread(& Client::receiveLoop, this);
 }
 
 void lso::Client::run() {
-    setup();
+    isRunning = true;
+    state = std::make_unique<LoginState>(*this);
+
+    startThreads();
 
     while (isRunning) {
         state -> print();
         state -> handleUserInput();
     };
+
+    stop();
+}
+
+void lso::Client::stop() {
+    sendQueue.Shutdown();
+    receiveQueue.Shutdown();
+    eventQueue.Shutdown();
+
+    if (senderThread.joinable()) senderThread.join();
+    if (eventHandlerThread.joinable()) eventHandlerThread.join();
+    if (receiverThread.joinable()) receiverThread.join();
 }
