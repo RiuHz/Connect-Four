@@ -67,25 +67,34 @@ void lso::TCPClient::sendData(const std::vector<uint32_t> & payload, const size_
     }
 }
 
-const lso::Message lso::TCPClient::receiveMessage() const {
-    std::vector<uint32_t> header = receiveData(2);
+bool lso::TCPClient::receiveMessage(Message & message) const {
+    std::vector<uint32_t> header;
+    std::vector<uint32_t> payload;
+    
+    if (! receiveData(header, 2))
+        return false;
 
     MessageType type = static_cast<MessageType>(ntohl(header[0]));
     uint32_t length = ntohl(header[1]);
 
-    if (length == 0)
-        return lso::Message(type);
+    message = Message(type);
 
-    std::vector<uint32_t> payload = receiveData(length);
+    if (length == 0)
+        return true;
+
+    if (! receiveData(payload, length))
+        return false;
 
     for (uint32_t & word: payload)
         word = ntohl(word);
 
-    return lso::Message(type, payload);
+    message = Message(type, payload);
+    
+    return true; 
 }
 
-const std::vector<uint32_t> lso::TCPClient::receiveData(const uint32_t length) const {
-    std::vector<uint32_t> payload(length);
+bool lso::TCPClient::receiveData(std::vector<uint32_t> payload, const uint32_t length) const {
+    payload.resize(length);
 
     size_t readBytes = 0;
     size_t totalBytes = sizeof(uint32_t) * payload.size();
@@ -95,10 +104,10 @@ const std::vector<uint32_t> lso::TCPClient::receiveData(const uint32_t length) c
         ssize_t remainingBytes = recv(TCPSocket, buffer + readBytes, length - readBytes, 0);
 
         if (remainingBytes <= 0)
-            throw std::runtime_error("[Rete] Impossibile leggere dal buffer TCP.");
+            return false;
 
         readBytes += static_cast<size_t>(remainingBytes);
     }
 
-    return payload;
+    return true;
 }
