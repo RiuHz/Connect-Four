@@ -1,0 +1,17 @@
+services:
+  server: 
+    build:
+      context: ./Server
+      dockerfile: Dockerfile
+    container_name: Connect-Four-Server
+    ports:
+      - "1926:1926"
+
+  # client:
+  #     build:
+  #       context: ./Client
+  #       dockerfile: Dockerfile
+  #     container_name: Connect-Four-Client
+  #     depends_on:
+  #       - server
+  # comando : docker compose up -d
