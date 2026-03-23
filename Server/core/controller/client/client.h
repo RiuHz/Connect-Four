@@ -3,7 +3,11 @@
 
 #include <stdbool.h>
 
+#include "../../threading/partita/partita.h"
+
+#include "../../handler/event/events.h"
 #include "../../handler/request/requests.h"
+#include "../../handler/response/responses.h"
 
 #include "../../../model/client/client.h"
 #include "../../../model/server/server.h"
