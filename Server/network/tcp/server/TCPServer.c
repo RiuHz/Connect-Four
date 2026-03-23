@@ -92,6 +92,8 @@ void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
 }
 
 void inviaMessaggio(Client * client, Messaggio messaggio) {
+    pthread_mutex_lock(& client -> mutex);
+
     uint32_t tipo = htonl(messaggio.header.type);
     uint32_t dimensione = htonl(messaggio.header.length);
     
@@ -107,6 +109,8 @@ void inviaMessaggio(Client * client, Messaggio messaggio) {
         payload[i] = htonl(payload[i]);
 
     inviaFlussoDati(client, payload, messaggio.header.length);
+
+    pthread_mutex_unlock(& client -> mutex);
 }
 
 void inviaFlussoDati(Client * client, void * buffer, size_t dimensione) {
