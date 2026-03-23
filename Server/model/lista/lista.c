@@ -63,14 +63,13 @@ void rimuoviClient(ListaClient * lista, Client * client) {
 }
 
 void aggiungiPartita(ListaPartite * lista, Partita * partita) {
-        pthread_mutex_lock(& lista -> mutex);
+    pthread_mutex_lock(& lista -> mutex);
 
-        partita -> next = lista -> head;
-        lista -> head = partita;
-        lista -> contatore += 1;
+    partita -> next = lista -> head;
+    lista -> head = partita;
+    lista -> contatore += 1;
 
-        pthread_mutex_unlock(& lista -> mutex);
-
+    pthread_mutex_unlock(& lista -> mutex);
 }
 
 void stampaListaPartite(ListaPartite * lista) {
@@ -97,7 +96,7 @@ void stampaListaPartite(ListaPartite * lista) {
 
 void rimuoviPartita(ListaPartite * lista, Partita * partita) {
 
-    pthread_mutex_unlock(& lista -> mutex);
+    pthread_mutex_lock(& lista -> mutex);
 
     Partita * corrente = lista -> head;
     Partita * precedente = NULL;
@@ -121,5 +120,48 @@ void rimuoviPartita(ListaPartite * lista, Partita * partita) {
     }
 
     pthread_mutex_unlock(& lista -> mutex);
+}
 
+unsigned int creaIDPartita(ListaPartite * lista) {
+    unsigned int id;
+
+    pthread_mutex_lock(& lista -> mutex);
+
+    if (lista -> head == NULL)
+        id = 1;
+    else
+        id = lista -> head -> id + 1;
+        
+    pthread_mutex_unlock(& lista -> mutex);
+
+    return id;
+}
+
+Partita * cercaPartita(ListaPartite * lista, unsigned int id) {
+    Partita * ricerca = NULL;
+
+    pthread_mutex_lock(& lista -> mutex);
+
+    for (Partita * partita = lista -> head; partita != NULL; partita = partita -> next) {
+        if (partita -> id == id) {
+            ricerca = partita;
+            break;
+        }
+    }
+        
+    pthread_mutex_unlock(& lista -> mutex);
+
+    return ricerca;
+}
+
+bool avversarioPresente(Partita * partita) {
+    bool trovata = false;
+
+    pthread_mutex_lock(& partita -> mutex);
+
+    trovata = (partita -> avversario != NULL);
+
+    pthread_mutex_unlock(& partita -> mutex);
+
+    return trovata;
 }

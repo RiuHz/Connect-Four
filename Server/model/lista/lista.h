@@ -26,4 +26,8 @@ void aggiungiPartita(ListaPartite * lista, Partita * partita);
 void stampaListaPartite(ListaPartite * lista);
 void rimuoviPartita(ListaPartite * lista, Partita * partita);
 
+unsigned int creaIDPartita(ListaPartite * lista);
+Partita * cercaPartita(ListaPartite * lista, unsigned int id);
+bool avversarioPresente(Partita * partita);
+
 #endif
