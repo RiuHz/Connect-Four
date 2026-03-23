@@ -106,8 +106,8 @@ void inviaMessaggio(Client * client, Messaggio messaggio) {
         return;
     }
 
-    uint32_t * payload = (uint32_t *)malloc(sizeof(messaggio.header.length));
-    memcpy(&payload,messaggio.payload,messaggio.header.length);
+    uint32_t * payload = (uint32_t * ) malloc(sizeof(messaggio.header.length));
+    memcpy(payload, messaggio.payload, messaggio.header.length);
 
     for (uint32_t i = 0; i < messaggio.header.length / sizeof(uint32_t); i++)
         payload[i] = htonl(payload[i]);
