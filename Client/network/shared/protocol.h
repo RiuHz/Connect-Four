@@ -44,7 +44,7 @@ typedef enum {
     
     // ==== Ingresso Partita ====
     REQ_JOIN_GAME, // Payload = Unsigned int
-    EVT_JOIN_REQUEST,
+    EVT_JOIN_REQUEST, // Payload = char nome[NAME_LEN]
     REQ_JOIN_DECISION, // Payload = Boolean
     RES_JOIN_GAME, // Payload = Boolean
     
@@ -112,13 +112,11 @@ LOBBY:
 
 LISTA_PARTITE:
     RES_GAMES_LIST
-    EVT_GAMES_LIST_UPDATED
+    EVT_GAME_UPDATE
     EVT_GAME_CREATED
     EVT_GAME_ENDED
     REQ_JOIN_GAME
     RES_JOIN_GAME
-
-
 */
 
 #endif
