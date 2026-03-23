@@ -1,7 +1,7 @@
 #include "events.h"
 
 Messaggio eventoRichiestaPartecipazione(Client * client) {
-    unsigned int dimensione = NAME_LEN;
+    unsigned int dimensione = ((NAME_LEN + 3) / 4) * 4;
     uint32_t * buffer = malloc(dimensione);
 
     memcpy(buffer, client -> nome, NAME_LEN);
