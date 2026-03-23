@@ -16,4 +16,6 @@ Messaggio rispostaListaPartite(ListaPartite * lista);
 
 Messaggio rispostaRivincita(unsigned int risposta);
 
+Messaggio rispostaMossa(unsigned int risposta);
+
 #endif

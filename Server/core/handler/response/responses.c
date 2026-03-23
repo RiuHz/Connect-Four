@@ -65,3 +65,13 @@ Messaggio rispostaRivincita(unsigned int risposta) {
 
     return creaMessaggio(RES_REMATCH, dimensione, buffer);
 }
+
+Messaggio rispostaMossa(unsigned int risposta) {
+    unsigned int dimensione = sizeof(unsigned int);
+    uint32_t * buffer = malloc(dimensione);
+    unsigned int offset = 0;
+
+    buffer[offset++] = risposta;
+
+    return creaMessaggio(RES_MOVE, dimensione, buffer);
+}
