@@ -27,7 +27,6 @@ typedef struct Partita {
     Client * proprietario;
     Client * avversario;
     unsigned int board[BOARD_ROWS][BOARD_COLUMNS];
-    GameState stato;
 
     struct Partita * next;
 } Partita;
