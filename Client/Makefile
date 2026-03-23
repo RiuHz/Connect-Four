@@ -8,6 +8,7 @@ SRC = main.cpp \
 	core/client/Client.cpp \
 	core/window/Window.cpp \
 	model/message/Message.cpp \
+	network/strategy/Strategy.cpp \
 	network/tcp/TCPClient.cpp
 
 OBJ = $(SRC:.cpp=.o)

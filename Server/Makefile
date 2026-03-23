@@ -4,11 +4,13 @@ CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-po
 
 SRC = main.c \
 	core/controller/client/client.c \
+	core/controller/partita/partita.c \
 	core/handler/event/events.c \
 	core/handler/request/requests.c \
 	core/handler/response/responses.c \
 	core/threading/broadcast/broadcast.c \
 	core/threading/client/client.c \
+	core/threading/partita/partita.c \
 	model/client/client.c \
 	model/coda/coda.c \
 	model/lista/lista.c \
