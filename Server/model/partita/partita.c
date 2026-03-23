@@ -4,6 +4,9 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
 
     Partita * partita = malloc(sizeof(Partita));
 
+    pthread_cond_init(& partita -> richiesta, NULL);
+    partita -> risposta = false;
+
     partita -> id = id;
 
     partita -> proprietario = proprietario;
@@ -19,28 +22,64 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
 }
 
 void aggiungiProprietario(Partita * partita, Client * proprietario) {
+    pthread_mutex_lock(& partita -> mutex);
+
     partita -> proprietario = proprietario;
+
+    pthread_mutex_unlock(& partita -> mutex);
 }
 
 void aggiungiAvversario(Partita * partita, Client * avversario) {
+    pthread_mutex_lock(& partita -> mutex);
+
     partita -> avversario = avversario;
+
+    pthread_mutex_unlock(& partita -> mutex);
 }
 
 void rimuoviProprietario(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
     partita -> proprietario = NULL;
+
+    pthread_mutex_unlock(& partita -> mutex);
+}
+
+void rimuoviAvversario(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
+    partita -> avversario = NULL;
+
+    pthread_mutex_unlock(& partita -> mutex);
+}
+
+void setRisposta(Partita * partita, bool risposta) {
+    pthread_mutex_lock(& partita -> mutex);
+
+    partita -> risposta = risposta;
+
+    pthread_mutex_unlock(& partita -> mutex);
 }
 
 bool controllaValiditaMossa(Partita * partita, unsigned int colonna) {
+    pthread_mutex_lock(& partita -> mutex);
+
     return colonna < BOARD_COLUMNS && partita -> board[0][colonna] == CELLA_VUOTA;
+
+    pthread_mutex_unlock(& partita -> mutex);
 }
 
-void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo) {    
+void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo) {   
+    pthread_mutex_lock(& partita -> mutex);
+    
     for (unsigned int riga = 0; riga < BOARD_ROWS; riga++) {
         if (partita -> board[riga][colonna] == CELLA_VUOTA) {
             partita -> board[riga][colonna] = simbolo;
             break;
         }
     }
+
+    pthread_mutex_unlock(& partita -> mutex);
 }
 
 void aggiungiMossaProprietario(Partita *partita, unsigned int colonna) {
@@ -52,6 +91,8 @@ void aggiungiMossaAvversario(Partita *partita, unsigned int colonna) {
 }
 
 EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo) {
+    pthread_mutex_lock(& partita -> mutex);
+
 
     if (verificaCombinazioneOrizzontale(partita,simbolo)) {
         return VITTORIA;
@@ -68,6 +109,8 @@ EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo) {
     if (verificaPareggio(partita)) {
         return PAREGGIO;
     }
+
+    pthread_mutex_unlock(& partita -> mutex);
 
     return NON_TERMINATA;
 }
@@ -149,29 +192,47 @@ bool verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbo
 }
 
 bool verificaPareggio(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
     unsigned int primaRiga = 0;
+    bool esito = true;
     
     for (unsigned int colonna = 0; colonna < BOARD_COLUMNS; colonna++) {
         if (partita -> board[primaRiga][colonna] == CELLA_VUOTA) {
-            return false;
+            esito = false;
+            break;
         }
     }
 
-    return true;
+    pthread_mutex_unlock(& partita -> mutex);
+
+    return esito;
 }
 
 Game serializzaPartita(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
     Game game;
 
     game.id = partita -> id;
+
     strcpy(game.proprietario, partita -> proprietario -> nome);
-    strcpy(game.avversario, partita -> avversario -> nome);
+    
+    if (partita -> avversario == NULL)
+        memset(game.avversario, 0, sizeof(game.avversario));
+    else
+        strcpy(game.avversario, partita -> avversario -> nome);
+    
     game.stato = partita -> stato;
+
+    pthread_mutex_unlock(& partita -> mutex);
 
     return game;
 }
 
 Board serializzaBoard(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
     Board board;
 
     for (unsigned int row = 0; row < BOARD_ROWS; row++) {
@@ -179,6 +240,8 @@ Board serializzaBoard(Partita * partita) {
             board.grid[row][column] = partita -> board[row][column];
         }
     }
+
+    pthread_mutex_unlock(& partita -> mutex);
 
     return board;
 }
