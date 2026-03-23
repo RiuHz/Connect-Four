@@ -15,10 +15,11 @@ void inizializzaListeServer(Server * server) {
     server -> listaPartite = malloc(sizeof(ListaPartite));
     pthread_mutex_init(& server -> listaPartite -> mutex, NULL);
     server -> listaPartite -> head = NULL;
+    server -> listaPartite -> contatore = 0;
 
     server -> codaBroadcast = malloc(sizeof(CodaBroadcast));
     pthread_mutex_init(& server -> codaBroadcast -> mutex, NULL);
-    server -> codaBroadcast -> semaforo = dispatch_semaphore_create(0);
+    pthread_cond_init(& server -> codaBroadcast -> inserimento, NULL);
     server -> codaBroadcast -> head = NULL;
     server -> codaBroadcast -> tail = NULL;
 }
