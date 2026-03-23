@@ -41,6 +41,25 @@ git clone https://github.com/RiuHz/Connect-Four.git
 cd Connect-Four
 ```
 
+2️⃣ Avvia il server con Docker: 
+```bash
+docker build -t connect-four-server .
+docker run -p 1926:1926 connect-four-server
+```
+
+Se vuoi visualizzare lo stato interno del server aggiungi il flag -it:
+```bash
+docker run -it -p 1926:1926 connect-four-server
+```
+
+3️⃣ Avvia il client: 
+```bash
+cd Connect-Four/Client
+make
+./main
+```
+Vuoi avviare più client? Apri un nuovo terminale e ripeti lo step 3
+
 # 🇬🇧 (EN-version) Connect-Four (LSO Project a.y. 2025/2026)
 6️⃣ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ <br>
 5️⃣ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ ⚪ <br>
@@ -82,3 +101,22 @@ The project is divided into two packages:
 git clone https://github.com/RiuHz/Connect-Four.git
 cd Connect-Four
 ```
+
+2️⃣ Start the server with Docker:
+```bash
+docker build -t connect-four-server .
+docker run -p 1926:1926 connect-four-server
+```
+
+If you want to view the internal status of the server, add the -it flag:
+```bash
+docker run -it -p 1926:1926 connect-four-server
+```
+
+3️⃣ Start the client:
+```bash
+cd Connect-Four/Client
+make
+./main
+```
+Want to launch multiple clients? Open a new terminal and repeat step 3.
