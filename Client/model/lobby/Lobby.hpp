@@ -27,7 +27,7 @@ namespace lso {
 
             Lobby(Game game) : id(game.id), owner(game.proprietario), opponent(game.avversario) {};
 
-            Lobby(const Lobby &) = delete;
+            Lobby(const Lobby &) = default;
             Lobby(Lobby &&) = default;
 
             virtual ~Lobby() = default;
