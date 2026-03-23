@@ -60,7 +60,7 @@ typedef enum {
     
     // ==== Svolgimento Partita ====
     REQ_MOVE, // Payload = Unsigned int
-    RES_BAD_MOVE,
+    RES_MOVE, // Payload = Boolean
 
     EVT_UPDATE_BOARD, // Payload = Board
     EVT_NEXT_TURN,
