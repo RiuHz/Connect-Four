@@ -8,14 +8,7 @@
 #include "../../../model/partita/partita.h"
 #include "../../../model/server/server.h"
 
-typedef struct ThreadPartitaData {
-    Server * server;
-    Partita * partita;
-} ThreadPartitaData;
-
-ThreadPartitaData * creaThreadPartitaData(Server * sever, Partita * partita);
-
-void avviaThreadPartita(Server * server, Partita * partita);
+void avviaThreadPartita(Partita * partita);
 
 void * wrapperThreadPartita(void * arg);
 

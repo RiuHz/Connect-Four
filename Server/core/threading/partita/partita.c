@@ -1,20 +1,9 @@
 #include "partita.h"
 
-ThreadPartitaData * creaThreadPartitaData(Server * server, Partita * partita) {
-    ThreadPartitaData * thread = malloc(sizeof(ThreadPartitaData));
-    
-    thread -> server = server;
-    thread -> partita = partita;
-
-    return thread;
-}
-
-void avviaThreadPartita(Server * server, Partita * partita) {
+void avviaThreadPartita(Partita * partita) {
     pthread_t thread;
 
-    ThreadPartitaData * threadData = creaThreadPartitaData(server, partita);
-
-    if (pthread_create(& thread, NULL, wrapperThreadPartita, (void *) threadData) != 0) {
+    if (pthread_create(& thread, NULL, wrapperThreadPartita, (void *) partita) != 0) {
         perror("Errore creazione thread partita");
         exit(1);
     }
@@ -23,13 +12,11 @@ void avviaThreadPartita(Server * server, Partita * partita) {
 }
 
 void * wrapperThreadPartita(void * arg) {
-    ThreadPartitaData * thread = (ThreadPartitaData *) arg;
+    Partita * partita = (Partita *) arg;
     
-    printf("[Partita] [Thread: %lu] Thread per la partita %d avviato correttamente\n", (unsigned long) pthread_self(), thread -> partita -> id);
+    printf("[Partita] [Thread: %lu] Thread per la partita %d avviato correttamente\n", (unsigned long) pthread_self(), partita -> id);
 
-    gestisciPartita(thread -> server, thread -> partita);
-
-    free(thread);
+    gestisciPartita(partita);
 
     return NULL;
 }
