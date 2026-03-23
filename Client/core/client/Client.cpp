@@ -11,10 +11,25 @@ lso::Client::State::State(lso::Client & client) : context(client) {
 }
 
 void lso::Client::State::handleServerEvents(const Message & message) {
-    // TODO Switch con tutti gli eventi in break
-
     switch (message.getType()) {
-
+        case EVT_JOIN_REQUEST:
+            break;
+        case EVT_GAME_UPDATE:
+            break;
+        case EVT_GAME_CREATED:
+            break;
+        case EVT_GAME_ENDED:
+            break;
+        case EVT_UPDATE_BOARD:
+            break;
+        case EVT_NEXT_TURN:
+            break;
+        case EVT_GAME_WON:
+            break;
+        case EVT_GAME_LOST:
+            break;
+        case EVT_GAME_DRAW:
+            break;
         default:
             context.receiveQueue.Enqueue(message);
     }
@@ -37,7 +52,7 @@ void lso::Client::LoginState::print() const {
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::LoginState::handleUserInput() const {
+void lso::Client::LoginState::handleUserInput() {
     std::string name = inputWindow -> getInput();
 
     if (name.empty()) {
@@ -75,7 +90,7 @@ void lso::Client::MenuState::print() const {
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::MenuState::handleUserInput() const {
+void lso::Client::MenuState::handleUserInput() {
     const std::string input = inputWindow -> getInput();
 
     if (input.empty()) {
@@ -91,28 +106,35 @@ void lso::Client::MenuState::handleUserInput() const {
     const int option = std::stoi(input);
 
     switch (static_cast<MenuOption>(option)) {
-        case MenuOption::CREATE_MATCH:
+        case MenuOption::CREATE_MATCH: {
             context.send(Message(REQ_CREATE_GAME));
-            // Message response = context.receive();
-
-            // * Gestisci risposta
-
-            context.transitionTo(std::make_unique<LobbyState>(context));
+            inputWindow -> addTitle("In attesa di risposta dal server...");
+            
+            Message response = context.receive();
+            Game game = response.getPayload<Game>(std::make_unique<GameStrategy>());
+            
+            context.transitionTo(std::make_unique<LobbyState>(context, game));
+        }
         break;
 
-        case MenuOption::LIST_GAMES:
+        case MenuOption::LIST_GAMES: {
             context.send(Message(REQ_GAMES_LIST));
+            inputWindow -> addTitle("In attesa di risposta dal server...");
 
-            // * Gestisci cosa succede se chiedo la lista di lobby
+            Message response = context.receive();
 
-            context.transitionTo(std::make_unique<GameListState>(context));
+            std::vector<Game> gameList = response.getPayload<std::vector<Game>>(std::make_unique<GameListStrategy>());
+
+            context.transitionTo(std::make_unique<GameListState>(context, gameList));
+        }
         break;
-
-        case MenuOption::EXIT:
+        
+        case MenuOption::EXIT: {
             inputWindow -> addTitle("Disconnessione in corso...");
             context.send(Message(REQ_DISCONNECT));
-
+            
             context.isRunning = false;
+        }
         break;
     }
 
@@ -120,7 +142,7 @@ void lso::Client::MenuState::handleUserInput() const {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::LobbyState::LobbyState(Client & context) : State(context) {
+lso::Client::LobbyState::LobbyState(Client & context, Game game) : State(context), lobby(game) {
     inputWindow -> addTitle("Inserisci la tua scelta");
 }
 
@@ -129,23 +151,63 @@ void lso::Client::LobbyState::print() const {
 
     stream
         << "============ Dettagli Partita ============" << std::endl
-        << "ID Partita: " <<  "Num lobby" << std::endl
-        << "Proprietario: " <<  "Nome Proprietario" << std::endl
-        << "Avversario: " <<  "Nome Avversario" << std::endl
+        << "ID Partita: " <<  lobby.getID() << std::endl
+        << "Proprietario: " <<  lobby.getOwner() << std::endl
+        << "Avversario: " <<  lobby.getOpponent() << std::endl
         << std::endl
-        << "Digita 'esci' per tornare al Menu Principale";
+        << joinRequest << std::endl
+        << std::endl
+        << "Digita (y / n) per rispondere a una richiesta di partecipazione" << std::endl
+        << "mentre 'esci' per tornare al Menu Principale";
     
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::LobbyState::handleUserInput() const {
-    // TODO
+void lso::Client::LobbyState::handleUserInput() {
+    const std::string input = inputWindow -> getInput();
+
+    if (input.empty()) {
+        inputWindow -> addTitle("Scelta vuota non supportata");
+        return;
+    }
+    
+    if (input == "y" && !joinRequest.empty()) {
+        context.send(Message(REQ_JOIN_DECISION, true));
+
+        context.transitionTo(std::make_unique<InGameState>(context, true));
+        return;
+    } 
+    
+    if (input == "n" && !joinRequest.empty()) {
+        context.send(Message(REQ_JOIN_DECISION, false));
+
+        joinRequest.clear();
+        print();
+        return;
+    } 
+    
+    if (input == "esci") {
+        context.send(Message(REQ_LEAVE_GAME));
+
+        if (!joinRequest.empty())
+            context.send(Message(REQ_JOIN_DECISION, false));
+
+        context.transitionTo(std::make_unique<MenuState>(context));
+        return;
+    }
+
+    inputWindow -> addTitle("Scelta non supportata");
 }
 
 void lso::Client::LobbyState::handleServerEvents(const Message & message) {
-    // TODO
-
     switch (message.getType()) {
+        case EVT_JOIN_REQUEST: {
+            std::string opponent = message.getPayload<std::string>(std::make_unique<StringStrategy>());
+
+            joinRequest = "Hai ricevuto una richiesta di partecipazione da " + opponent;
+            print();
+        }    
+        break;
 
         default:
             State::handleServerEvents(message);
@@ -154,23 +216,59 @@ void lso::Client::LobbyState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::InGameState::InGameState(Client & context) : State(context) {
+lso::Client::InGameState::InGameState(Client & context, const bool owner) : State(context), owner(owner) {
     inputWindow -> addTitle("Inserisci la colonna");
+
+    // TODO Inizializzare notification
 }
 
 void lso::Client::InGameState::print() const {
-    // TODO
-    // * Quindi andra il print della board, perché siamo in partita
+    std::ostringstream stream;
+
+    stream
+        << "================= Partita =================" << std::endl
+        << std::endl
+        << board.toString() << std::endl
+        << std::endl
+        << notification << std::endl;
+
+        // TODO Aggiustare la stampa basandosi sui turni
+    
+    outputWindow -> print(stream.str());
 }
 
-void lso::Client::InGameState::handleUserInput() const {
-    // TODO
+void lso::Client::InGameState::handleUserInput() {
+    const std::string input = inputWindow -> getInput();
+
+    if (input.empty()) {
+        inputWindow -> addTitle("Scelta vuota non supportata");
+        return;
+    }
 }
 
 void lso::Client::InGameState::handleServerEvents(const Message & message) {
     // TODO
-
+    
     switch (message.getType()) {
+        case EVT_UPDATE_BOARD:
+
+        break;
+
+        case EVT_NEXT_TURN:
+
+        break;
+
+        case EVT_GAME_WON:
+
+        break;
+
+        case EVT_GAME_LOST:
+
+        break;
+
+        case EVT_GAME_DRAW:
+
+        break;
 
         default:
             State::handleServerEvents(message);
@@ -179,7 +277,10 @@ void lso::Client::InGameState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::GameListState::GameListState(Client & context) : State(context) {
+lso::Client::GameListState::GameListState(Client & context, std::vector<Game> & gameList) : State(context) {
+    for (Game game : gameList)
+        lobbyList.push_back(Lobby(game));
+    
     inputWindow -> addTitle("Inserisci il numero della lobby");
 }
 
@@ -188,25 +289,133 @@ void lso::Client::GameListState::print() const {
 
     stream
         << "============== Lista Partite ==============" << std::endl
-        << "1) Proprietario VS Avversario (In Attesa / In Gioco / Appena Creata / Terminata)" << std::endl
         << std::endl
-        << "Digita '0' per tornare al Menu Principale";
+        << getNotification() << std::endl
+        << std::endl
+        << getLobbyList()
+        << std::endl
+        << "Digita il numero della Partita per inviare una richiesta di partecipazione" << std::endl
+        << "mentre 0 per tornare al Menu Principale";
     
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::GameListState::handleUserInput() const {
-    // TODO
+void lso::Client::GameListState::handleUserInput() {
+    const std::string input = inputWindow -> getInput();
+
+    if (input.empty()) {
+        inputWindow -> addTitle("Scelta vuota non supportata");
+        return;
+    }
+
+    if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
+        inputWindow -> addTitle("Scelta non numerica non supportata");
+        return;
+    }
+
+    const unsigned int option = std::stoi(input);
+
+    if (option == 0) {
+        context.transitionTo(std::make_unique<MenuState>(context));
+        return;
+    }
+
+    context.send(Message(REQ_JOIN_GAME, option));
+
+    Message response = context.receive();
+    inputWindow -> addTitle("In attesa di risposta...");
+
+    bool accepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
+
+    if (accepted) {
+        context.transitionTo(std::make_unique<InGameState>(context, false));
+    } else {
+        inputWindow -> addTitle("Richiesta di partecipazione rifiutata");
+    }
 }
 
 void lso::Client::GameListState::handleServerEvents(const Message & message) {
-    // TODO
-
     switch (message.getType()) {
+        case EVT_GAME_UPDATE: {
+            Game game = message.getPayload<Game>(std::make_unique<GameStrategy>());
+            
+            updateLobby(Lobby(game));
+            notification = "La Partita con ID " + std::to_string(game.id) + " è stata aggiornata!";
+
+            print();
+        }
+        break;
+
+        case EVT_GAME_CREATED: {
+            Game game = message.getPayload<Game>(std::make_unique<GameStrategy>());
+            
+            lobbyList.push_back(Lobby(game));
+            notification = "La Partita con ID " + std::to_string(game.id) + " è stata appena creata!";
+
+            print();
+        }
+        break;
+
+        case EVT_GAME_ENDED: {
+            unsigned int id = message.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
+            
+            removeLobby(id);
+            notification = "La Partita con ID " + std::to_string(id) + " è terminata!";
+
+            print();
+        }
+        break;
 
         default:
             State::handleServerEvents(message);
     }
+}
+
+std::string lso::Client::GameListState::getLobbyList() const {
+    std::ostringstream stream;
+
+    if (lobbyList.empty())
+        stream << "Nessuna partita presente" << std::endl;
+    else
+        for (const Lobby & lobby : lobbyList)
+            stream
+                << lobby.getID() << ") "
+                << lobby.getOwner()
+                << " VS "
+                << lobby.getOpponent()
+                << std::endl; 
+
+    return stream.str();
+}
+
+void lso::Client::GameListState::updateLobby(const Lobby & target) {
+    std::vector<Lobby>::iterator lobby = std::find_if(
+        lobbyList.begin(),
+        lobbyList.end(),
+        [& target] (const Lobby & lobby) {
+            return lobby == target;
+        }
+    );
+
+    if (lobby == lobbyList.end())
+        return;
+
+    * lobby = target;
+}
+
+void lso::Client::GameListState::removeLobby(const unsigned int target) {
+    std::vector<Lobby>::iterator lobby = std::find_if(
+        lobbyList.begin(),
+        lobbyList.end(),
+        [target] (const Lobby & lobby) {
+            return lobby.getID() == target;
+        }
+    );
+
+    if (lobby == lobbyList.end())
+        return;
+
+    lobbyList.erase(lobby);
 }
 
 // --------------------------------------------------------------------------------
@@ -240,13 +449,21 @@ void lso::Client::receiveLoop() {
 void lso::Client::transitionTo(std::unique_ptr<State> nextState) {
     std::lock_guard<std::mutex> lock(stateTransition);
 
-    state = std::move(nextState); 
+    state = std::move(nextState);
 }
 
 void lso::Client::startThreads() {
     senderThread = std::thread(& Client::sendLoop, this);
     eventHandlerThread = std::thread(& Client::handleEventLoop, this);
     receiverThread = std::thread(& Client::receiveLoop, this);
+}
+
+lso::Message lso::Client::receive() {
+    Message message;
+
+    receiveQueue.Dequeue(message);
+
+    return message;
 }
 
 void lso::Client::run() {

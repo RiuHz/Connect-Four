@@ -1,12 +1,10 @@
 #ifndef CLIENT_HPP
 #define CLIENT_HPP
 
-#include <iostream>
 #include <memory>
 #include <algorithm>
 #include <mutex>
 #include <thread>
-#include <atomic>
 
 #include <ncurses.h>
 
@@ -19,6 +17,7 @@
 #include "../../model/lobby/Lobby.hpp"
 #include "../../model/message/Message.hpp"
 
+#include "../../network/strategy/Strategy.hpp"
 #include "../../network/tcp/TCPClient.hpp"
 
 namespace lso {
@@ -43,7 +42,7 @@ namespace lso {
 
                     virtual void print() const = 0;
 
-                    virtual void handleUserInput() const = 0;
+                    virtual void handleUserInput() = 0;
 
                     virtual void handleServerEvents(const Message & message);
 
@@ -78,7 +77,7 @@ namespace lso {
 
                     inline void print() const override;
 
-                    void handleUserInput() const override;
+                    void handleUserInput() override;
 
             };
 
@@ -97,14 +96,16 @@ namespace lso {
 
                     void print() const override;
 
-                    void handleUserInput() const override;
+                    void handleUserInput() override;
                 
             };
 
             class LobbyState: public State {
                 private:
 
-                    Lobby lobby; // TODO va fatto il model
+                    Lobby lobby;
+                    
+                    std::string joinRequest;
 
                 protected:
 
@@ -112,19 +113,22 @@ namespace lso {
 
                 public:
 
-                    LobbyState(Client & context);
+                    LobbyState(Client & context, Game game);
 
                     void print() const override;
 
-                    void handleUserInput() const override;
+                    void handleUserInput() override;
 
                     void handleServerEvents(const Message & message) override;
             };
 
             class InGameState: public State {
                 private:
-                    
-                    GameBoard board; // TODO va gestita questa
+
+                    GameBoard board;
+                    const bool owner;
+
+                    std::string notification;
 
                 protected:
 
@@ -132,11 +136,11 @@ namespace lso {
 
                 public:
 
-                    InGameState(Client & context);
+                    InGameState(Client & context, const bool owner);
 
                     void print() const override;
 
-                    void handleUserInput() const override;
+                    void handleUserInput() override;
                     
                     void handleServerEvents(const Message & message) override;
             };
@@ -144,9 +148,14 @@ namespace lso {
             class GameListState: public State {
                 private:
 
-                    // TODO
-                    // ? Vettore
-                    // Lobby List
+                    std::vector<Lobby> lobbyList;
+                    std::string notification;
+
+                    inline std::string getNotification() const { return notification.empty() ? std::string("Nessuna nuova notifica") : notification; };
+                    std::string getLobbyList() const;
+
+                    void updateLobby(const Lobby &);
+                    void removeLobby(const unsigned int);
 
                 protected:
 
@@ -154,21 +163,21 @@ namespace lso {
 
                 public:
 
-                    GameListState(Client & context);
+                    GameListState(Client & context, std::vector<Game> & gameList);
 
                     void print() const override;
 
-                    void handleUserInput() const override;
+                    void handleUserInput() override;
 
                     void handleServerEvents(const Message & message) override;
             };
 
         private:
 
+            bool isRunning;
+
             std::unique_ptr<State> state;
             std::unique_ptr<TCPClient> serverConnection;
-
-            std::atomic<bool> isRunning;
 
             std::thread senderThread;
             std::thread eventHandlerThread;
@@ -191,7 +200,7 @@ namespace lso {
             void transitionTo(std::unique_ptr<State>);
 
             inline void send(const Message & message) { sendQueue.Enqueue(message); };
-            bool receive(Message & message) { return receiveQueue.Dequeue(message); };
+            Message receive();
 
             void stop();
 
