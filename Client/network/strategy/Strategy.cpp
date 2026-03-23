@@ -20,8 +20,6 @@ Game lso::GameStrategy::convertToHost(const std::vector<uint32_t> & payload) con
     memcpy(game.avversario, & payload[offset], NAME_LEN);
     offset += (NAME_LEN + 3) / 4;
 
-    game.stato = payload[offset++];
-
     return game;
 };
 
@@ -41,8 +39,6 @@ std::vector<Game> lso::GameListStrategy::convertToHost(const std::vector<uint32_
 
         memcpy(game.avversario, & payload[offset], NAME_LEN);
         offset += (NAME_LEN + 3) / 4;
-
-        game.stato = payload[offset++];
 
         gameList.push_back(game);
     }

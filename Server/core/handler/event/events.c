@@ -23,8 +23,6 @@ Messaggio eventoAggiornamentoPartita(Partita * partita) {
 
     memcpy(& buffer[offset], game.avversario, NAME_LEN);
     offset += (NAME_LEN + 3) / 4;
-
-    buffer[offset++] = game.stato;
     
     return creaMessaggio(EVT_GAME_UPDATE, dimensione, buffer);
 }
@@ -43,8 +41,6 @@ Messaggio eventoPartitaCreata(Partita * partita) {
 
     memcpy(& buffer[offset], game.avversario, NAME_LEN);
     offset += (NAME_LEN + 3) / 4;
-
-    buffer[offset++] = game.stato;
 
     return creaMessaggio(EVT_GAME_CREATED, dimensione, buffer);
 }

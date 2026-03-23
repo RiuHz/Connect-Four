@@ -14,8 +14,6 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
     partita -> avversario = NULL;
 
     memset(partita -> board, 0, sizeof(partita -> board));
-    
-    partita -> stato = GAME_WAITING;
 
     partita -> next = NULL;
 
@@ -223,8 +221,6 @@ Game serializzaPartita(Partita * partita) {
         memset(game.avversario, 0, sizeof(game.avversario));
     else
         strcpy(game.avversario, partita -> avversario -> nome);
-    
-    game.stato = partita -> stato;
 
     pthread_mutex_unlock(& partita -> mutex);
 

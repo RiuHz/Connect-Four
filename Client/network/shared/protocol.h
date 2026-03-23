@@ -15,16 +15,10 @@
 #define SERVER_ADDRESS "127.0.0.1"
 #define SERVER_PORT 1926
 
-typedef enum {
-    GAME_WAITING = 1,
-    GAME_IN_PROGRESS
-} GameState;
-
 typedef struct {
     uint32_t id;
     char proprietario[NAME_LEN];
     char avversario[NAME_LEN];
-    uint32_t stato;
 } Game;
 
 typedef struct {
