@@ -51,11 +51,7 @@ std::vector<Game> lso::GameListStrategy::convertToHost(const std::vector<uint32_
 }
 
 std::string lso::StringStrategy::convertToHost(const std::vector<uint32_t> & payload) const {
-    std::string string;
-
-    string.resize(NAME_LEN);
-
-    memcpy((void *) string.data(), payload.data(), NAME_LEN);
+    std::string string = (char *) payload.data();
 
     return string;
 }
