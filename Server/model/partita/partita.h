@@ -17,12 +17,17 @@ typedef enum {
 } EsitoPartita;
 
 typedef struct Partita {
+    pthread_t thread;
     pthread_mutex_t mutex;
+    pthread_cond_t richiesta;
+    bool risposta;
+
     unsigned int id;
     Client * proprietario;
     Client * avversario;
     unsigned int board[BOARD_ROWS][BOARD_COLUMNS];
     GameState stato;
+
     struct Partita * next;
 } Partita;
 
@@ -31,6 +36,9 @@ Partita * creaPartita(unsigned int id, Client * proprietario);
 void aggiungiProprietario(Partita * partita, Client * proprietario);
 void aggiungiAvversario(Partita * partita, Client * avversario);
 void rimuoviProprietario(Partita * partita);
+void rimuoviAvversario(Partita * partita);
+
+void setRisposta(Partita * partita, bool risposta);
 
 bool controllaValiditaMossa(Partita * partita, unsigned int colonna);
 
