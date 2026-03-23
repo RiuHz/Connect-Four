@@ -2,6 +2,9 @@
 #define STRATEGY_HPP
 
 #include <vector>
+#include <string>
+#include <cstring>
+#include <stdexcept>
 
 #include "../shared/protocol.h"
 

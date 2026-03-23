@@ -1,6 +1,8 @@
 #ifndef PROTOCOL_H
 #define PROTOCOL_H
 
+#include <cstdint>
+
 #define NAME_LEN 20
 
 #define BOARD_ROWS 6
