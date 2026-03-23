@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <mutex>
 #include <thread>
+#include <atomic>
 
 #include <ncurses.h>
 
@@ -114,6 +115,7 @@ namespace lso {
                 public:
 
                     LobbyState(Client & context, Game game);
+                    LobbyState(Client & context, Lobby lobby);
 
                     void print() const override;
 
@@ -125,10 +127,13 @@ namespace lso {
             class InGameState: public State {
                 private:
 
+                    Lobby lobby;
                     GameBoard board;
                     const bool owner;
 
                     std::string notification;
+
+                    std::atomic<bool> nextTurn {false};
 
                 protected:
 
@@ -136,7 +141,7 @@ namespace lso {
 
                 public:
 
-                    InGameState(Client & context, const bool owner);
+                    InGameState(Client & context, const bool owner, const Lobby lobby);
 
                     void print() const override;
 
@@ -145,15 +150,45 @@ namespace lso {
                     void handleServerEvents(const Message & message) override;
             };
 
+            class RematchState: public State {
+                private:
+
+                    Lobby lobby;
+                    GameBoard board;
+                    const bool winner;
+
+                    std::string notification;
+
+                private:
+
+                    void handleRematchResponse();
+
+                protected:
+
+                    // ...
+
+                public:
+
+                    RematchState(Client & context, const bool winner, const bool draw, const GameBoard board, const Lobby lobby);
+
+                    void print() const override;
+
+                    void handleUserInput() override;
+
+            };
+
             class GameListState: public State {
                 private:
 
                     std::vector<Lobby> lobbyList;
                     std::string notification;
 
+                private:
+
                     inline std::string getNotification() const { return notification.empty() ? std::string("Nessuna nuova notifica") : notification; };
                     std::string getLobbyList() const;
 
+                    Lobby findLobby(const unsigned int);
                     void updateLobby(const Lobby &);
                     void removeLobby(const unsigned int);
 

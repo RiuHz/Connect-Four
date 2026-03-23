@@ -146,6 +146,10 @@ lso::Client::LobbyState::LobbyState(Client & context, Game game) : State(context
     inputWindow -> addTitle("Inserisci la tua scelta");
 }
 
+lso::Client::LobbyState::LobbyState(Client & context, Lobby lobby) : State(context), lobby(lobby) {
+    inputWindow -> addTitle("Inserisci la tua scelta");
+}
+
 void lso::Client::LobbyState::print() const {
     std::ostringstream stream;
 
@@ -174,7 +178,7 @@ void lso::Client::LobbyState::handleUserInput() {
     if (input == "y" && !joinRequest.empty()) {
         context.send(Message(REQ_JOIN_DECISION, true));
 
-        context.transitionTo(std::make_unique<InGameState>(context, true));
+        context.transitionTo(std::make_unique<InGameState>(context, true, lobby));
         return;
     } 
     
@@ -216,10 +220,14 @@ void lso::Client::LobbyState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::InGameState::InGameState(Client & context, const bool owner) : State(context), owner(owner) {
+lso::Client::InGameState::InGameState(Client & context, const bool owner, const Lobby lobby) : State(context), board(), owner(owner), lobby(lobby) {
     inputWindow -> addTitle("Inserisci la colonna");
 
-    // TODO Inizializzare notification
+    if (owner) {
+        notification = "Inserisci la colonna";
+    } else {
+        notification = "In attesa dell'avversario...";
+    }
 }
 
 void lso::Client::InGameState::print() const {
@@ -231,8 +239,6 @@ void lso::Client::InGameState::print() const {
         << board.toString() << std::endl
         << std::endl
         << notification << std::endl;
-
-        // TODO Aggiustare la stampa basandosi sui turni
     
     outputWindow -> print(stream.str());
 }
@@ -244,34 +250,144 @@ void lso::Client::InGameState::handleUserInput() {
         inputWindow -> addTitle("Scelta vuota non supportata");
         return;
     }
+
+    if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
+        inputWindow -> addTitle("Scelta non numerica non supportata");
+        return;
+    }
+
+    const int option = std::stoi(input);
+
+    context.send(Message(REQ_MOVE, option));
+
+    Message response = context.receive();
+    bool isMoveValid = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
+
+    if (isMoveValid) {
+        nextTurn.wait(true);
+        nextTurn.store(false);
+    }
 }
 
 void lso::Client::InGameState::handleServerEvents(const Message & message) {
-    // TODO
-    
+
     switch (message.getType()) {
-        case EVT_UPDATE_BOARD:
+        case EVT_UPDATE_BOARD: {
+            Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
+            this -> board.update(board);
+            print();
+        }
         break;
 
-        case EVT_NEXT_TURN:
+        case EVT_NEXT_TURN: {
+            notification = "Inserisci la colonna";
 
+            print();
+
+            nextTurn.store(true);
+            nextTurn.notify_all();
+        }
         break;
 
-        case EVT_GAME_WON:
-
+        case EVT_GAME_WON: {
+            context.transitionTo(std::make_unique<RematchState>(context, true, false, board, lobby));
+        }
         break;
 
-        case EVT_GAME_LOST:
-
+        case EVT_GAME_LOST: {
+            context.transitionTo(std::make_unique<RematchState>(context, false, false, board, lobby));
+        }
         break;
 
-        case EVT_GAME_DRAW:
-
+        case EVT_GAME_DRAW: {
+            context.transitionTo(std::make_unique<RematchState>(context, owner, true, board, lobby));
+        }
         break;
 
         default:
             State::handleServerEvents(message);
+    }
+}
+
+// --------------------------------------------------------------------------------
+
+lso::Client::RematchState::RematchState(Client & context, const bool winner, const bool draw, const GameBoard board, const Lobby lobby) : State(context), board(board), winner(winner), lobby(lobby) {
+    inputWindow -> addTitle("Inserisci la tua scelta");
+
+    if (draw) {
+        notification = "Che bravi, Pareggio!";
+    } else if (winner) {
+        notification = "Hai vinto!";
+    } else {
+        notification = "Ops.. Hai Perso..";
+    }
+}
+
+void lso::Client::RematchState::print() const {
+    std::ostringstream stream;
+
+    stream
+        << "================= Partita =================" << std::endl
+        << std::endl
+        << board.toString() << std::endl
+        << std::endl
+        << notification << std::endl
+        << "Digita (y / n) per scegliere di effettuare un rematch" << std::endl;
+    
+    outputWindow -> print(stream.str());
+}
+
+void lso::Client::RematchState::handleUserInput() {
+    const std::string input = inputWindow -> getInput();
+
+    if (input.empty()) {
+        inputWindow -> addTitle("Scelta vuota non supportata");
+        return;
+    }
+
+    if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
+        inputWindow -> addTitle("Scelta non numerica non supportata");
+        return;
+    }
+
+    if (input == "y") {
+        context.send(Message(REQ_REMATCH, true));
+        handleRematchResponse();
+
+        return;
+    }
+
+    if (input == "n") {
+        context.send(Message(REQ_REMATCH, false));
+        handleRematchResponse();
+
+        return;
+    }
+
+    inputWindow -> addTitle("Scelta non supportata");
+}
+
+void lso::Client::RematchState::handleRematchResponse() {
+    Message response = context.receive();
+    bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
+
+    if (rematchAccepted) {
+        context.transitionTo(std::make_unique<InGameState>(context, winner, lobby));
+
+        return;
+    }
+
+    if (!rematchAccepted && winner) {
+        context.transitionTo(std::make_unique<LobbyState>(context, lobby));
+
+        return;
+    }
+
+    if (!rematchAccepted && !winner) {
+        context.transitionTo(std::make_unique<MenuState>(context));
+
+        return;
     }
 }
 
@@ -328,7 +444,9 @@ void lso::Client::GameListState::handleUserInput() {
     bool accepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
     if (accepted) {
-        context.transitionTo(std::make_unique<InGameState>(context, false));
+        Lobby lobby = findLobby(option);
+
+        context.transitionTo(std::make_unique<InGameState>(context, false, lobby));
     } else {
         inputWindow -> addTitle("Richiesta di partecipazione rifiutata");
     }
@@ -386,6 +504,21 @@ std::string lso::Client::GameListState::getLobbyList() const {
                 << std::endl; 
 
     return stream.str();
+}
+
+lso::Lobby lso::Client::GameListState::findLobby(const unsigned int target) {
+    std::vector<Lobby>::iterator lobby = std::find_if(
+        lobbyList.begin(),
+        lobbyList.end(),
+        [target] (const Lobby & lobby) {
+            return lobby.getID() == target;
+        }
+    );
+
+    if (lobby == lobbyList.end())
+        throw std::runtime_error("Expected to find lobby..");
+
+    return * lobby;
 }
 
 void lso::Client::GameListState::updateLobby(const Lobby & target) {
