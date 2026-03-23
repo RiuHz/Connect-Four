@@ -4,10 +4,10 @@ void avviaBroadcast(Server * server) {
 
     printf("[Broadcast] [Thread: %lu] Servizio di broadcast avviato correttamente\n", (unsigned long) pthread_self());
     
-    while (true) {
-        sem_wait(& server -> codaBroadcast -> semaforo);
-        
+    while (true) {        
         pthread_mutex_lock(& server -> codaBroadcast -> mutex); 
+        pthread_cond_wait(& server -> codaBroadcast -> inserimento, & server -> codaBroadcast -> mutex);
+
         pthread_mutex_lock(& server -> listaClient -> mutex); 
 
         while (server -> codaBroadcast -> head != NULL) {
@@ -27,6 +27,7 @@ void avviaBroadcast(Server * server) {
         }
 
         pthread_mutex_unlock(& server -> listaClient -> mutex);
+        
         pthread_mutex_unlock(& server -> codaBroadcast -> mutex);
     }
 
