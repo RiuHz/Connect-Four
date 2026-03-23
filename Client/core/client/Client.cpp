@@ -178,7 +178,7 @@ void lso::Client::LobbyState::handleUserInput() {
     if (input == "y" && !joinRequest.empty()) {
         context.send(Message(REQ_JOIN_DECISION, true));
 
-        context.transitionTo(std::make_unique<InGameState>(context, true, lobby));
+        context.transitionTo(std::make_unique<InGameState>(context, true));
         return;
     } 
     
@@ -220,7 +220,7 @@ void lso::Client::LobbyState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::InGameState::InGameState(Client & context, const bool owner, const Lobby lobby) : State(context), board(), owner(owner), lobby(lobby) {
+lso::Client::InGameState::InGameState(Client & context, const bool owner) : State(context), board(), owner(owner) {
     inputWindow -> addTitle("Inserisci la colonna");
 
     if (owner) {
@@ -291,17 +291,17 @@ void lso::Client::InGameState::handleServerEvents(const Message & message) {
         break;
 
         case EVT_GAME_WON: {
-            context.transitionTo(std::make_unique<RematchState>(context, true, false, board, lobby));
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_WON, board, owner));
         }
         break;
 
         case EVT_GAME_LOST: {
-            context.transitionTo(std::make_unique<RematchState>(context, false, false, board, lobby));
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, board, owner));
         }
         break;
 
         case EVT_GAME_DRAW: {
-            context.transitionTo(std::make_unique<RematchState>(context, owner, true, board, lobby));
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, board, owner));
         }
         break;
 
@@ -312,15 +312,26 @@ void lso::Client::InGameState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::RematchState::RematchState(Client & context, const bool winner, const bool draw, const GameBoard board, const Lobby lobby) : State(context), board(board), winner(winner), lobby(lobby) {
+lso::Client::RematchState::RematchState(Client & context, const MessageType esito, const GameBoard board, const bool owner) : State(context), board(board), owner(owner) {
     inputWindow -> addTitle("Inserisci la tua scelta");
 
-    if (draw) {
-        notification = "Che bravi, Pareggio!";
-    } else if (winner) {
-        notification = "Hai vinto!";
-    } else {
-        notification = "Ops.. Hai Perso..";
+    switch (esito) {
+        case EVT_GAME_WON: {
+            notification = "Complimenti, hai vinto!";
+        }
+        break;
+
+        case EVT_GAME_LOST: {
+            notification = "Ops.. Hai Perso..";
+        }
+        break;
+    
+        case EVT_GAME_DRAW: {
+            notification = "Che bravi, Pareggio!";
+        } break;
+
+        default:
+        break;
     }
 }
 
@@ -373,18 +384,12 @@ void lso::Client::RematchState::handleRematchResponse() {
     bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
     if (rematchAccepted) {
-        context.transitionTo(std::make_unique<InGameState>(context, winner, lobby));
+        context.transitionTo(std::make_unique<InGameState>(context, owner));
 
         return;
     }
 
-    if (!rematchAccepted && winner) {
-        context.transitionTo(std::make_unique<LobbyState>(context, lobby));
-
-        return;
-    }
-
-    if (!rematchAccepted && !winner) {
+    if (!rematchAccepted) {
         context.transitionTo(std::make_unique<MenuState>(context));
 
         return;
@@ -446,7 +451,7 @@ void lso::Client::GameListState::handleUserInput() {
     if (accepted) {
         Lobby lobby = findLobby(option);
 
-        context.transitionTo(std::make_unique<InGameState>(context, false, lobby));
+        context.transitionTo(std::make_unique<InGameState>(context, false));
     } else {
         inputWindow -> addTitle("Richiesta di partecipazione rifiutata");
     }

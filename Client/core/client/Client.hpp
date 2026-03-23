@@ -127,7 +127,6 @@ namespace lso {
             class InGameState: public State {
                 private:
 
-                    Lobby lobby;
                     GameBoard board;
                     const bool owner;
 
@@ -141,7 +140,7 @@ namespace lso {
 
                 public:
 
-                    InGameState(Client & context, const bool owner, const Lobby lobby);
+                    InGameState(Client & context, const bool owner);
 
                     void print() const override;
 
@@ -153,9 +152,8 @@ namespace lso {
             class RematchState: public State {
                 private:
 
-                    Lobby lobby;
                     GameBoard board;
-                    const bool winner;
+                    const bool owner;
 
                     std::string notification;
 
@@ -169,7 +167,7 @@ namespace lso {
 
                 public:
 
-                    RematchState(Client & context, const bool winner, const bool draw, const GameBoard board, const Lobby lobby);
+                    RematchState(Client & context, const MessageType esito, const GameBoard board, const bool owner);
 
                     void print() const override;
 
