@@ -15,7 +15,7 @@ typedef struct MessaggioBroadcast {
 
 typedef struct CodaBroadcast {
     pthread_mutex_t mutex;
-    sem_t semaforo;
+    pthread_cond_t inserimento;
     MessaggioBroadcast * head;
     MessaggioBroadcast * tail;
 } CodaBroadcast;

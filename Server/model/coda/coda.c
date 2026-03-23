@@ -9,6 +9,8 @@ MessaggioBroadcast * creaMessaggioBroadcast(Messaggio messaggio) {
     messaggioBroadcast -> messaggio -> payload = malloc(messaggio.header.length);
     memcpy(messaggioBroadcast -> messaggio -> payload, messaggio.payload, messaggio.header.length);
 
+    messaggioBroadcast -> next = NULL;
+
     return messaggioBroadcast;
 }
 
@@ -32,7 +34,8 @@ void accodaMessaggioBroadcast(CodaBroadcast * coda, Messaggio messaggio) {
     }
 
     pthread_mutex_unlock(& coda -> mutex);
-    sem_post(& coda -> semaforo);
+
+    pthread_cond_signal(& coda -> inserimento);
 }
 
 void stampaCodaBroadcast(CodaBroadcast * coda) {
@@ -55,7 +58,6 @@ void stampaCodaBroadcast(CodaBroadcast * coda) {
 }
 
 void decodaMessaggioBroadcast(CodaBroadcast * coda) {
-    pthread_mutex_lock(& coda -> mutex);
 
     if (coda -> head == NULL && coda -> tail == NULL) {
         printf("La coda broadcast è vuota...\n");
@@ -72,6 +74,4 @@ void decodaMessaggioBroadcast(CodaBroadcast * coda) {
 
     cancellaMessaggioBroadcast(messaggio);
     free(messaggio);
-
-    pthread_mutex_unlock(& coda -> mutex);
 }
