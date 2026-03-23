@@ -7,8 +7,6 @@ void gestisciPartita(Partita * partita) {
     bool turnoProprietario = true;
     bool turnoAvversario = false;
 
-    bool invertireRuoli = false;
-
     printf("[Partita] [Thread: %lu] La Partita (%d) è iniziata\n", (unsigned long) pthread_self(), partita -> id);
 
     while (rematch) {
@@ -48,9 +46,7 @@ void gestisciPartita(Partita * partita) {
 
             inviaAggiornamentoBoard(partita);
 
-            EsitoPartita esito = controllaEsitoProprietario(partita);
-
-            if (esito != NON_TERMINATA) {
+            if (controllaEsitoProprietario(partita) != NON_TERMINATA) {
                 partitaInCorso = false;
                 break;
             }
@@ -88,14 +84,8 @@ void gestisciPartita(Partita * partita) {
 
             inviaAggiornamentoBoard(partita);
 
-            esito = controllaEsitoAvversario(partita);
-
-            if (esito != NON_TERMINATA) {
+            if (controllaEsitoAvversario(partita) != NON_TERMINATA) {
                 partitaInCorso = false;
-            }
-
-            if (esito == VITTORIA) {
-                invertireRuoli = true;
             }
 
         }
@@ -123,11 +113,11 @@ void gestisciPartita(Partita * partita) {
         inviaMessaggio(partita -> avversario, risposta);
 
         eliminaMessaggio(& risposta);
-
-        if (!invertireRuoli) {
-            scambiaGiocatori(partita);
-        }
     }
+
+    printf("[Partita] [Thread: %lu] La Partita (%d) è terminata, chiusura del thread...\n", (unsigned long) pthread_self(), partita -> id);
+
+    pthread_exit(NULL);
 }
 
 void inviaAggiornamentoBoard(Partita * partita) {
@@ -246,7 +236,10 @@ void gestisciLobby(Server * server, Partita * partita) {
 
                 if (risposta == true) {
                     avviaThreadPartita(partita);
+
                     attendiTerminePartita(partita);
+
+                    inLobby = false;
                 }
 
                 eliminaMessaggio(& messaggio);
@@ -263,9 +256,9 @@ void gestisciLobby(Server * server, Partita * partita) {
 
     eliminaMessaggio(& evento);
 
-    rimuoviPartita(server -> listaPartite, partita);
+    printf("[Client] [Thread: %lu] Rimossa la Partita creata da %s\n", (unsigned long) pthread_self(), partita -> proprietario -> nome);
 
-    printf("[Client] [Thread: %lu] Rimossa la Partita, chiusura del thread...\n", (unsigned long) pthread_self());
+    rimuoviPartita(server -> listaPartite, partita);
 }
 
 void gestisciRichiestaPartecipazione(Server * server, Partita * partita, Client * client) {
