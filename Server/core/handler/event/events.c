@@ -1,9 +1,18 @@
 #include "events.h"
 
+Messaggio eventoRichiestaPartecipazione(Client * client) {
+    unsigned int dimensione = sizeof(client -> nome);
+    uint32_t * buffer = malloc(dimensione);
+
+    memcpy(& buffer[0], client -> nome, sizeof(client -> nome));
+
+    return creaMessaggio(EVT_JOIN_REQUEST, dimensione, buffer);
+}
+
 Messaggio eventoAggiornamentoPartita(Partita * partita) {
     Game game = serializzaPartita(partita);
     
-    unsigned int dimensione = sizeof(Game) / sizeof(uint32_t);
+    unsigned int dimensione = sizeof(Game);
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
@@ -23,7 +32,7 @@ Messaggio eventoAggiornamentoPartita(Partita * partita) {
 Messaggio eventoPartitaCreata(Partita * partita) {
     Game game = serializzaPartita(partita);
     
-    unsigned int dimensione = sizeof(Game) / sizeof(uint32_t);
+    unsigned int dimensione = sizeof(Game);
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
@@ -47,13 +56,13 @@ Messaggio eventoPartitaTerminata(unsigned int id) {
 
     buffer[offset++] = id;
 
-    return creaMessaggio(EVT_GAME_CREATED, dimensione, buffer);
+    return creaMessaggio(EVT_GAME_ENDED, dimensione, buffer);
 }
 
 Messaggio eventoAggiornamentoBoard(Partita * partita) {
     Board board = serializzaBoard(partita);
 
-    unsigned int dimensione = sizeof(Board) / sizeof(uint32_t);
+    unsigned int dimensione = sizeof(Board);
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 

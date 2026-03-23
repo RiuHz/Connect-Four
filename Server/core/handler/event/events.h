@@ -1,5 +1,5 @@
-#ifndef RESPONSES_H
-#define RESPONSES_H
+#ifndef EVENTS_H
+#define EVENTS_H
 
 #include <stdlib.h>
 #include <arpa/inet.h>
@@ -9,8 +9,9 @@
 
 #include "../../../network/shared/protocol.h"
 
-Messaggio eventoAggiornamentoPartita(Partita * partita);
+Messaggio eventoRichiestaPartecipazione(Client * client);
 
+Messaggio eventoAggiornamentoPartita(Partita * partita);
 Messaggio eventoPartitaCreata(Partita * partita);
 Messaggio eventoPartitaTerminata(unsigned int id);
 
