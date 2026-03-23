@@ -20,6 +20,7 @@ typedef struct Partita {
     pthread_t thread;
     pthread_mutex_t mutex;
     pthread_cond_t richiesta;
+    pthread_cond_t terminata;
     bool risposta;
 
     unsigned int id;
@@ -37,7 +38,6 @@ void aggiungiProprietario(Partita * partita, Client * proprietario);
 void aggiungiAvversario(Partita * partita, Client * avversario);
 void rimuoviProprietario(Partita * partita);
 void rimuoviAvversario(Partita * partita);
-void scambiaGiocatori(Partita * partita);
 
 void setRisposta(Partita * partita, bool risposta);
 

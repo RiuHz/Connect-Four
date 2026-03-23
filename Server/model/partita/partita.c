@@ -54,17 +54,6 @@ void rimuoviAvversario(Partita * partita) {
     pthread_mutex_unlock(& partita -> mutex);
 }
 
-void scambiaGiocatori(Partita * partita) {
-    pthread_mutex_lock(& partita -> mutex);
-
-    Client * temp = partita -> avversario;
-
-    partita -> avversario = partita -> proprietario;
-    partita -> proprietario = temp;
-
-    pthread_mutex_unlock(& partita -> mutex);
-}
-
 void setRisposta(Partita * partita, bool risposta) {
     pthread_mutex_lock(& partita -> mutex);
 
