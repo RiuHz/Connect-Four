@@ -1,10 +1,10 @@
 #include "events.h"
 
 Messaggio eventoRichiestaPartecipazione(Client * client) {
-    unsigned int dimensione = sizeof(client -> nome);
+    unsigned int dimensione = NAME_LEN;
     uint32_t * buffer = malloc(dimensione);
 
-    memcpy(& buffer[0], client -> nome, sizeof(client -> nome));
+    memcpy(buffer, client -> nome, NAME_LEN);
 
     return creaMessaggio(EVT_JOIN_REQUEST, dimensione, buffer);
 }
