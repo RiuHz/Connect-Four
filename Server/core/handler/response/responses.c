@@ -3,7 +3,7 @@
 Messaggio rispostaCreaPartita(Partita * partita) {
     Game game = serializzaPartita(partita);
 
-    unsigned int dimensione = sizeof(Game) / sizeof(uint32_t);
+    unsigned int dimensione = sizeof(Game);
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
@@ -31,7 +31,9 @@ Messaggio rispostaAccessoPartita(unsigned int risposta) {
 }
 
 Messaggio rispostaListaPartite(ListaPartite * lista){
-    unsigned int dimensione = (unsigned int) (sizeof(Game) * lista -> contatore / sizeof(unsigned int));
+    pthread_mutex_lock(& lista -> mutex);
+
+    unsigned int dimensione = sizeof(Game) * lista -> contatore;
     uint32_t * buffer = malloc(dimensione);
     unsigned int offset = 0;
 
@@ -48,6 +50,8 @@ Messaggio rispostaListaPartite(ListaPartite * lista){
 
         buffer[offset++] = game.stato;
     }
+
+    pthread_mutex_unlock(& lista -> mutex);
     
     return creaMessaggio(RES_GAMES_LIST, dimensione, buffer);
 }
