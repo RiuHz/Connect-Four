@@ -437,9 +437,9 @@ void lso::Client::GameListState::handleUserInput() {
     }
 
     context.send(Message(REQ_JOIN_GAME, option));
+    inputWindow -> addTitle("In attesa di risposta...");
 
     Message response = context.receive();
-    inputWindow -> addTitle("In attesa di risposta...");
 
     bool accepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
