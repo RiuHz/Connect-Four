@@ -100,8 +100,11 @@ void inviaMessaggio(Client * client, Messaggio messaggio) {
     inviaFlussoDati(client, & tipo, sizeof(uint32_t));
     inviaFlussoDati(client, & dimensione, sizeof(uint32_t));
 
-    if (messaggio.header.length == 0)
+    if (messaggio.header.length == 0) {
+        pthread_mutex_unlock(& client -> mutex);
+
         return;
+    }
 
     uint32_t * payload = messaggio.payload;
 
