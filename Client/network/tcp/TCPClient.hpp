@@ -27,7 +27,7 @@ namespace lso {
             void sendData(const uint32_t data) const;
             void sendData(const std::vector<uint32_t> & payload, const size_t length) const;
 
-            bool receiveData(std::vector<uint32_t> payload, const uint32_t length) const;
+            bool receiveData(std::vector<uint32_t> & payload, const uint32_t length) const;
 
         protected:
             

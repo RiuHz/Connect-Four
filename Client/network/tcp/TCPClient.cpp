@@ -82,7 +82,7 @@ bool lso::TCPClient::receiveMessage(Message & message) const {
     if (length == 0)
         return true;
 
-    if (! receiveData(payload, length))
+    if (! receiveData(payload, length / sizeof(uint32_t)))
         return false;
 
     for (uint32_t & word: payload)
@@ -93,19 +93,19 @@ bool lso::TCPClient::receiveMessage(Message & message) const {
     return true; 
 }
 
-bool lso::TCPClient::receiveData(std::vector<uint32_t> payload, const uint32_t length) const {
+bool lso::TCPClient::receiveData(std::vector<uint32_t> & payload, const uint32_t length) const {
     payload.resize(length);
 
     size_t readBytes = 0;
-    size_t totalBytes = sizeof(uint32_t) * payload.size();
+    size_t totalBytes = payload.size() * sizeof(uint32_t);
     uint8_t * buffer = reinterpret_cast<uint8_t *>(& payload[0]);
-
+    
     while (readBytes < totalBytes) {
-        ssize_t remainingBytes = recv(TCPSocket, buffer + readBytes, length - readBytes, 0);
-
+        ssize_t remainingBytes = recv(TCPSocket, buffer + readBytes, totalBytes - readBytes, 0);
+        
         if (remainingBytes <= 0)
             return false;
-
+        
         readBytes += static_cast<size_t>(remainingBytes);
     }
 
