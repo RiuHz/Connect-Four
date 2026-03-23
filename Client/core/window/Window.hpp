@@ -53,6 +53,8 @@ namespace lso {
             using Window::Window;
 
             void print(const std::string & text) override;
+
+            void clear() { wclear(window); };
         
     };
 

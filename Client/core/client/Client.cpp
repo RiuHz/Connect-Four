@@ -42,6 +42,8 @@ lso::Client::LoginState::LoginState(lso::Client & context) : State(context) {
 }
 
 void lso::Client::LoginState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
@@ -79,6 +81,8 @@ lso::Client::MenuState::MenuState(Client & context) : State(context) {
 }
 
 void lso::Client::MenuState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
@@ -151,6 +155,8 @@ lso::Client::LobbyState::LobbyState(Client & context, Lobby lobby) : State(conte
 }
 
 void lso::Client::LobbyState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
@@ -231,6 +237,8 @@ lso::Client::InGameState::InGameState(Client & context, const bool owner) : Stat
 }
 
 void lso::Client::InGameState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
@@ -336,6 +344,8 @@ lso::Client::RematchState::RematchState(Client & context, const MessageType esit
 }
 
 void lso::Client::RematchState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
@@ -406,6 +416,8 @@ lso::Client::GameListState::GameListState(Client & context, std::vector<Game> & 
 }
 
 void lso::Client::GameListState::print() const {
+    outputWindow -> clear();
+
     std::ostringstream stream;
 
     stream
