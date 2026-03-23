@@ -1,39 +1,54 @@
 #include "GameBoard.hpp"
 
-void lso::GameBoard::printRow(const unsigned int row) const {
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
+std::string lso::GameBoard::rowToString(const unsigned int row) const {
+    std::ostringstream stream;
+    
+    stream << TextColor::BLUE << '|' << TextColor::WHITE;
 
     for (unsigned int column = 0; column < columns; column++)
-        std::cout << " " << grid[row][column] << " ";
+        stream << " " << grid[row][column] << " ";
 
-    std::cout << TextColor::BLUE << '|' << TextStyle::RESET << std::endl;
+    stream << TextColor::BLUE << '|' << TextStyle::RESET << std::endl;
+
+    return stream.str();
 }
 
-void lso::GameBoard::printSeparator() const {
-    std::cout << TextColor::BLUE << '+';
+std::string lso::GameBoard::separatorToString() const {
+    std::ostringstream stream;
+    
+    stream << TextColor::BLUE << '+';
 
     for (unsigned int column = 0; column < columns; column++)
-        std::cout << "---";
+        stream << "---";
 
-    std::cout << '+' << TextStyle::RESET << std::endl;
+    stream << '+' << TextStyle::RESET << std::endl;
+
+    return stream.str();
 }
 
-void lso::GameBoard::printColumnNumbers() const {
-    std::cout << TextColor::BLUE << '|' << TextColor::WHITE;
+std::string lso::GameBoard::columnNumbersToString() const {
+    std::ostringstream stream;
+
+    stream << TextColor::BLUE << '|' << TextColor::WHITE;
 
     for (unsigned int column = 0; column < columns; column++) {
-        std::cout << ' ' << column + 1 << ' ';
+        stream << ' ' << column + 1 << ' ';
     }
 
-    std::cout << TextColor::BLUE << '|' << TextStyle::RESET << std::endl;
+    return stream.str();
 }
 
-void lso::GameBoard::print() const {
-    for (unsigned int row = 0; row < rows; row++)
-        GameBoard::printRow(row);
+std::string lso::GameBoard::toString() const {
+    std::ostringstream stream;
 
-    GameBoard::printSeparator();
-    GameBoard::printColumnNumbers();
+    for (unsigned int row = 0; row < rows; row++)
+        stream << rowToString(row);
+
+    stream
+        << separatorToString()
+        << columnNumbersToString();
+
+    return stream.str();
 }
 
 void lso::GameBoard::update(const Board board) {

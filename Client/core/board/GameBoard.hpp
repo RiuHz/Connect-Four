@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include "../../enum/text/TextStyles.hpp"
 #include "../../enum/text/TextColors.hpp"
@@ -25,11 +26,11 @@ namespace lso {
             const std::string playerSymbol = colorToString.at(TextColor::YELLOW) + "O" + styleToString.at(TextStyle::RESET);
             const std::string opponentSymbol = colorToString.at(TextColor::RED) + "O" + styleToString.at(TextStyle::RESET);
 
-            void printRow(const unsigned int row) const;
+            std::string rowToString(const unsigned int row) const;
 
-            void printSeparator() const;
+            std::string separatorToString() const;
 
-            void printColumnNumbers() const;
+            std::string columnNumbersToString() const;
 
             inline unsigned int invert(unsigned int row) const noexcept { return rows - row - 1; };
 
@@ -43,7 +44,7 @@ namespace lso {
 
             void update(const Board board);
             
-            void print() const; 
+            std::string toString() const; 
 
         public:
 
@@ -57,6 +58,7 @@ namespace lso {
 
             bool operator == (const GameBoard &) const noexcept = delete;
             bool operator != (const GameBoard &) const noexcept = delete;
+
     };
 
 }
