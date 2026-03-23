@@ -22,8 +22,7 @@ void * wrapperThreadPartita(void * arg) {
 }
 
 void attendiTerminePartita(Partita * partita) {
-    if (pthread_join(partita -> thread, NULL) != 0) {
-        printf("Errore nel join del thread\n");
-        exit(1);
-    }
+    pthread_mutex_lock(& partita -> mutex);
+    pthread_cond_wait(& partita -> terminata, & partita -> mutex);
+    pthread_mutex_unlock(& partita -> mutex);
 }
