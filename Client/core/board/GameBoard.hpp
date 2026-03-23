@@ -48,8 +48,8 @@ namespace lso {
 
         public:
 
-            GameBoard(const Board &) = delete;
-            GameBoard(Board &&) noexcept = delete;
+            GameBoard(const GameBoard &) = default;
+            GameBoard(GameBoard &&) noexcept = delete;
 
             ~GameBoard() = default;
 
