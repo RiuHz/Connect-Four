@@ -42,10 +42,10 @@ namespace lso {
         if (stopped)
             throw std::runtime_error("Queue has been stopped");
         
-        std::lock_guard<std::mutex> lock(access);
+        std::unique_lock<std::mutex> lock(access);
         InsertAtBack(data);
 
-        waiting.release();
+        waiting.notify_all();
     };
 
     template <typename Data>
@@ -63,13 +63,17 @@ namespace lso {
 
     template <typename Data>
     bool Queue<Data>::Dequeue(Data & data) {
-        if (this -> Empty())
-            waiting.acquire();
+        std::unique_lock<std::mutex> lock(access);
 
-        if (this -> Empty () && stopped)
+        waiting.wait(
+            lock,
+            [this] { 
+                return !Empty() || stopped; 
+            }
+        );
+
+        if (stopped && Empty())
             return false;
-
-        std::lock_guard<std::mutex> lock(access);
 
         data = std::move(head -> element);
         RemoveFromFront();
@@ -81,18 +85,6 @@ namespace lso {
     void Queue<Data>::Shutdown() {        
         stopped = true;
 
-        while (! this -> Empty()) {
-            std::this_thread::yield();
-        }
-
-        waiting.release();
+        waiting.notify_all();
     }
-
-    template <typename Data>
-    bool Queue<Data>::Empty() noexcept {
-        std::lock_guard<std::mutex> lock(access);
-
-        return head == nullptr;
-    }
-
 }

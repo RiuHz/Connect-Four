@@ -2,7 +2,7 @@
 #define QUEUE_HPP
 
 #include <mutex>
-#include <semaphore>
+#include <condition_variable>
 #include <atomic>
 
 namespace lso {
@@ -48,12 +48,14 @@ namespace lso {
             std::atomic<bool> stopped;
 
             std::mutex access;
-            std::binary_semaphore waiting;
+            std::condition_variable waiting;
 
         private:
 
             void InsertAtBack(const Data & data);
             void RemoveFromFront();
+
+            inline bool Empty() const noexcept { return head == nullptr; };
 
         protected:
 
@@ -61,7 +63,7 @@ namespace lso {
 
         public:
 
-            Queue() : stopped(false), waiting(0) {};
+            Queue() : stopped(false) {};
 
             Queue(const Queue &) = delete;
             Queue(Queue &&) noexcept = delete;
@@ -80,7 +82,6 @@ namespace lso {
             bool Dequeue(Data &);
             
             void Shutdown();
-            bool Empty() noexcept;
 
     };
 }
