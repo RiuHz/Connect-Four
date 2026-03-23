@@ -7,12 +7,12 @@
 
 #include "../../../model/server/server.h"
 
-typedef struct ThreadData {
+typedef struct ThreadClientData {
     Server * server;
     int socket;
-} ThreadData;
+} ThreadClientData;
 
-ThreadData * creaThreadData(Server * sever, int socket);
+ThreadClientData * creaThreadClientData(Server * sever, int socket);
 
 void avviaThreadSocket(Server * server, int socket);
 

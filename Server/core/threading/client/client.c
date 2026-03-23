@@ -1,7 +1,7 @@
 #include "client.h"
 
-ThreadData * creaThreadData(Server * server, int socket) {
-    ThreadData * thread = malloc(sizeof(ThreadData));
+ThreadClientData * creaThreadClientData(Server * server, int socket) {
+    ThreadClientData * thread = malloc(sizeof(ThreadClientData));
     
     thread -> server = server;
     thread -> socket = socket;
@@ -12,7 +12,7 @@ ThreadData * creaThreadData(Server * server, int socket) {
 void avviaThreadSocket(Server * server, int socket) {
     pthread_t thread;
 
-    ThreadData * threadData = creaThreadData(server, socket);
+    ThreadClientData * threadData = creaThreadClientData(server, socket);
 
     if (pthread_create(& thread, NULL, wrapperThreadSocket, (void *) threadData) != 0) {
         perror("Errore creazione thread");
@@ -21,7 +21,7 @@ void avviaThreadSocket(Server * server, int socket) {
 }
 
 void * wrapperThreadSocket(void * arg) {
-    ThreadData * thread = (ThreadData *) arg;
+    ThreadClientData * thread = (ThreadClientData *) arg;
     
     printf("[Client] [Thread: %lu] Thread per la socket %d avviato correttamente\n", (unsigned long) pthread_self(), thread -> socket);
 
