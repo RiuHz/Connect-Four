@@ -4,6 +4,7 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
 
     Partita * partita = malloc(sizeof(Partita));
 
+    pthread_mutex_init(& partita -> mutex, NULL);
     pthread_cond_init(& partita -> richiesta, NULL);
     partita -> risposta = false;
 

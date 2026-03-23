@@ -241,13 +241,13 @@ void gestisciLobby(Server * server, Partita * partita) {
             case REQ_JOIN_DECISION: {
                 bool risposta = richiestaRispostaAccessoPartita(messaggio.payload);
 
+                setRisposta(partita, risposta);
+                pthread_cond_signal(& partita -> richiesta);
+
                 if (risposta == true) {
                     avviaThreadPartita(partita);
                     attendiTerminePartita(partita);
                 }
-
-                setRisposta(partita, risposta);
-                pthread_cond_signal(& partita -> richiesta);
 
                 eliminaMessaggio(& messaggio);
             }
@@ -285,6 +285,12 @@ void gestisciRichiestaPartecipazione(Server * server, Partita * partita, Client 
 
     pthread_cond_wait(& partita -> richiesta, & partita -> mutex);
 
+    Messaggio risposta = rispostaAccessoPartita(partita -> risposta);
+
+    inviaMessaggio(partita -> avversario, risposta);
+
+    eliminaMessaggio(& risposta);
+
     if (partita -> risposta == true) {
         pthread_mutex_unlock(& partita -> mutex);
 
@@ -292,10 +298,11 @@ void gestisciRichiestaPartecipazione(Server * server, Partita * partita, Client 
     } else {
         partita -> avversario = NULL;
 
+        pthread_mutex_unlock(& partita -> mutex);
+
         Messaggio evento = eventoAggiornamentoPartita(partita);
         accodaMessaggioBroadcast(server -> codaBroadcast, evento);
 
         eliminaMessaggio(& evento);
-        pthread_mutex_unlock(& partita -> mutex);
     }
 }
