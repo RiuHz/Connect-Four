@@ -29,6 +29,6 @@ Messaggio attendiMessaggio(Client * client);
 void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza);
 
 void inviaMessaggio(Client * client, Messaggio messaggio);
-void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione);
+void inviaFlussoDati(Client * client, void * buffer, size_t dimensione);
 
 #endif

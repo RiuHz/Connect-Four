@@ -72,7 +72,7 @@ Messaggio attendiMessaggio(Client * client) {
 
 void leggiFlussoDati(Client * client, void * buffer, size_t lunghezza) {
     size_t bytesLetti = 0;
-    char * ptr = (char *) buffer;
+    uint8_t * ptr = (uint8_t *) buffer;
 
     while (bytesLetti < lunghezza) {
         ssize_t byteRimanenti = recv(client -> socket, ptr + bytesLetti, lunghezza - bytesLetti, 0);
@@ -97,24 +97,26 @@ void inviaMessaggio(Client * client, Messaggio messaggio) {
     
     inviaFlussoDati(client, & tipo, sizeof(uint32_t));
     inviaFlussoDati(client, & dimensione, sizeof(uint32_t));
-    
-    if (dimensione == 0)
+
+    if (messaggio.header.length == 0)
         return;
-    
+
     uint32_t * payload = messaggio.payload;
 
-    for (uint32_t i = 0; i < dimensione; i++)
+    for (uint32_t i = 0; i < messaggio.header.length / sizeof(uint32_t); i++)
         payload[i] = htonl(payload[i]);
-    
+
     inviaFlussoDati(client, payload, messaggio.header.length);
 }
 
-void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {
+void inviaFlussoDati(Client * client, void * buffer, size_t dimensione) {
     size_t byteInviati = 0;
+    uint8_t * ptr = (uint8_t *) buffer;
 
     while (byteInviati < dimensione) {
-        ssize_t byteRimanenti = send(client -> socket, buffer + byteInviati, dimensione - byteInviati, 0);
+        ssize_t byteRimanenti = send(client -> socket, ptr + byteInviati, dimensione - byteInviati, 0);
 
+        
         if (byteRimanenti <= 0) {
             fprintf(
                 stderr,
@@ -124,7 +126,7 @@ void inviaFlussoDati(Client * client, uint32_t * buffer, size_t dimensione) {
             );
             exit(1);
         }
-
+        
         byteInviati += (size_t) byteRimanenti;
     }
 }
