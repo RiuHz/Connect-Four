@@ -1,10 +1,13 @@
 #include "Client.hpp"
 
-lso::Client::State::State(lso::Client & client) : context(client) {
+lso::Client::State::State(Client & client) : context(client) {
     int maxHeight;
     int maxWidth;
 
     getmaxyx(stdscr, maxHeight, maxWidth);
+
+    std::cerr << "[DEBUG] maxHeight: " << maxHeight << ", maxWidth: " << maxWidth << std::endl;
+
 
     outputWindow = std::make_unique<OutputWindow>(maxHeight - 3, maxWidth, 0, 0);
     inputWindow = std::make_unique<InputWindow>(3, maxWidth, maxHeight - 3, 0);
@@ -36,10 +39,6 @@ void lso::Client::State::handleServerEvents(const Message & message) {
 }
 
 // --------------------------------------------------------------------------------
-
-lso::Client::LoginState::LoginState(lso::Client & context) : State(context) {
-    inputWindow -> addTitle("Inserisci il tuo nome");    
-}
 
 void lso::Client::LoginState::print() const {
     outputWindow -> clear();
@@ -75,10 +74,6 @@ void lso::Client::LoginState::handleUserInput() {
 }
 
 // --------------------------------------------------------------------------------
-
-lso::Client::MenuState::MenuState(Client & context) : State(context) {
-    inputWindow -> addTitle("Inserisci la tua scelta");
-}
 
 void lso::Client::MenuState::print() const {
     outputWindow -> clear();
@@ -145,14 +140,6 @@ void lso::Client::MenuState::handleUserInput() {
 }
 
 // --------------------------------------------------------------------------------
-
-lso::Client::LobbyState::LobbyState(Client & context, Game game) : State(context), lobby(game) {
-    inputWindow -> addTitle("Inserisci la tua scelta");
-}
-
-lso::Client::LobbyState::LobbyState(Client & context, Lobby lobby) : State(context), lobby(lobby) {
-    inputWindow -> addTitle("Inserisci la tua scelta");
-}
 
 void lso::Client::LobbyState::print() const {
     outputWindow -> clear();
@@ -226,17 +213,33 @@ void lso::Client::LobbyState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::InGameState::InGameState(Client & context, const bool owner) : State(context), board(), owner(owner) {
-    inputWindow -> addTitle("Inserisci la colonna");
+lso::Client::InGameState::InGameState(Client & context, const bool owner) :
+    State(context),
+    board(),
+    owner(owner),
+    turnState(
+        owner
+        ? std::unique_ptr<State>(std::make_unique<TurnState>(context, * this)) 
+        : std::unique_ptr<State>(std::make_unique<WaitingState>(context, * this))
+    )
+{}
 
-    if (owner) {
-        notification = "Inserisci la colonna";
-    } else {
-        notification = "In attesa dell'avversario...";
-    }
+void lso::Client::InGameState::changeTurnTo(std::unique_ptr<State> state) {
+    std::lock_guard<std::recursive_mutex> lock(context.stateTransition);
+    
+    turnState = std::move(state);
+
+    nextTurn.store(false);
+    nextTurn.notify_all();
 }
 
-void lso::Client::InGameState::print() const {
+void lso::Client::InGameState::handleUserInput() {
+    turnState -> handleUserInput();
+
+    nextTurn.wait(true);
+}
+
+void lso::Client::InGameState::TurnState::print() const {
     outputWindow -> clear();
 
     std::ostringstream stream;
@@ -244,14 +247,14 @@ void lso::Client::InGameState::print() const {
     stream
         << "================= Partita =================" << std::endl
         << std::endl
-        << board.toString() << std::endl
+        << gameContext.board.toString() << std::endl
         << std::endl
-        << notification << std::endl;
+        << "Inserisci la tua colonna" << std::endl;
     
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::InGameState::handleUserInput() {
+void lso::Client::InGameState::TurnState::handleUserInput() {
     const std::string input = inputWindow -> getInput();
 
     if (input.empty()) {
@@ -264,52 +267,88 @@ void lso::Client::InGameState::handleUserInput() {
         return;
     }
 
-    const int option = std::stoi(input);
+    const unsigned int option = (unsigned int) std::stoi(input);
 
     context.send(Message(REQ_MOVE, option));
+    inputWindow -> addTitle("In attesa di validazione della mossa...");
 
     Message response = context.receive();
     bool isMoveValid = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
-    if (isMoveValid) {
-        nextTurn.wait(true);
-        nextTurn.store(false);
+    if (!isMoveValid) {
+        inputWindow -> addTitle("Mossa non valida!");
+        return;
     }
+    
+    gameContext.changeTurnTo(std::make_unique<WaitingState>(context, gameContext));
 }
 
-void lso::Client::InGameState::handleServerEvents(const Message & message) {
+void lso::Client::InGameState::TurnState::handleServerEvents(const Message & message) {
 
     switch (message.getType()) {
         case EVT_UPDATE_BOARD: {
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
-            this -> board.update(board);
+            gameContext.board.update(board);
+            print();
+        }
+        break;
+
+        default:
+            State::handleServerEvents(message);
+    }
+
+}
+
+void lso::Client::InGameState::WaitingState::print() const {
+    outputWindow -> clear();
+
+    std::ostringstream stream;
+
+    stream
+        << "================= Partita =================" << std::endl
+        << std::endl
+        << gameContext.board.toString() << std::endl
+        << std::endl
+        << "In attesa dell'avversario" << std::endl;
+    
+    outputWindow -> print(stream.str());
+}
+
+void lso::Client::InGameState::WaitingState::handleUserInput() {
+    gameContext.nextTurn.store(true);
+}
+
+void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & message) {
+    switch (message.getType()) {
+        case EVT_UPDATE_BOARD: {
+            Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
+
+            gameContext.board.update(board);
             print();
         }
         break;
 
         case EVT_NEXT_TURN: {
-            notification = "Inserisci la colonna";
-
-            print();
-
-            nextTurn.store(true);
-            nextTurn.notify_all();
+            gameContext.changeTurnTo(std::make_unique<TurnState>(context, gameContext));
         }
         break;
 
         case EVT_GAME_WON: {
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_WON, board, owner));
+            std::cerr << "Ho ricevuto un EVT_GAME_WON" << std::endl;
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext.board, gameContext.owner));
         }
         break;
 
         case EVT_GAME_LOST: {
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, board, owner));
+            std::cerr << "Ho ricevuto un EVT_GAME_LOST" << std::endl;
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext.board, gameContext.owner));
         }
         break;
 
         case EVT_GAME_DRAW: {
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, board, owner));
+            std::cerr << "Ho ricevuto un EVT_GAME_LOST" << std::endl;
+            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext.board, gameContext.owner));
         }
         break;
 
@@ -320,9 +359,7 @@ void lso::Client::InGameState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::RematchState::RematchState(Client & context, const MessageType esito, const GameBoard board, const bool owner) : State(context), board(board), owner(owner) {
-    inputWindow -> addTitle("Inserisci la tua scelta");
-
+lso::Client::RematchState::RematchState(Client & context, const MessageType esito, const GameBoard & board, const bool owner) : State(context), board(board), owner(owner) {
     switch (esito) {
         case EVT_GAME_WON: {
             notification = "Complimenti, hai vinto!";
@@ -411,8 +448,6 @@ void lso::Client::RematchState::handleRematchResponse() {
 lso::Client::GameListState::GameListState(Client & context, std::vector<Game> & gameList) : State(context) {
     for (Game game : gameList)
         lobbyList.push_back(Lobby(game));
-    
-    inputWindow -> addTitle("Inserisci il numero della lobby");
 }
 
 void lso::Client::GameListState::print() const {
@@ -446,7 +481,7 @@ void lso::Client::GameListState::handleUserInput() {
         return;
     }
 
-    const unsigned int option = std::stoi(input);
+    const unsigned int option = (unsigned int) std::stoi(input);
 
     if (option == 0) {
         context.transitionTo(std::make_unique<MenuState>(context));
@@ -574,7 +609,7 @@ void lso::Client::handleEventLoop() {
     Message event;
 
     while (eventQueue.Dequeue(event)) {
-        std::lock_guard<std::mutex> lock(stateTransition);
+        std::lock_guard<std::recursive_mutex> lock(stateTransition);
 
         state -> handleServerEvents(event);
     }
@@ -597,7 +632,7 @@ void lso::Client::receiveLoop() {
 }
 
 void lso::Client::transitionTo(std::unique_ptr<State> nextState) {
-    std::lock_guard<std::mutex> lock(stateTransition);
+    std::lock_guard<std::recursive_mutex> lock(stateTransition);
 
     state = std::move(nextState);
 }

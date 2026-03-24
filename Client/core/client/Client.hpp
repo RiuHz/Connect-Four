@@ -74,7 +74,7 @@ namespace lso {
 
                 public:
 
-                    LoginState(Client & client);
+                    using State::State;
 
                     inline void print() const override;
 
@@ -93,7 +93,7 @@ namespace lso {
 
                 public:
 
-                    MenuState(Client & context);
+                    using State::State;
 
                     void print() const override;
 
@@ -114,8 +114,8 @@ namespace lso {
 
                 public:
 
-                    LobbyState(Client & context, Game game);
-                    LobbyState(Client & context, Lobby lobby);
+                    LobbyState(Client & context, Game game) : State(context), lobby(game) {};
+                    LobbyState(Client & context, Lobby lobby) : State(context), lobby(lobby) {};
 
                     void print() const override;
 
@@ -129,10 +129,63 @@ namespace lso {
 
                     GameBoard board;
                     const bool owner;
+                    
+                    std::atomic<bool> nextTurn {true};
+                    
+                    std::unique_ptr<State> turnState;
 
-                    std::string notification;
+                private:
 
-                    std::atomic<bool> nextTurn {false};
+                    void changeTurnTo(std::unique_ptr<State> state);
+
+                private:
+
+                    class TurnState: public State {
+                        private:
+
+                                InGameState & gameContext;
+
+                            protected:
+
+                                //...
+
+                            public:
+
+                                void print() const override;
+
+                                void handleUserInput() override;
+
+                                void handleServerEvents(const Message & message) override;
+
+                            public:
+
+                                TurnState(Client & clientContext, InGameState & gameContext) : State(clientContext), gameContext(gameContext) {};
+                        };
+
+                        class WaitingState: public State {
+                            private:
+
+                                InGameState & gameContext;
+
+                                
+
+                            protected:
+
+                                //...
+
+                            public:
+
+                                void print() const override;
+
+                                void handleUserInput() override;
+
+                                void handleServerEvents(const Message & message) override;
+
+                            public:
+
+                                WaitingState(Client & clientContext, InGameState & gameContext) : State(clientContext), gameContext(gameContext) {};
+                        };
+
 
                 protected:
 
@@ -142,17 +195,17 @@ namespace lso {
 
                     InGameState(Client & context, const bool owner);
 
-                    void print() const override;
+                    inline void print() const override { turnState -> print(); };
 
                     void handleUserInput() override;
                     
-                    void handleServerEvents(const Message & message) override;
+                    inline void handleServerEvents(const Message & message) override { turnState -> handleServerEvents(message); };
             };
 
             class RematchState: public State {
                 private:
 
-                    GameBoard board;
+                    const GameBoard & board;
                     const bool owner;
 
                     std::string notification;
@@ -167,7 +220,7 @@ namespace lso {
 
                 public:
 
-                    RematchState(Client & context, const MessageType esito, const GameBoard board, const bool owner);
+                    RematchState(Client & context, const MessageType esito, const GameBoard & board, const bool owner);
 
                     void print() const override;
 
@@ -220,7 +273,7 @@ namespace lso {
             Queue<Message> receiveQueue;
             Queue<Message> eventQueue;
 
-            std::mutex stateTransition;
+            std::recursive_mutex stateTransition;
 
         private:
 
