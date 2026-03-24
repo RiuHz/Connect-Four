@@ -11,7 +11,6 @@ void lso::OutputWindow::print(const std::string & text) {
 
     wmove(window, 0, 0);
     wprintw(window, "%s", text.c_str());
-    wprintw(window, "%s", text.c_str());
 
     wrefresh(window);
 }
@@ -33,7 +32,6 @@ void lso::InputWindow::addTitle(const std::string & text) {
     box(window, 0, 0);
     wmove(window, 0, 1);
     wprintw(window, "%s", text.c_str());
-    wprintw(window, "%s", text.c_str());
 
     wrefresh(window);
 }
@@ -43,9 +41,11 @@ void lso::InputWindow::print(const std::string & text) {
 
     wmove(innerWindow, 0, 0);
     wprintw(innerWindow, "> ");
-    wprintw(window, "%s", text.c_str());
+    wprintw(innerWindow, "%s", text.c_str());
 
+    wrefresh(innerWindow);
     wrefresh(window);
+
 }
 
 std::string lso::InputWindow::getInput() {
