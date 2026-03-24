@@ -24,6 +24,8 @@ lso::InputWindow::InputWindow(const int height, const int width, const int start
     box(window, 0, 0);
     
     innerWindow = derwin(window, height - 2, width - 2, 1, 1);
+
+    wrefresh(window);
 }
 
 void lso::InputWindow::addTitle(const std::string & text) {
@@ -44,8 +46,6 @@ void lso::InputWindow::print(const std::string & text) {
     wprintw(innerWindow, "%s", text.c_str());
 
     wrefresh(innerWindow);
-    wrefresh(window);
-
 }
 
 std::string lso::InputWindow::getInput() {
