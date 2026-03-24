@@ -108,6 +108,8 @@ void gestisciPartita(Partita * partita) {
             risposta = rispostaRivincita(true);
 
             partitaInCorso = true;
+            turnoProprietario = true;
+    
             ripristinaBoard(partita);
             inviaAggiornamentoBoard(partita);
         } else {
