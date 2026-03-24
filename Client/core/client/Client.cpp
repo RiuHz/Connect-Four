@@ -286,6 +286,21 @@ void lso::Client::InGameState::TurnState::handleServerEvents(const Message & mes
         }
         break;
 
+        case EVT_GAME_WON: {
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext));
+        }
+        break;
+
+        case EVT_GAME_LOST: {
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext));
+        }
+        break;
+
+        case EVT_GAME_DRAW: {
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext));
+        }
+        break;
+
         default:
             State::handleServerEvents(message);
     }
@@ -392,11 +407,6 @@ void lso::Client::InGameState::RematchState::handleUserInput() {
         return;
     }
 
-    if (! std::all_of(input.begin(), input.end(), ::isdigit)) {
-        inputWindow -> addTitle("Scelta non numerica non supportata");
-        return;
-    }
-
     if (input == "y") {
         context.send(Message(REQ_REMATCH, true));
         handleRematchResponse();
@@ -415,7 +425,7 @@ void lso::Client::InGameState::RematchState::handleUserInput() {
 }
 
 void lso::Client::InGameState::RematchState::handleRematchResponse() {
-    inputWindow -> addTitle("In attesa dell'avversario...");
+    inputWindow -> addTitle("In attesa dell'avversario per fare rematch...");
 
     Message response = context.receive();
     bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
