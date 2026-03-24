@@ -167,8 +167,6 @@ namespace lso {
 
                                 InGameState & gameContext;
 
-                                
-
                             protected:
 
                                 //...
@@ -209,6 +207,8 @@ namespace lso {
 
                                 void handleUserInput() override;
 
+                                void handleServerEvents(const Message &message);
+                                
                         };
 
                 protected:
