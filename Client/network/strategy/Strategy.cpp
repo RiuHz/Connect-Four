@@ -26,8 +26,8 @@ Game lso::GameStrategy::convertToHost(const std::vector<uint32_t> & payload) con
 std::vector<Game> lso::GameListStrategy::convertToHost(const std::vector<uint32_t> & payload) const {
     std::vector<Game> gameList;
 
-    unsigned int totalBytes = payload.size();
-    unsigned int offset = 0;
+    unsigned long totalBytes = payload.size();
+    unsigned long offset = 0;
 
     while (offset < totalBytes) {
         Game game;
