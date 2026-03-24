@@ -272,8 +272,8 @@ void lso::Client::InGameState::TurnState::handleUserInput() {
         inputWindow -> addTitle("Mossa non valida!");
         return;
     }
-    
-    gameContext.changeTurnTo(std::make_unique<WaitingState>(context, gameContext));
+
+    gameContext.nextTurn.store(true);
 }
 
 void lso::Client::InGameState::TurnState::handleServerEvents(const Message & message) {
@@ -283,6 +283,11 @@ void lso::Client::InGameState::TurnState::handleServerEvents(const Message & mes
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
             gameContext.board.update(board);
+        }
+        break;
+
+        case EVT_NEXT_TURN: {
+            gameContext.changeTurnTo(std::make_unique<TurnState>(context, gameContext));
         }
         break;
 

@@ -168,6 +168,7 @@ EsitoPartita controllaEsitoProprietario(Partita * partita) {
         case NON_TERMINATA: {
             Messaggio eventoProssimoTurno = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
 
+            inviaMessaggio(partita -> proprietario, eventoProssimoTurno);
             inviaMessaggio(partita -> avversario, eventoProssimoTurno);
 
             eliminaMessaggio(& eventoProssimoTurno);
@@ -213,6 +214,7 @@ EsitoPartita controllaEsitoAvversario(Partita * partita) {
             Messaggio eventoProssimoTurno = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
 
             inviaMessaggio(partita -> proprietario, eventoProssimoTurno);
+            inviaMessaggio(partita -> avversario, eventoProssimoTurno);
 
             eliminaMessaggio(& eventoProssimoTurno);
         }
