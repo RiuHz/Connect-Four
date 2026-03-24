@@ -6,9 +6,6 @@ lso::Client::State::State(Client & client) : context(client) {
 
     getmaxyx(stdscr, maxHeight, maxWidth);
 
-    std::cerr << "[DEBUG] maxHeight: " << maxHeight << ", maxWidth: " << maxWidth << std::endl;
-
-
     outputWindow = std::make_unique<OutputWindow>(maxHeight - 3, maxWidth, 0, 0);
     inputWindow = std::make_unique<InputWindow>(3, maxWidth, maxHeight - 3, 0);
 }
