@@ -14,7 +14,7 @@ Partita * creaPartita(unsigned int id, Client * proprietario) {
     partita -> proprietario = proprietario;
     partita -> avversario = NULL;
 
-    memset(partita -> board, 0, sizeof(partita -> board));
+    memset(partita -> board, CELLA_VUOTA, sizeof(partita -> board));
 
     partita -> next = NULL;
 
@@ -64,9 +64,11 @@ void setRisposta(Partita * partita, bool risposta) {
 bool controllaValiditaMossa(Partita * partita, unsigned int colonna) {
     pthread_mutex_lock(& partita -> mutex);
 
-    return colonna < BOARD_COLUMNS && partita -> board[0][colonna] == CELLA_VUOTA;
+    bool validazione = colonna < BOARD_COLUMNS && partita -> board[BOARD_ROWS - 1][colonna] == CELLA_VUOTA;
 
     pthread_mutex_unlock(& partita -> mutex);
+
+    return validazione;
 }
 
 void aggiungiMossa(Partita *partita, unsigned int colonna, unsigned int simbolo) {   
@@ -91,28 +93,29 @@ void aggiungiMossaAvversario(Partita *partita, unsigned int colonna) {
 }
 
 EsitoPartita controllaEsitoPartita(Partita * partita, unsigned int simbolo) {
+    EsitoPartita esito = NON_TERMINATA;
+
     pthread_mutex_lock(& partita -> mutex);
 
-
-    if (verificaCombinazioneOrizzontale(partita,simbolo)) {
-        return VITTORIA;
+    if (verificaCombinazioneOrizzontale(partita, simbolo)) {
+        esito = VITTORIA;
     }
     
-    if (verificaCombinazioneVerticale(partita,simbolo)) {
-        return VITTORIA;
+    if (verificaCombinazioneVerticale(partita, simbolo)) {
+        esito = VITTORIA;
     }
 
-    if (verificaCombinazioneDiagonale(partita,simbolo)) {
-        return VITTORIA;
+    if (verificaCombinazioneDiagonale(partita, simbolo)) {
+        esito = VITTORIA;
     }
 
     if (verificaPareggio(partita)) {
-        return PAREGGIO;
+        esito = PAREGGIO;
     }
 
     pthread_mutex_unlock(& partita -> mutex);
 
-    return NON_TERMINATA;
+    return esito;
 }
 
 bool verificaCombinazioneOrizzontale(Partita * partita, unsigned int simbolo) {
@@ -192,19 +195,14 @@ bool verificaCombinazioneDiagonaleSecondaria(Partita *partita,unsigned int simbo
 }
 
 bool verificaPareggio(Partita * partita) {
-    pthread_mutex_lock(& partita -> mutex);
-
-    unsigned int primaRiga = 0;
     bool esito = true;
     
     for (unsigned int colonna = 0; colonna < BOARD_COLUMNS; colonna++) {
-        if (partita -> board[primaRiga][colonna] == CELLA_VUOTA) {
+        if (partita -> board[BOARD_ROWS - 1][colonna] == CELLA_VUOTA) {
             esito = false;
             break;
         }
     }
-
-    pthread_mutex_unlock(& partita -> mutex);
 
     return esito;
 }
@@ -229,9 +227,9 @@ Game serializzaPartita(Partita * partita) {
 }
 
 Board serializzaBoard(Partita * partita) {
-    pthread_mutex_lock(& partita -> mutex);
-
     Board board;
+    
+    pthread_mutex_lock(& partita -> mutex);
 
     for (unsigned int row = 0; row < BOARD_ROWS; row++) {
         for (unsigned int column = 0; column < BOARD_COLUMNS; column++) {
