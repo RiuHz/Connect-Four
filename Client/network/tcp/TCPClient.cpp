@@ -21,7 +21,7 @@ void lso::TCPClient::connectTCPClient() {
 
 void lso::TCPClient::sendMessage(const Message & message) const {
     uint32_t type = htonl(message.getType());
-    uint32_t length = htonl(message.getLength());
+    uint32_t length = htonl((uint32_t) message.getLength());
 
     sendData(type);
     sendData(length);

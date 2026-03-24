@@ -26,7 +26,7 @@ namespace lso {
             inline const std::vector<uint32_t> & getPayload() const noexcept { return payload; }
             
             template <typename Data>
-            inline const Data getPayload(std::unique_ptr<Strategy<Data>> strategy) const noexcept { return strategy -> convertToHost(payload); };
+            inline const Data getPayload(std::unique_ptr<Strategy<Data>> strategy) const noexcept { return strategy -> convertToHost(payload); }
             
         public:
 
