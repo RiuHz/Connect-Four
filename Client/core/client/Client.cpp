@@ -260,13 +260,16 @@ void lso::Client::InGameState::TurnState::handleUserInput() {
         return;
     }
 
+
     const unsigned int option = (unsigned int) std::stoi(input);
 
     context.send(Message(REQ_MOVE, option));
     inputWindow -> addTitle("In attesa di validazione della mossa...");
 
     Message response = context.receive();
+        
     bool isMoveValid = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
+    
 
     if (!isMoveValid) {
         inputWindow -> addTitle("Mossa non valida!");
@@ -287,7 +290,7 @@ void lso::Client::InGameState::TurnState::handleServerEvents(const Message & mes
         break;
 
         case EVT_NEXT_TURN: {
-            gameContext.changeTurnTo(std::make_unique<TurnState>(context, gameContext));
+            gameContext.changeTurnTo(std::make_unique<WaitingState>(context, gameContext));
         }
         break;
 
@@ -652,6 +655,7 @@ lso::Message lso::Client::receive() {
     Message message;
 
     receiveQueue.Dequeue(message);
+    
 
     return message;
 }
