@@ -22,6 +22,7 @@ lso::InputWindow::InputWindow(const int height, const int width, const int start
     cbreak();
 
     box(window, 0, 0);
+    wrefresh(window);
     
     innerWindow = derwin(window, height - 2, width - 2, 1, 1);
 }
