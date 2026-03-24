@@ -52,12 +52,6 @@ void gestisciPartita(Partita * partita) {
                 break;
             }
 
-            Messaggio evento = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
-
-            inviaMessaggio(partita -> avversario, evento);
-
-            eliminaMessaggio(& evento);
-
             while (turnoAvversario) {
                 printf("[Partita] [Thread: %lu] La Partita (%d) è in attesa della mossa dell'avversario (%s)\n", (unsigned long) pthread_self(), partita -> id, partita -> avversario -> nome);
                 Messaggio messaggio = attendiMessaggio(partita -> avversario);
@@ -94,13 +88,8 @@ void gestisciPartita(Partita * partita) {
 
             if (controllaEsitoAvversario(partita) != NON_TERMINATA) {
                 partitaInCorso = false;
+                break;
             }
-
-            evento = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
-
-            inviaMessaggio(partita -> proprietario, evento);
-
-            eliminaMessaggio(& evento);
         }
 
         Messaggio richiestaProprietario = attendiMessaggio(partita -> proprietario);
@@ -117,6 +106,10 @@ void gestisciPartita(Partita * partita) {
         if (rematchProprietario == true && rematchAvversario == true) {
             printf("[Partita] [Thread: %lu] La Partita (%d) viene rigiocata in un rematch\n", (unsigned long) pthread_self(), partita -> id);
             risposta = rispostaRivincita(true);
+
+            partitaInCorso = true;
+            ripristinaBoard(partita);
+            inviaAggiornamentoBoard(partita);
         } else {
             printf("[Partita] [Thread: %lu] La Partita (%d) si conclude\n", (unsigned long) pthread_self(), partita -> id);
             risposta = rispostaRivincita(false);
