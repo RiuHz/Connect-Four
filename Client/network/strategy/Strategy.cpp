@@ -3,7 +3,7 @@
 Board lso::BoardStrategy::convertToHost(const std::vector<uint32_t> & payload) const {
     Board board;
 
-    memcpy(board.grid, & payload, sizeof(board.grid));
+    memcpy(board.grid, payload.data(), sizeof(board.grid));
 
     return board;
 };
