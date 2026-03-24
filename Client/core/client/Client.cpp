@@ -287,7 +287,6 @@ void lso::Client::InGameState::TurnState::handleServerEvents(const Message & mes
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
             gameContext.board.update(board);
-            print();
         }
         break;
 
@@ -322,7 +321,6 @@ void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & 
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
             gameContext.board.update(board);
-            print();
         }
         break;
 
