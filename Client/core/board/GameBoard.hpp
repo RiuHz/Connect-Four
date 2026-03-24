@@ -6,9 +6,6 @@
 #include <string>
 #include <sstream>
 
-#include "../../enum/text/TextStyles.hpp"
-#include "../../enum/text/TextColors.hpp"
-
 #include "../../network/shared/protocol.h"
 
 namespace lso {
@@ -20,11 +17,11 @@ namespace lso {
             const unsigned int columns = BOARD_COLUMNS;
             const unsigned int rows = BOARD_ROWS;
 
-            std::vector< std::vector<std::string> > grid;
-
             const std::string emptySymbol = "·";
-            const std::string playerSymbol = colorToString.at(TextColor::YELLOW) + "O" + styleToString.at(TextStyle::RESET);
-            const std::string opponentSymbol = colorToString.at(TextColor::RED) + "O" + styleToString.at(TextStyle::RESET);
+            const std::string playerSymbol = "O";
+            const std::string opponentSymbol = "X";
+            
+            std::vector< std::vector<std::string> > grid;
 
             std::string rowToString(const unsigned int row) const;
 

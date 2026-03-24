@@ -3,12 +3,12 @@
 std::string lso::GameBoard::rowToString(const unsigned int row) const {
     std::ostringstream stream;
     
-    stream << TextColor::BLUE << '|' << TextColor::WHITE;
+    stream << '|';
 
     for (unsigned int column = 0; column < columns; column++)
         stream << " " << grid[row][column] << " ";
 
-    stream << TextColor::BLUE << '|' << TextStyle::RESET << std::endl;
+    stream << '|' << std::endl;
 
     return stream.str();
 }
@@ -16,12 +16,12 @@ std::string lso::GameBoard::rowToString(const unsigned int row) const {
 std::string lso::GameBoard::separatorToString() const {
     std::ostringstream stream;
     
-    stream << TextColor::BLUE << '+';
+    stream << '+';
 
     for (unsigned int column = 0; column < columns; column++)
         stream << "---";
 
-    stream << '+' << TextStyle::RESET << std::endl;
+    stream << '+' << std::endl;
 
     return stream.str();
 }
@@ -29,7 +29,7 @@ std::string lso::GameBoard::separatorToString() const {
 std::string lso::GameBoard::columnNumbersToString() const {
     std::ostringstream stream;
 
-    stream << TextColor::BLUE << '|' << TextColor::WHITE;
+    stream << '|';
 
     for (unsigned int column = 0; column < columns; column++) {
         stream << ' ' << column + 1 << ' ';
