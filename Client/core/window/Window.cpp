@@ -44,7 +44,7 @@ void lso::InputWindow::print(const std::string & text) {
 
     wmove(innerWindow, 0, 0);
     wprintw(innerWindow, "> ");
-    wprintw(window, "%s", "%s", text.c_str());
+    wprintw(window, "%s", text.c_str());
 
     wrefresh(innerWindow);
     wrefresh(window);
