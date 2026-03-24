@@ -210,16 +210,12 @@ void lso::Client::LobbyState::handleServerEvents(const Message & message) {
 
 // --------------------------------------------------------------------------------
 
-lso::Client::InGameState::InGameState(Client & context, const bool owner) :
-    State(context),
-    board(),
-    owner(owner),
-    turnState(
-        owner
-        ? std::unique_ptr<State>(std::make_unique<TurnState>(context, * this)) 
-        : std::unique_ptr<State>(std::make_unique<WaitingState>(context, * this))
-    )
-{}
+lso::Client::InGameState::InGameState(Client & context, const bool owner) : State(context), board(), owner(owner) {
+    if (owner)
+        turnState = std::make_unique<TurnState>(context, * this);
+    else
+        turnState = std::make_unique<WaitingState>(context, * this);
+}
 
 void lso::Client::InGameState::changeTurnTo(std::unique_ptr<State> state) {
     std::lock_guard<std::recursive_mutex> lock(context.stateTransition);
@@ -287,7 +283,6 @@ void lso::Client::InGameState::TurnState::handleServerEvents(const Message & mes
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
             gameContext.board.update(board);
-            print();
         }
         break;
 
@@ -322,7 +317,6 @@ void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & 
             Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
 
             gameContext.board.update(board);
-            print();
         }
         break;
 
@@ -332,20 +326,17 @@ void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & 
         break;
 
         case EVT_GAME_WON: {
-            std::cerr << "Ho ricevuto un EVT_GAME_WON" << std::endl;
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext.board, gameContext.owner));
         }
         break;
 
         case EVT_GAME_LOST: {
-            std::cerr << "Ho ricevuto un EVT_GAME_LOST" << std::endl;
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext.board, gameContext.owner));
         }
         break;
 
         case EVT_GAME_DRAW: {
-            std::cerr << "Ho ricevuto un EVT_GAME_LOST" << std::endl;
-            context.transitionTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext.board, gameContext.owner));
         }
         break;
 
@@ -356,7 +347,7 @@ void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & 
 
 // --------------------------------------------------------------------------------
 
-lso::Client::RematchState::RematchState(Client & context, const MessageType esito, const GameBoard & board, const bool owner) : State(context), board(board), owner(owner) {
+lso::Client::InGameState::RematchState::RematchState(Client & context, const MessageType esito, InGameState & gameContext) : State(context), gameContext(gameContext) {
     switch (esito) {
         case EVT_GAME_WON: {
             notification = "Complimenti, hai vinto!";
@@ -377,7 +368,7 @@ lso::Client::RematchState::RematchState(Client & context, const MessageType esit
     }
 }
 
-void lso::Client::RematchState::print() const {
+void lso::Client::InGameState::RematchState::print() const {
     outputWindow -> clear();
 
     std::ostringstream stream;
@@ -385,7 +376,7 @@ void lso::Client::RematchState::print() const {
     stream
         << "================= Partita =================" << std::endl
         << std::endl
-        << board.toString() << std::endl
+        << gameContext.board.toString() << std::endl
         << std::endl
         << notification << std::endl
         << "Digita (y / n) per scegliere di effettuare un rematch" << std::endl;
@@ -393,7 +384,7 @@ void lso::Client::RematchState::print() const {
     outputWindow -> print(stream.str());
 }
 
-void lso::Client::RematchState::handleUserInput() {
+void lso::Client::InGameState::RematchState::handleUserInput() {
     const std::string input = inputWindow -> getInput();
 
     if (input.empty()) {
@@ -423,12 +414,14 @@ void lso::Client::RematchState::handleUserInput() {
     inputWindow -> addTitle("Scelta non supportata");
 }
 
-void lso::Client::RematchState::handleRematchResponse() {
+void lso::Client::InGameState::RematchState::handleRematchResponse() {
+    inputWindow -> addTitle("In attesa dell'avversario...");
+
     Message response = context.receive();
     bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
     if (rematchAccepted) {
-        context.transitionTo(std::make_unique<InGameState>(context, owner));
+        context.transitionTo(std::make_unique<InGameState>(context, gameContext.owner));
 
         return;
     }

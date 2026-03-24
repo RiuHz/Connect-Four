@@ -186,6 +186,30 @@ namespace lso {
                                 WaitingState(Client & clientContext, InGameState & gameContext) : State(clientContext), gameContext(gameContext) {};
                         };
 
+                        class RematchState: public State {
+                            private:
+
+                                InGameState & gameContext;
+
+                                std::string notification;
+
+                            private:
+
+                                void handleRematchResponse();
+
+                            protected:
+
+                                // ...
+
+                            public:
+
+                                RematchState(Client & context, const MessageType esito, InGameState & gameContext);
+
+                                void print() const override;
+
+                                void handleUserInput() override;
+
+                        };
 
                 protected:
 
@@ -200,32 +224,6 @@ namespace lso {
                     void handleUserInput() override;
                     
                     inline void handleServerEvents(const Message & message) override { turnState -> handleServerEvents(message); };
-            };
-
-            class RematchState: public State {
-                private:
-
-                    const GameBoard & board;
-                    const bool owner;
-
-                    std::string notification;
-
-                private:
-
-                    void handleRematchResponse();
-
-                protected:
-
-                    // ...
-
-                public:
-
-                    RematchState(Client & context, const MessageType esito, const GameBoard & board, const bool owner);
-
-                    void print() const override;
-
-                    void handleUserInput() override;
-
             };
 
             class GameListState: public State {
