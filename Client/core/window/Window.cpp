@@ -58,7 +58,7 @@ std::string lso::InputWindow::getInput() {
         if ( (ch == 127 || ch == 8) && !input.empty())
             input.pop_back();
         else if (isprint(ch))
-            input.push_back(ch);
+            input.push_back((char) ch);
 
         print(input);
 

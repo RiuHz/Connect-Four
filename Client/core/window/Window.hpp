@@ -79,6 +79,8 @@ namespace lso {
 
             InputWindow(const int height, const int width, const int startY, const int startX);
 
+            virtual ~InputWindow() { delwin(innerWindow); };
+
     };
 
 }
