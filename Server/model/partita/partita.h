@@ -38,6 +38,8 @@ void aggiungiAvversario(Partita * partita, Client * avversario);
 void rimuoviProprietario(Partita * partita);
 void rimuoviAvversario(Partita * partita);
 
+void ripristinaBoard(Partita * partita);
+
 void setRisposta(Partita * partita, bool risposta);
 
 bool controllaValiditaMossa(Partita * partita, unsigned int colonna);

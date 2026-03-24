@@ -53,6 +53,14 @@ void rimuoviAvversario(Partita * partita) {
     pthread_mutex_unlock(& partita -> mutex);
 }
 
+void ripristinaBoard(Partita * partita) {
+    pthread_mutex_lock(& partita -> mutex);
+
+    memset(partita -> board, CELLA_VUOTA, sizeof(partita -> board));
+
+    pthread_mutex_unlock(& partita -> mutex);
+}
+
 void setRisposta(Partita * partita, bool risposta) {
     pthread_mutex_lock(& partita -> mutex);
 
