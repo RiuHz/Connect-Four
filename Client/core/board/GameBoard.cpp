@@ -35,6 +35,8 @@ std::string lso::GameBoard::columnNumbersToString() const {
         stream << ' ' << column + 1 << ' ';
     }
 
+    stream << '|';
+
     return stream.str();
 }
 
