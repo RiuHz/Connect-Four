@@ -65,6 +65,10 @@ void lso::GameBoard::update(const Board board) {
                 case CELLA_AVVERSARIO:
                     grid[invert(row)][column] = opponentSymbol;
                 break;
+
+                case CELLA_VUOTA:
+                    grid[invert(row)][column] = emptySymbol;
+                break;
             }
         }
     }
