@@ -326,17 +326,17 @@ void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & 
         break;
 
         case EVT_GAME_WON: {
-            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_WON, gameContext));
         }
         break;
 
         case EVT_GAME_LOST: {
-            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_LOST, gameContext));
         }
         break;
 
         case EVT_GAME_DRAW: {
-            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext.board, gameContext.owner));
+            gameContext.changeTurnTo(std::make_unique<RematchState>(context, EVT_GAME_DRAW, gameContext));
         }
         break;
 
