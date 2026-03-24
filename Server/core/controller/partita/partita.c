@@ -14,14 +14,15 @@ void gestisciPartita(Partita * partita) {
         while (partitaInCorso) {
 
             while (turnoProprietario) {
+                printf("[Partita] [Thread: %lu] La Partita (%d) è in attesa della mossa del proprietario (%s)\n", (unsigned long) pthread_self(), partita -> id, partita -> proprietario -> nome);
                 Messaggio messaggio = attendiMessaggio(partita -> proprietario);
-
+                
                 switch (messaggio.header.type) {
                     case REQ_MOVE: {
-                        unsigned int mossa = richiestaMossa(messaggio.payload);
-
+                        unsigned int mossa = richiestaMossa(messaggio.payload) - 1;
+                        
                         Messaggio risposta;
-
+                        
                         if (!controllaValiditaMossa(partita, mossa)) {
                             risposta = rispostaMossa(false);
                         } else {
@@ -51,12 +52,19 @@ void gestisciPartita(Partita * partita) {
                 break;
             }
 
+            Messaggio evento = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
+
+            inviaMessaggio(partita -> avversario, evento);
+
+            eliminaMessaggio(& evento);
+
             while (turnoAvversario) {
+                printf("[Partita] [Thread: %lu] La Partita (%d) è in attesa della mossa dell'avversario (%s)\n", (unsigned long) pthread_self(), partita -> id, partita -> avversario -> nome);
                 Messaggio messaggio = attendiMessaggio(partita -> avversario);
 
                 switch (messaggio.header.type) {
                     case REQ_MOVE: {
-                        unsigned int mossa = richiestaMossa(messaggio.payload);
+                        unsigned int mossa = richiestaMossa(messaggio.payload) - 1;
 
                         Messaggio risposta;
 
@@ -88,6 +96,11 @@ void gestisciPartita(Partita * partita) {
                 partitaInCorso = false;
             }
 
+            evento = creaMessaggio(EVT_NEXT_TURN, 0, NULL);
+
+            inviaMessaggio(partita -> proprietario, evento);
+
+            eliminaMessaggio(& evento);
         }
 
         Messaggio richiestaProprietario = attendiMessaggio(partita -> proprietario);
@@ -102,8 +115,10 @@ void gestisciPartita(Partita * partita) {
         Messaggio risposta;
 
         if (rematchProprietario == true && rematchAvversario == true) {
+            printf("[Partita] [Thread: %lu] La Partita (%d) viene rigiocata in un rematch\n", (unsigned long) pthread_self(), partita -> id);
             risposta = rispostaRivincita(true);
         } else {
+            printf("[Partita] [Thread: %lu] La Partita (%d) si conclude\n", (unsigned long) pthread_self(), partita -> id);
             risposta = rispostaRivincita(false);
 
             rematch = false;
@@ -134,6 +149,7 @@ EsitoPartita controllaEsitoProprietario(Partita * partita) {
 
     switch (esito) {
         case VITTORIA: {
+            printf("[Partita] [Thread: %lu] La Partita (%d) è stata vinta dal proprietario (%s)\n", (unsigned long) pthread_self(), partita -> id, partita -> proprietario -> nome);
             Messaggio eventoVittoria = creaMessaggio(EVT_GAME_WON, 0, NULL);
             Messaggio eventoSconfitta = creaMessaggio(EVT_GAME_LOST, 0, NULL);
 
@@ -146,6 +162,7 @@ EsitoPartita controllaEsitoProprietario(Partita * partita) {
         break;
 
         case PAREGGIO: {
+            printf("[Partita] [Thread: %lu] La Partita (%d) è finita in pareggio\n", (unsigned long) pthread_self(), partita -> id);
             Messaggio eventoPareggio = creaMessaggio(EVT_GAME_DRAW, 0, NULL);
 
             inviaMessaggio(partita -> proprietario, eventoPareggio);
@@ -176,6 +193,7 @@ EsitoPartita controllaEsitoAvversario(Partita * partita) {
 
     switch (esito) {
         case VITTORIA: {
+            printf("[Partita] [Thread: %lu] La Partita (%d) è stata vinta dall'avversario (%s)\n", (unsigned long) pthread_self(), partita -> id, partita -> avversario -> nome);
             Messaggio eventoVittoria = creaMessaggio(EVT_GAME_WON, 0, NULL);
             Messaggio eventoSconfitta = creaMessaggio(EVT_GAME_LOST, 0, NULL);
 
@@ -188,6 +206,7 @@ EsitoPartita controllaEsitoAvversario(Partita * partita) {
         break;
 
         case PAREGGIO: {
+            printf("[Partita] [Thread: %lu] La Partita (%d) è finita in pareggio\n", (unsigned long) pthread_self(), partita -> id);
             Messaggio eventoPareggio = creaMessaggio(EVT_GAME_DRAW, 0, NULL);
 
             inviaMessaggio(partita -> proprietario, eventoPareggio);
