@@ -125,6 +125,8 @@ void gestisciPartita(Partita * partita) {
 
     printf("[Partita] [Thread: %lu] La Partita (%d) è terminata, chiusura del thread...\n", (unsigned long) pthread_self(), partita -> id);
 
+    pthread_cond_signal(& partita -> terminata);
+
     pthread_exit(NULL);
 }
 
@@ -306,10 +308,5 @@ void gestisciRichiestaPartecipazione(Server * server, Partita * partita, Client 
         partita -> avversario = NULL;
 
         pthread_mutex_unlock(& partita -> mutex);
-
-        Messaggio evento = eventoAggiornamentoPartita(partita);
-        accodaMessaggioBroadcast(server -> codaBroadcast, evento);
-
-        eliminaMessaggio(& evento);
     }
 }

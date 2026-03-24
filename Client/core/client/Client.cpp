@@ -265,7 +265,7 @@ void lso::Client::InGameState::TurnState::handleUserInput() {
 
     context.send(Message(REQ_MOVE, option));
     inputWindow -> addTitle("In attesa di validazione della mossa...");
-
+    
     Message response = context.receive();
         
     bool isMoveValid = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
@@ -500,7 +500,6 @@ void lso::Client::GameListState::handleUserInput() {
     inputWindow -> addTitle("In attesa di risposta...");
 
     Message response = context.receive();
-
     bool accepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
     if (accepted) {
