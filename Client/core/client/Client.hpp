@@ -130,7 +130,7 @@ namespace lso {
                     GameBoard board;
                     const bool owner;
                     
-                    std::atomic<bool> nextTurn {true};
+                    std::atomic<bool> nextTurn {false};
                     
                     std::unique_ptr<State> turnState;
 
