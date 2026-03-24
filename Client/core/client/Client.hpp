@@ -209,6 +209,8 @@ namespace lso {
 
                                 void handleUserInput() override;
 
+                                void handleServerEvents(const Message & message) override;
+
                         };
 
                 protected:

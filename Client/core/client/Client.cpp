@@ -385,6 +385,7 @@ lso::Client::InGameState::RematchState::RematchState(Client & context, const Mes
         case EVT_GAME_DRAW: {
             notification = "Che bravi, Pareggio!";
         } break;
+        
 
         default:
         break;
@@ -432,14 +433,36 @@ void lso::Client::InGameState::RematchState::handleUserInput() {
     inputWindow -> addTitle("Scelta non supportata");
 }
 
+
+void lso::Client::InGameState::RematchState::handleServerEvents(const Message & message) {
+    switch (message.getType()) {
+        case EVT_UPDATE_BOARD: {
+            Board board = message.getPayload<Board>(std::make_unique<BoardStrategy>());
+            gameContext.board.update(board);
+        }
+        break;
+
+        default:
+            State::handleServerEvents(message);
+    }
+}
+
+
 void lso::Client::InGameState::RematchState::handleRematchResponse() {
     inputWindow -> addTitle("In attesa dell'avversario per fare rematch...");
 
     Message response = context.receive();
     bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
+
     if (rematchAccepted) {
-        context.transitionTo(std::make_unique<InGameState>(context, gameContext.owner));
+        if(gameContext.owner){
+            gameContext.changeTurnTo(std::make_unique<TurnState>(context, gameContext));
+        }
+        else
+        {
+            gameContext.changeTurnTo(std::make_unique<WaitingState>(context, gameContext));
+        }
 
         return;
     }
