@@ -10,9 +10,9 @@ void lso::OutputWindow::print(const std::string & text) {
     werase(window);
 
     wmove(window, 0, 0);
-    wprintw(window, text.c_str());
+    wprintw(window, "%s", text.c_str());
 
-    refresh();
+    wrefresh(window);
 }
 
 // --------------------------------------------------------------------------------
@@ -22,7 +22,7 @@ lso::InputWindow::InputWindow(const int height, const int width, const int start
     cbreak();
 
     box(window, 0, 0);
-    refresh();
+    wrefresh(window);
     
     innerWindow = derwin(window, height - 2, width - 2, 1, 1);
 }
@@ -32,9 +32,9 @@ void lso::InputWindow::addTitle(const std::string & text) {
     
     box(window, 0, 0);
     wmove(window, 0, 1);
-    wprintw(window, text.c_str());
+    wprintw(window, "%s", text.c_str());
 
-    refresh();
+    wrefresh(window);
 }
 
 void lso::InputWindow::print(const std::string & text) {
@@ -42,9 +42,10 @@ void lso::InputWindow::print(const std::string & text) {
 
     wmove(innerWindow, 0, 0);
     wprintw(innerWindow, "> ");
-    wprintw(innerWindow, text.c_str());
+    wprintw(innerWindow, "%s", text.c_str());
 
-    refresh();
+    wrefresh(innerWindow);
+    wrefresh(window);
 }
 
 std::string lso::InputWindow::getInput() {
