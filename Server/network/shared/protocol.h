@@ -19,7 +19,6 @@ typedef struct {
     uint32_t id;
     char proprietario[NAME_LEN];
     char avversario[NAME_LEN];
-    uint32_t stato;
 } Game;
 
 typedef struct {

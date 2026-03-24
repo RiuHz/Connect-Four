@@ -15,8 +15,6 @@ Messaggio rispostaCreaPartita(Partita * partita) {
     memcpy(& buffer[offset], game.avversario, NAME_LEN);
     offset += (NAME_LEN + 3) / 4;
 
-    buffer[offset++] = game.stato;
-
     return creaMessaggio(RES_CREATE_GAME, dimensione, buffer);
 }
 
@@ -47,8 +45,6 @@ Messaggio rispostaListaPartite(ListaPartite * lista){
 
         memcpy(& buffer[offset], game.avversario, NAME_LEN);
         offset += (NAME_LEN + 3) / 4;
-
-        buffer[offset++] = game.stato;
     }
 
     pthread_mutex_unlock(& lista -> mutex);
