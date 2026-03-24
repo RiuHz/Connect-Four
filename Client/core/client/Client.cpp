@@ -435,13 +435,20 @@ void lso::Client::InGameState::RematchState::handleRematchResponse() {
     Message response = context.receive();
     bool rematchAccepted = response.getPayload<unsigned int>(std::make_unique<UnsignedIntStrategy>());
 
-    if (rematchAccepted) {
-        context.transitionTo(std::make_unique<InGameState>(context, gameContext.owner));
+    if (rematchAccepted && gameContext.owner) {
+        gameContext.changeTurnTo(std::make_unique<TurnState>(context, gameContext));
 
         return;
     }
 
+    if (rematchAccepted && !gameContext.owner) {
+        gameContext.changeTurnTo(std::make_unique<WaitingState>(context, gameContext));
+        
+        return;
+    }
+
     if (!rematchAccepted) {
+        // ?
         context.transitionTo(std::make_unique<MenuState>(context));
 
         return;
