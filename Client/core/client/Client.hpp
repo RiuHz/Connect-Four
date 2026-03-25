@@ -207,13 +207,8 @@ namespace lso {
 
                                 void handleUserInput() override;
 
-<<<<<<< HEAD
-                                void handleServerEvents(const Message &message);
-                                
-=======
                                 void handleServerEvents(const Message & message) override;
 
->>>>>>> 33780430d2473c03bc01b2ad2f5a6ee2a588d961
                         };
 
                 protected:
@@ -226,7 +221,7 @@ namespace lso {
 
                     inline void print() const override { turnState -> print(); };
 
-                    void handleUserInput() override;
+                    inline void handleUserInput() override { turnState -> handleUserInput(); };
                     
                     inline void handleServerEvents(const Message & message) override { turnState -> handleServerEvents(message); };
             };
