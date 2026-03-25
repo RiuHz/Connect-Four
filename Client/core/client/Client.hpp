@@ -221,7 +221,7 @@ namespace lso {
 
                     inline void print() const override { turnState -> print(); };
 
-                    void handleUserInput() override;
+                    inline void handleUserInput() override { turnState -> handleUserInput(); };
                     
                     inline void handleServerEvents(const Message & message) override { turnState -> handleServerEvents(message); };
             };

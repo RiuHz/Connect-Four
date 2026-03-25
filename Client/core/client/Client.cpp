@@ -226,12 +226,6 @@ void lso::Client::InGameState::changeTurnTo(std::unique_ptr<State> state) {
     nextTurn.notify_all();
 }
 
-void lso::Client::InGameState::handleUserInput() {
-    turnState -> handleUserInput();
-
-    nextTurn.wait(true);
-}
-
 void lso::Client::InGameState::TurnState::print() const {
     outputWindow -> clear();
 
@@ -277,6 +271,7 @@ void lso::Client::InGameState::TurnState::handleUserInput() {
     }
 
     gameContext.nextTurn.store(true);
+    gameContext.nextTurn.wait(true);
 }
 
 void lso::Client::InGameState::TurnState::handleServerEvents(const Message & message) {
@@ -332,6 +327,7 @@ void lso::Client::InGameState::WaitingState::print() const {
 
 void lso::Client::InGameState::WaitingState::handleUserInput() {
     gameContext.nextTurn.store(true);
+    gameContext.nextTurn.wait(true);
 }
 
 void lso::Client::InGameState::WaitingState::handleServerEvents(const Message & message) {
@@ -463,7 +459,6 @@ void lso::Client::InGameState::RematchState::handleRematchResponse() {
     }
 
     if (!rematchAccepted) {
-        // ?
         context.transitionTo(std::make_unique<MenuState>(context));
 
         return;
