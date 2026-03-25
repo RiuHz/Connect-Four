@@ -1,5 +1,5 @@
 CCompiler = g++
-CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c++23 -flto -fstack-protector-strong
+CFlags = -Wconversion -Wall -Wextra -Werror -pedantic -O3 -std=c++23 -flto=auto -fstack-protector-strong
 CDebugFlags = -Wconversion -Wall -Wextra -Werror -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong
 CTestFlags = -Wconversion -Wall -Wextra -pedantic -g -fno-omit-frame-pointer -O0 -std=c++23 -fsanitize=address -fstack-protector-strong
 
