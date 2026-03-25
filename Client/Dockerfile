@@ -4,6 +4,6 @@ WORKDIR /Connect-Four/Client
 
 COPY . /Connect-Four/Client
 
-RUN make test
+RUN make
 
-CMD ["./test"]
+CMD ["./main"]
